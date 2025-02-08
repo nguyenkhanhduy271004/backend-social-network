@@ -1,0 +1,88 @@
+package com.project.social_network.services.impl;
+
+import com.project.social_network.converter.PostConverter;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.UserException;
+import com.project.social_network.models.entities.Post;
+import com.project.social_network.models.entities.User;
+import com.project.social_network.models.requests.PostReplyRequest;
+import com.project.social_network.repositories.PostRepository;
+import com.project.social_network.services.interfaces.PostService;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PostServiceImpl implements PostService {
+
+  @Autowired
+  private PostRepository postRepository;
+  @Autowired
+  private PostConverter postConverter;
+
+  @Override
+  public Post createPost(Post req, User user) throws UserException {
+    Post post = postConverter.postConverter(req, user);
+    return postRepository.save(post);
+  }
+
+  @Override
+  public List<Post> findAllPost() {
+    return postRepository.findAllByIsPostTrueOrderByCreatedAtDesc();
+  }
+
+  @Override
+  public Post rePost(Long postId, User user) throws UserException, PostException {
+    Post post = findById(postId);
+    if (post.getRePostUsers().contains(user)) {
+      post.getRePostUsers().remove(user);
+    } else {
+      post.getRePostUsers().add(user);
+    }
+    return post;
+  }
+
+  @Override
+  public Post findById(Long postId) throws PostException {
+    Post post = postRepository.findById(postId).orElseThrow(() -> new PostException("Post not found with id: " + postId));
+    return post;
+  }
+
+  @Override
+  public void deletePostById(Long postId, Long userId) throws UserException, PostException {
+    Post post = findById(postId);
+
+    if(!userId.equals(post.getUser().getId())) {
+      throw new UserException("You can't delete another user's post");
+    }
+
+    postRepository.deleteById(post.getId());
+  }
+
+  @Override
+  public Post removeFromRePost(Long postId, User user) throws UserException, PostException {
+    return null;
+  }
+
+  @Override
+  public Post createdReply(PostReplyRequest req, User user) throws UserException, PostException {
+    Post replyFor = findById(req.getPostId());
+    Post post = postConverter.postReplyConverter(req, user);
+    post.setReplyFor(replyFor);
+
+    Post savedPost = postRepository.save(post);
+    post.getReplyPost().add(savedPost);
+    postRepository.save(replyFor);
+    return replyFor;
+  }
+
+  @Override
+  public List<Post> getUserPost(User user) {
+    return postRepository.findByRePostUsersContainsOrUser_IdAndIsPostTrueOrderByCreatedAtDesc(user, user.getId());
+  }
+
+  @Override
+  public List<Post> findByLikesContainsUser(User user) {
+    return postRepository.findByLikesUser_id(user.getId());
+  }
+}
