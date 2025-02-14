@@ -16,4 +16,5 @@ public interface UserService {
 
   List<User> searchUser(String query);
 
+  List<User> findAllUsers();
 }

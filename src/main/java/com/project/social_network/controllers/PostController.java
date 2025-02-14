@@ -9,7 +9,9 @@ import com.project.social_network.models.entities.User;
 import com.project.social_network.models.requests.PostReplyRequest;
 import com.project.social_network.models.responses.ApiResponse;
 import com.project.social_network.services.interfaces.PostService;
+import com.project.social_network.services.interfaces.UploadImageFile;
 import com.project.social_network.services.interfaces.UserService;
+import java.io.IOException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -37,9 +41,22 @@ public class PostController {
   @Autowired
   private PostConverter postConverter;
 
+  @Autowired
+  private UploadImageFile uploadImageFile;
+
+
   @PostMapping("/create")
-  public ResponseEntity<PostDto> createPost(@RequestBody Post req, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public ResponseEntity<PostDto> createPost(
+      @RequestParam("file") MultipartFile file,
+      @RequestParam("content") String content,
+      @RequestHeader("Authorization") String jwt) throws UserException, PostException, IOException {
     User user = userService.findUserProfileByJwt(jwt);
+
+    String imageFileUrl = uploadImageFile.uploadImage(file);
+
+    Post req = new Post();
+    req.setContent(content);
+    req.setImage(imageFileUrl);
 
     Post post = postService.createPost(req, user);
 

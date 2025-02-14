@@ -33,14 +33,21 @@ public class PostConverter {
   }
 
   public Post postReplyConverter(PostReplyRequest post, User user) {
-    ModelMapper modelMapper = new ModelMapper();
-    Post newPost = modelMapper.map(post, Post.class);
+    Post newPost = new Post();
+    newPost.setContent(post.getContent());
     newPost.setCreatedAt(LocalDateTime.now());
+
+    if (post.getImage() != null) {
+      newPost.setImage(post.getImage());
+    }
+
     newPost.setUser(user);
-    newPost.setReply(false);
-    newPost.setPost(true);
+    newPost.setReply(true);
+    newPost.setPost(false);
+
     return newPost;
   }
+
 
   public PostDto toPostDto(Post post, User reqUser) {
     UserDto user = userConverter.toUserDto(post.getUser());

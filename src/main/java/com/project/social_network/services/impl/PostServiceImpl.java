@@ -39,6 +39,7 @@ public class PostServiceImpl implements PostService {
     } else {
       post.getRePostUsers().add(user);
     }
+    postRepository.save(post);
     return post;
   }
 
@@ -67,14 +68,18 @@ public class PostServiceImpl implements PostService {
   @Override
   public Post createdReply(PostReplyRequest req, User user) throws UserException, PostException {
     Post replyFor = findById(req.getPostId());
+
     Post post = postConverter.postReplyConverter(req, user);
     post.setReplyFor(replyFor);
 
     Post savedPost = postRepository.save(post);
-    post.getReplyPost().add(savedPost);
+
+    replyFor.getReplyPost().add(savedPost);
     postRepository.save(replyFor);
-    return replyFor;
+
+    return savedPost;
   }
+
 
   @Override
   public List<Post> getUserPost(User user) {

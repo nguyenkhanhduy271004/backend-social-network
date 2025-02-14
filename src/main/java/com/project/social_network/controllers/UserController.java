@@ -6,6 +6,7 @@ import com.project.social_network.models.dtos.UserDto;
 import com.project.social_network.models.entities.User;
 import com.project.social_network.services.interfaces.UserService;
 import com.project.social_network.utils.UserUtil;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,20 @@ public class UserController {
   private UserConverter userConverter;
   @Autowired
   private UserUtil userUtil;
+
+  @GetMapping("/")
+  public ResponseEntity<List<UserDto>> getUser(@RequestHeader("Authorization") String jwt) throws UserException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    List<User> users = userService.findAllUsers();
+    List<UserDto> userDtos = new ArrayList<>();
+
+    for(User us:users) {
+      UserDto userDto = userConverter.toUserDto(user);
+      userDtos.add(userDto);
+    }
+    return new ResponseEntity<>(userDtos, HttpStatus.OK);
+  }
 
   @GetMapping("/profile")
   public ResponseEntity<UserDto> getUserProfile(@RequestHeader("Authorization") String jwt) throws UserException {

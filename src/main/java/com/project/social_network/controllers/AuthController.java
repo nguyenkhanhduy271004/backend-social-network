@@ -79,13 +79,13 @@ public class AuthController {
     String password = user.getPassword();
 
     Authentication authentication = authenticate(username, password);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
 
     String token = jwtProvider.generateToken(authentication);
 
-    AuthResponse res = new AuthResponse(token, true);
-
-    return new ResponseEntity<AuthResponse>(res, HttpStatus.ACCEPTED);
+    return ResponseEntity.ok(new AuthResponse(token, true));
   }
+
 
   private Authentication authenticate(String username, String password) {
     UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
