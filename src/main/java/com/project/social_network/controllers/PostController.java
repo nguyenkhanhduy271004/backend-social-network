@@ -47,23 +47,27 @@ public class PostController {
 
   @PostMapping("/create")
   public ResponseEntity<PostDto> createPost(
-      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "file", required = false) MultipartFile file,
       @RequestParam("content") String content,
       @RequestHeader("Authorization") String jwt) throws UserException, PostException, IOException {
+
     User user = userService.findUserProfileByJwt(jwt);
 
-    String imageFileUrl = uploadImageFile.uploadImage(file);
+    String imageFileUrl = null;
+    if (file != null && !file.isEmpty()) {
+      imageFileUrl = uploadImageFile.uploadImage(file);
+    }
 
     Post req = new Post();
     req.setContent(content);
     req.setImage(imageFileUrl);
 
     Post post = postService.createPost(req, user);
-
     PostDto postDto = postConverter.toPostDto(post, user);
 
     return new ResponseEntity<>(postDto, HttpStatus.CREATED);
   }
+
 
   @PostMapping("/reply")
   public ResponseEntity<PostDto> replyPost(@RequestBody PostReplyRequest req, @RequestHeader("Authorization") String jwt) throws UserException, PostException {

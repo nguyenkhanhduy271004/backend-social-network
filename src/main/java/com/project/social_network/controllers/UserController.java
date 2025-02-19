@@ -39,8 +39,24 @@ public class UserController {
     List<UserDto> userDtos = new ArrayList<>();
 
     for(User us:users) {
-      UserDto userDto = userConverter.toUserDto(user);
+      UserDto userDto = userConverter.toUserDto(us);
       userDtos.add(userDto);
+    }
+    return new ResponseEntity<>(userDtos, HttpStatus.OK);
+  }
+
+  @GetMapping("/random")
+  public ResponseEntity<List<UserDto>> getUserRandom(@RequestHeader("Authorization") String jwt) throws UserException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    List<User> users = userService.findAllUsers();
+    List<UserDto> userDtos = new ArrayList<>();
+
+    for(User us:users) {
+      UserDto userDto = userConverter.toUserDto(us);
+      if(!user.getFollowings().contains(us) && !us.getId().equals(user.getId())) {
+        userDtos.add(userDto);
+      }
     }
     return new ResponseEntity<>(userDtos, HttpStatus.OK);
   }

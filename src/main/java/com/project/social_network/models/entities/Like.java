@@ -11,11 +11,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "likes")
-public class Like {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+public class Like extends BaseEntity{
 
   @ManyToOne
   private User user;
