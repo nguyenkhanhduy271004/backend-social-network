@@ -1,6 +1,7 @@
 package com.project.social_network.models.entities;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -18,8 +19,12 @@ public class Story extends BaseEntity{
 
   private String content;
   private String image;
+  private boolean isDeleted = false;
 
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "story", cascade = CascadeType.ALL)
   private List<Like> likes = new ArrayList<>();
+
+  @Column(name = "created_at")
+  private LocalDateTime createdAt = LocalDateTime.now();
 
 }

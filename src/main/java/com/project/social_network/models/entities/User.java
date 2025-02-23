@@ -38,6 +38,10 @@ public class User extends BaseEntity{
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<Post> posts = new ArrayList<>();
 
+  @JsonIgnore
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  private List<Story> stories = new ArrayList<>();
+
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<Like> likes = new ArrayList<>();
 

@@ -36,7 +36,7 @@ public class LikeController {
 
     LikeDto likeDto = likeConverter.toLikeDto(like, user);
 
-    return new ResponseEntity<LikeDto>(likeDto, HttpStatus.CREATED);
+    return new ResponseEntity<>(likeDto, HttpStatus.CREATED);
   }
 
   @PostMapping("/post/{postId}")
