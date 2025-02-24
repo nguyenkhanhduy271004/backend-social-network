@@ -6,6 +6,7 @@ import com.project.social_network.models.entities.User;
 import com.project.social_network.repositories.UserRepository;
 import com.project.social_network.services.interfaces.UserService;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -89,8 +90,11 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<User> searchUser(String query) {
-    return userRepository.searchUser(query);
+  public List<User> searchUser(String query, Long userId) {
+    return userRepository.searchUser(query)
+        .stream()
+        .filter(user -> !user.getId().equals(userId))
+        .collect(Collectors.toList());
   }
 
   @Override

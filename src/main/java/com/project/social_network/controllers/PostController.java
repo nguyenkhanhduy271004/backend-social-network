@@ -68,6 +68,37 @@ public class PostController {
     return new ResponseEntity<>(postDto, HttpStatus.CREATED);
   }
 
+  @PutMapping("/{postId}/edit")
+  public ResponseEntity<PostDto> editPost(
+      @PathVariable Long postId,
+      @RequestParam(value = "file", required = false) MultipartFile file,
+      @RequestParam("content") String content,
+      @RequestHeader("Authorization") String jwt) throws UserException, PostException, IOException {
+
+    User user = userService.findUserProfileByJwt(jwt);
+
+    Post post = postService.findById(postId);
+
+    if (!post.getUser().getId().equals(user.getId())) {
+      throw new PostException("You do not have permission to edit this post.");
+    }
+
+    String imageFileUrl = post.getImage();
+    if (file != null && !file.isEmpty()) {
+      imageFileUrl = uploadImageFile.uploadImage(file);
+    }
+
+    post.setContent(content);
+    post.setImage(imageFileUrl);
+
+    Post updatedPost = postService.updatePost(post);
+
+    PostDto postDto = postConverter.toPostDto(updatedPost, user);
+
+    return new ResponseEntity<>(postDto, HttpStatus.OK);
+  }
+
+
 
   @PostMapping("/reply")
   public ResponseEntity<PostDto> replyPost(@RequestBody PostReplyRequest req, @RequestHeader("Authorization") String jwt) throws UserException, PostException {

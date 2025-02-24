@@ -90,4 +90,10 @@ public class PostServiceImpl implements PostService {
   public List<Post> findByLikesContainsUser(User user) {
     return postRepository.findByLikesUser_id(user.getId());
   }
+
+  @Override
+  public Post updatePost(Post post) {
+    return postRepository.save(post);
+  }
+
 }

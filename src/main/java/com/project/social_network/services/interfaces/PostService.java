@@ -17,4 +17,5 @@ public interface PostService {
   Post createdReply(PostReplyRequest req, User user) throws UserException, PostException;
   List<Post> getUserPost(User user);
   List<Post> findByLikesContainsUser(User user);
+  Post updatePost(Post post);
 }

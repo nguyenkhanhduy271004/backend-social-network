@@ -14,7 +14,7 @@ public interface UserService {
 
   User followUser(Long userId, User user) throws UserException;
 
-  List<User> searchUser(String query);
+  List<User> searchUser(String query, Long userId);
 
   List<User> findAllUsers();
 }

@@ -37,7 +37,7 @@ public class AppConfig {
   private CorsConfigurationSource corsConfigurationSource() {
     return request -> {
       CorsConfiguration cfg = new CorsConfiguration();
-      cfg.setAllowedOrigins(Collections.singletonList("http://localhost:3001"));
+      cfg.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
       cfg.setAllowedMethods(Collections.singletonList("*"));
       cfg.setAllowCredentials(true);
       cfg.setAllowedHeaders(Collections.singletonList("*"));

@@ -28,7 +28,7 @@ public class StoryServiceImpl implements StoryService {
 
   @Override
   public List<Story> findAllStory() {
-    return storyRepository.findAll();
+    return storyRepository.findAllByIsDeletedFalse();
   }
 
   @Override

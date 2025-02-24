@@ -81,10 +81,10 @@ public class UserController {
   }
 
   @GetMapping("/search")
-  public ResponseEntity<List<UserDto>> getUserById(@RequestParam String query, @RequestHeader("Authorization") String jwt) throws UserException {
+  public ResponseEntity<List<UserDto>> getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt) throws UserException {
     User reqUser = userService.findUserProfileByJwt(jwt);
 
-    List<User> users = userService.searchUser(query);
+    List<User> users = userService.searchUser(query, reqUser.getId());
     List<UserDto> userDtos = userConverter.toUserDtos(users);
     return new ResponseEntity<>(userDtos, HttpStatus.ACCEPTED);
   }
