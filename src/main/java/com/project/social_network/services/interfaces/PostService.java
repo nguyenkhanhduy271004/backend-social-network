@@ -2,8 +2,10 @@ package com.project.social_network.services.interfaces;
 
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
+import com.project.social_network.models.entities.Comment;
 import com.project.social_network.models.entities.Post;
 import com.project.social_network.models.entities.User;
+import com.project.social_network.models.requests.CommentRequest;
 import com.project.social_network.models.requests.PostReplyRequest;
 import java.util.List;
 
@@ -18,4 +20,6 @@ public interface PostService {
   List<Post> getUserPost(User user);
   List<Post> findByLikesContainsUser(User user);
   Post updatePost(Post post);
+  Post createComment(CommentRequest commentRequest, User user) throws UserException, PostException;
+  List<Comment> getAllCommentsByPostId(Long postId) throws  UserException, PostException;
 }

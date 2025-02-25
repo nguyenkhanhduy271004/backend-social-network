@@ -1,7 +1,9 @@
 package com.project.social_network.converter;
 
+import com.project.social_network.models.dtos.CommentDto;
 import com.project.social_network.models.dtos.PostDto;
 import com.project.social_network.models.dtos.UserDto;
+import com.project.social_network.models.entities.Comment;
 import com.project.social_network.models.entities.Post;
 import com.project.social_network.models.entities.User;
 import com.project.social_network.models.requests.PostReplyRequest;
@@ -118,5 +120,14 @@ public class PostConverter {
 
     return postDto;
 
+  }
+
+  public CommentDto toCommentDto(Comment comment) {
+    CommentDto commentDto = new CommentDto();
+    commentDto.setPostId(comment.getPost().getId());
+    commentDto.setUser(comment.getUser());
+    commentDto.setContent(commentDto.getContent());
+
+    return commentDto;
   }
 }

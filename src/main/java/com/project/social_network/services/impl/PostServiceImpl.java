@@ -3,22 +3,30 @@ package com.project.social_network.services.impl;
 import com.project.social_network.converter.PostConverter;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
+import com.project.social_network.models.entities.Comment;
 import com.project.social_network.models.entities.Post;
 import com.project.social_network.models.entities.User;
+import com.project.social_network.models.requests.CommentRequest;
 import com.project.social_network.models.requests.PostReplyRequest;
+import com.project.social_network.repositories.CommentRepository;
 import com.project.social_network.repositories.PostRepository;
 import com.project.social_network.services.interfaces.PostService;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class PostServiceImpl implements PostService {
 
   @Autowired
   private PostRepository postRepository;
   @Autowired
   private PostConverter postConverter;
+  @Autowired
+  private CommentRepository commentRepository;
 
   @Override
   public Post createPost(Post req, User user) throws UserException {
@@ -94,6 +102,27 @@ public class PostServiceImpl implements PostService {
   @Override
   public Post updatePost(Post post) {
     return postRepository.save(post);
+  }
+
+  @Override
+  public Post createComment(CommentRequest commentRequest, User user) throws UserException, PostException {
+    Post post = findById(commentRequest.getPostId());
+
+    Comment comment = new Comment();
+    comment.setUser(user);
+    comment.setPost(post);
+    comment.setContent(commentRequest.getContent());
+
+    post.getComments().add(comment);
+
+    return postRepository.save(post);
+  }
+
+
+  @Override
+  public List<Comment> getAllCommentsByPostId(Long postId) throws UserException, PostException {
+    List<Comment> comments = commentRepository.findByPost_Id(postId);
+    return commentRepository.findByPost_Id(postId);
   }
 
 }

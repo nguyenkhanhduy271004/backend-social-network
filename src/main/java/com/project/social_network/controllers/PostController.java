@@ -3,15 +3,19 @@ package com.project.social_network.controllers;
 import com.project.social_network.converter.PostConverter;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
+import com.project.social_network.models.dtos.CommentDto;
 import com.project.social_network.models.dtos.PostDto;
+import com.project.social_network.models.entities.Comment;
 import com.project.social_network.models.entities.Post;
 import com.project.social_network.models.entities.User;
+import com.project.social_network.models.requests.CommentRequest;
 import com.project.social_network.models.requests.PostReplyRequest;
 import com.project.social_network.models.responses.ApiResponse;
 import com.project.social_network.services.interfaces.PostService;
 import com.project.social_network.services.interfaces.UploadImageFile;
 import com.project.social_network.services.interfaces.UserService;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -177,4 +181,26 @@ public class PostController {
 
     return new ResponseEntity<>(postDtos, HttpStatus.OK);
   }
+
+  @GetMapping("/{postId}/comment")
+  public ResponseEntity<?> getAllCommentsByPostId(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+    User user = userService.findUserProfileByJwt(jwt);
+    List<Comment> comments = postService.getAllCommentsByPostId(postId);
+    List<CommentDto> commentDtos = new ArrayList<>();
+    for(Comment comment:comments) {
+      CommentDto commentDto = postConverter.toCommentDto(comment);
+      commentDtos.add(commentDto);
+    }
+    return new ResponseEntity<>(commentDtos, HttpStatus.OK);
+  }
+
+  @PostMapping("/{postId}/comment")
+  public ResponseEntity<?> createComment(@RequestBody CommentRequest commentRequest, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    Post post = postService.createComment(commentRequest, user);
+    PostDto postDto = postConverter.toPostDto(post, post.getUser());
+    return new ResponseEntity<>(postDto, HttpStatus.CREATED);
+  }
+
 }

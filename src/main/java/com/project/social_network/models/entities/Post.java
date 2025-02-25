@@ -35,6 +35,9 @@ public class Post extends BaseEntity{
   @ManyToOne
   private Post replyFor;
 
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Comment> comments = new ArrayList<>();
+
   private boolean isReply;
   private boolean isPost;
 
