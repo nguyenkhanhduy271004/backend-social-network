@@ -22,4 +22,5 @@ public interface PostService {
   Post updatePost(Post post);
   Post createComment(CommentRequest commentRequest, User user) throws UserException, PostException;
   List<Comment> getAllCommentsByPostId(Long postId) throws  UserException, PostException;
+
 }

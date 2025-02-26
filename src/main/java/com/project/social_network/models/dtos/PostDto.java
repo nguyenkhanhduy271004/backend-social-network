@@ -23,6 +23,8 @@ public class PostDto {
 
   private int totalReplies;
 
+  private int totalComments;
+
   private boolean isLiked;
 
   private boolean isRePost;

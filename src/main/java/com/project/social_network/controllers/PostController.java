@@ -1,6 +1,7 @@
 package com.project.social_network.controllers;
 
 import com.project.social_network.converter.PostConverter;
+import com.project.social_network.exception.CommentException;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.models.dtos.CommentDto;
@@ -11,6 +12,7 @@ import com.project.social_network.models.entities.User;
 import com.project.social_network.models.requests.CommentRequest;
 import com.project.social_network.models.requests.PostReplyRequest;
 import com.project.social_network.models.responses.ApiResponse;
+import com.project.social_network.services.interfaces.CommentService;
 import com.project.social_network.services.interfaces.PostService;
 import com.project.social_network.services.interfaces.UploadImageFile;
 import com.project.social_network.services.interfaces.UserService;
@@ -41,6 +43,9 @@ public class PostController {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private CommentService commentService;
 
   @Autowired
   private PostConverter postConverter;
@@ -201,6 +206,22 @@ public class PostController {
     Post post = postService.createComment(commentRequest, user);
     PostDto postDto = postConverter.toPostDto(post, post.getUser());
     return new ResponseEntity<>(postDto, HttpStatus.CREATED);
+  }
+
+  @DeleteMapping("/{commentId}/comment")
+  public ResponseEntity<?> deleteComment(@PathVariable Long commentId, @RequestHeader("Authorization") String jwt) throws UserException, CommentException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    commentService.deleteCommentById(commentId, user);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @PutMapping("/{commentId}/comment")
+  public ResponseEntity<?> editComment(@RequestBody CommentRequest commentRequest, @RequestHeader("Authorization") String jwt) throws UserException, CommentException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    Comment comment = commentService.editComment(commentRequest, user);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
 }

@@ -7,6 +7,7 @@ import com.project.social_network.models.entities.Comment;
 import com.project.social_network.models.entities.Post;
 import com.project.social_network.models.entities.User;
 import com.project.social_network.models.requests.PostReplyRequest;
+import com.project.social_network.models.responses.UserCommentResponse;
 import com.project.social_network.utils.PostUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ public class PostConverter {
     postDto.setImage(post.getImage());
     postDto.setTotalLikes(post.getLikes().size());
     postDto.setTotalReplies(post.getRePostUsers().size());
+    postDto.setTotalComments(post.getComments().size());
     postDto.setUser(user);
     postDto.setLiked(isLiked);
     postDto.setRePost(isReposted);
@@ -112,6 +114,7 @@ public class PostConverter {
     postDto.setImage(post.getImage());
     postDto.setTotalLikes(post.getLikes().size());
     postDto.setTotalReplies(post.getRePostUsers().size());
+    postDto.setTotalComments(post.getComments().size());
     postDto.setUser(user);
     postDto.setLiked(isLiked);
     postDto.setRePost(isReposted);
@@ -125,9 +128,14 @@ public class PostConverter {
   public CommentDto toCommentDto(Comment comment) {
     CommentDto commentDto = new CommentDto();
     commentDto.setPostId(comment.getPost().getId());
-    commentDto.setUser(comment.getUser());
-    commentDto.setContent(commentDto.getContent());
 
+    UserCommentResponse user = new UserCommentResponse();
+    user.setId(comment.getUser().getId());
+    user.setFullName(comment.getUser().getFullName());
+    user.setImage(comment.getUser().getImage());
+    commentDto.setUser(user);
+    commentDto.setContent(comment.getContent());
+    commentDto.setCreatedDate(comment.getCreatedDate());
     return commentDto;
   }
 }
