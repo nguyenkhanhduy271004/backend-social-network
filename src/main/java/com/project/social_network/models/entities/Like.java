@@ -25,4 +25,7 @@ public class Like {
 
   @ManyToOne
   private Story story;
+
+  @ManyToOne
+  private Reel reel;
 }

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface MessageRepository extends JpaRepository<Message, Long> {
   List<Message> findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(Long senderId, Long receiverId, Long receiverId2, Long senderId2);
 
-  @Query("SELECT DISTINCT m.receiverId FROM Message m WHERE m.senderId = :senderId")
-  List<Long> findDistinctReceiverIdsBySenderId(Long senderId);
+  @Query("SELECT DISTINCT CASE WHEN m.senderId = :userId THEN m.receiverId ELSE m.senderId END FROM Message m WHERE m.senderId = :userId OR m.receiverId = :userId")
+  List<Long> findDistinctChatPartners(Long userId);
+
 }

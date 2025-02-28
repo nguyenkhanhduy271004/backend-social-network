@@ -17,10 +17,6 @@ import lombok.Data;
 @Data
 public class User extends BaseEntity{
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
-
   private String fullName;
   private String location;
   private String website;
@@ -41,6 +37,10 @@ public class User extends BaseEntity{
   @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<Story> stories = new ArrayList<>();
+
+  @JsonIgnore
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  private List<Reel> reels = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<Like> likes = new ArrayList<>();

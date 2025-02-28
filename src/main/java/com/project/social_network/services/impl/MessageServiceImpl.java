@@ -39,7 +39,7 @@ public class MessageServiceImpl implements MessageService {
 
   @Override
   public List<UserDto> findDistinctReceiverIdsBySenderId(Long senderId) {
-    List<Long> userIds = messageRepository.findDistinctReceiverIdsBySenderId(senderId);
+    List<Long> userIds = messageRepository.findDistinctChatPartners(senderId);
 
     List<UserDto> userDtos = new ArrayList<>();
 
