@@ -11,6 +11,7 @@ import com.project.social_network.models.requests.PostReplyRequest;
 import com.project.social_network.repositories.CommentRepository;
 import com.project.social_network.repositories.PostRepository;
 import com.project.social_network.services.interfaces.PostService;
+import jakarta.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,6 +124,11 @@ public class PostServiceImpl implements PostService {
   public List<Comment> getAllCommentsByPostId(Long postId) throws UserException, PostException {
     List<Comment> comments = commentRepository.findByPost_Id(postId);
     return commentRepository.findByPost_Id(postId);
+  }
+
+  @Override
+  public List<Post> getRepostedPostsByUserId(Long userId) {
+    return postRepository.findRepostedPostsByUserId(userId);
   }
 
 }

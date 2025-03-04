@@ -5,6 +5,7 @@ import com.project.social_network.models.entities.User;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
@@ -16,4 +17,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   @Query("SELECT p FROM Post p JOIN p.likes l WHERE l.user.id=:userId")
   List<Post> findByLikesUser_id(Long userId);
+
+  @Query("SELECT p FROM Post p JOIN p.rePostUsers u WHERE u.id = :userId")
+  List<Post> findRepostedPostsByUserId(@Param("userId") Long userId);
 }

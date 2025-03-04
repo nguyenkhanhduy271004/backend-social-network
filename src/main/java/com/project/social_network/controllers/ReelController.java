@@ -81,7 +81,7 @@ public class ReelController {
 
     reelService.deleteReelById(reelId, user.getId());
 
-    ApiResponse res = new ApiResponse("Reel deleted successfully", true);
+    ApiResponse res = ApiResponse.successNoData("Reel deleted successfully", HttpStatus.OK);
     return new ResponseEntity<>(res, HttpStatus.OK);
   }
 

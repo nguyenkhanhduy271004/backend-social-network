@@ -148,7 +148,7 @@ public class PostController {
 
     postService.deletePostById(postId, user.getId());
 
-    ApiResponse res = new ApiResponse("Post deleted successfully", true);
+    ApiResponse res = ApiResponse.successNoData("Post deleted successfully", HttpStatus.OK);
     return new ResponseEntity<>(res, HttpStatus.OK);
   }
 
@@ -158,7 +158,7 @@ public class PostController {
 
     List<Post> post = postService.findAllPost();
 
-   List<PostDto> postDtos = postConverter.toPostDtos(post, user);
+    List<PostDto> postDtos = postConverter.toPostDtos(post, user);
 
     return new ResponseEntity<>(postDtos, HttpStatus.OK);
   }
@@ -222,6 +222,18 @@ public class PostController {
 
     Comment comment = commentService.editComment(commentRequest, user);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @GetMapping("/repost")
+  public ResponseEntity<List<PostDto>> getRepostedPosts(@RequestHeader("Authorization") String jwt) throws UserException{
+    User user = userService.findUserProfileByJwt(jwt);
+    List<Post> posts = postService.getRepostedPostsByUserId(user.getId());
+    List<PostDto> postDtos = new ArrayList<>();
+    for (Post post:posts) {
+      PostDto postDto = postConverter.toPostDto(post, user);
+      postDtos.add(postDto);
+    }
+    return new ResponseEntity<>(postDtos, HttpStatus.OK);
   }
 
 }

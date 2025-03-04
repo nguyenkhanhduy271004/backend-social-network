@@ -85,7 +85,7 @@ public class StoryController {
 
     storyService.deleteStoryById(storyId, user.getId());
 
-    ApiResponse res = new ApiResponse("Story deleted successfully", true);
+    ApiResponse res = ApiResponse.successNoData("Story deleted successfully", HttpStatus.OK);
     return new ResponseEntity<>(res, HttpStatus.OK);
   }
 
