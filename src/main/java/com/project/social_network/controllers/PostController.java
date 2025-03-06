@@ -16,6 +16,7 @@ import com.project.social_network.services.interfaces.CommentService;
 import com.project.social_network.services.interfaces.PostService;
 import com.project.social_network.services.interfaces.UploadImageFile;
 import com.project.social_network.services.interfaces.UserService;
+import com.project.social_network.utils.ApiResponseUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -143,14 +144,18 @@ public class PostController {
   }
 
   @DeleteMapping("/{postId}")
-  public ResponseEntity<ApiResponse> deletePost(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public ResponseEntity<ApiResponse<Object>> deletePost(
+      @PathVariable Long postId,
+      @RequestHeader("Authorization") String jwt
+  ) throws UserException, PostException {
     User user = userService.findUserProfileByJwt(jwt);
-
     postService.deletePostById(postId, user.getId());
 
-    ApiResponse res = ApiResponse.successNoData("Post deleted successfully", HttpStatus.OK);
-    return new ResponseEntity<>(res, HttpStatus.OK);
+    ApiResponse<Object> response = ApiResponseUtils.success("Post deleted successfully", null);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
+  
 
   @GetMapping("/")
   public ResponseEntity<List<PostDto>> getAllPosts(@RequestHeader("Authorization") String jwt) throws UserException, PostException {
