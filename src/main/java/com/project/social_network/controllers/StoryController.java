@@ -11,6 +11,8 @@ import com.project.social_network.models.entities.Post;
 import com.project.social_network.models.entities.Story;
 import com.project.social_network.models.entities.User;
 import com.project.social_network.models.responses.ApiResponse;
+import com.project.social_network.models.responses.ResponseData;
+import com.project.social_network.models.responses.ResponseError;
 import com.project.social_network.services.interfaces.PostService;
 import com.project.social_network.services.interfaces.StoryService;
 import com.project.social_network.services.interfaces.UploadImageFile;
@@ -46,7 +48,7 @@ public class StoryController {
   @Autowired
   private UploadImageFile uploadImageFile;
   @PostMapping("/create")
-  public ResponseEntity<StoryDto> createStory(
+  public Object createStory(
       @RequestParam(value = "file") MultipartFile file,
       @RequestParam("content") String content,
       @RequestHeader("Authorization") String jwt) throws UserException, StoryException, IOException {
@@ -62,46 +64,68 @@ public class StoryController {
     req.setContent(content);
     req.setImage(imageFileUrl);
 
-    Story story = storyService.createStory(req, user);
-    StoryDto storyDto = storyConverter.toStoryDto(story, user);
+    try {
+      Story story = storyService.createStory(req, user);
+      StoryDto storyDto = storyConverter.toStoryDto(story, user);
 
-    return new ResponseEntity<>(storyDto, HttpStatus.CREATED);
+      return new ResponseData<>(HttpStatus.CREATED.value(), "Create story successfully", storyDto);
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Create story failed");
+
+    }
+
   }
 
   @GetMapping("/{storyId}")
-  public ResponseEntity<StoryDto> findPostById(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public Object findPostById(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
     User user = userService.findUserProfileByJwt(jwt);
 
-    Story story = storyService.findStoryById(storyId);
+    try {
+     Story story = storyService.findStoryById(storyId);
 
-    StoryDto storyDto = storyConverter.toStoryDto(story, user);
+     StoryDto storyDto = storyConverter.toStoryDto(story, user);
 
-    return new ResponseEntity<>(storyDto, HttpStatus.OK);
+     return new ResponseData<>(HttpStatus.OK.value(), "Get story by id" + storyId + " successfully", storyDto);
+   } catch (StoryException e) {
+     return new ResponseError(HttpStatus.NOT_FOUND.value(), "Get story by id" + storyId + " failed");
+
+   }
+
   }
 
   @DeleteMapping("/{storyId}")
-  public ResponseEntity<ApiResponse> deletePost(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public Object deletePost(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
     User user = userService.findUserProfileByJwt(jwt);
 
-    storyService.deleteStoryById(storyId, user.getId());
+    try {
+      storyService.deleteStoryById(storyId, user.getId());
 
-    ApiResponse res = ApiResponse.successNoData("Story deleted successfully", HttpStatus.OK);
-    return new ResponseEntity<>(res, HttpStatus.OK);
+      return new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete story by id" + storyId + " successfully");
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Delete story by id" + storyId + " failed");
+
+    }
   }
 
   @GetMapping("/")
-  public ResponseEntity<List<StoryDto>> getAllStories(@RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public Object getAllStories(@RequestHeader("Authorization") String jwt) throws UserException, PostException {
     User user = userService.findUserProfileByJwt(jwt);
 
-    List<Story> stories = storyService.findAllStory();
+    try {
+      List<Story> stories = storyService.findAllStory();
 
-    List<StoryDto> storyDtos = new ArrayList<>();
+      List<StoryDto> storyDtos = new ArrayList<>();
 
-    for(Story story : stories) {
-      StoryDto storyDto = storyConverter.toStoryDto(story, user);
-      storyDtos.add(storyDto);
+      for(Story story : stories) {
+        StoryDto storyDto = storyConverter.toStoryDto(story, user);
+        storyDtos.add(storyDto);
+      }
+
+      return new ResponseData<>(HttpStatus.OK.value(), "Get all stories successfully", storyDtos);
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all stories failed");
+
     }
 
-    return new ResponseEntity<>(storyDtos, HttpStatus.OK);
   }
 }

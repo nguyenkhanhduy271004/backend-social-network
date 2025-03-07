@@ -2,11 +2,16 @@ package com.project.social_network.controllers;
 
 import com.project.social_network.converter.ReelConverter;
 import com.project.social_network.exception.ReelException;
+import com.project.social_network.exception.StoryException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.models.dtos.ReelDto;
+import com.project.social_network.models.dtos.StoryDto;
 import com.project.social_network.models.entities.Reel;
+import com.project.social_network.models.entities.Story;
 import com.project.social_network.models.entities.User;
 import com.project.social_network.models.responses.ApiResponse;
+import com.project.social_network.models.responses.ResponseData;
+import com.project.social_network.models.responses.ResponseError;
 import com.project.social_network.services.interfaces.ReelService;
 import com.project.social_network.services.interfaces.UploadImageFile;
 import com.project.social_network.services.interfaces.UserService;
@@ -42,7 +47,7 @@ public class ReelController {
   private UploadImageFile uploadImageFile;
 
   @PostMapping("/create")
-  public ResponseEntity<ReelDto> createReel(
+  public Object createReel(
       @RequestParam(value = "file") MultipartFile file,
       @RequestParam("content") String content,
       @RequestHeader("Authorization") String jwt) throws UserException, ReelException, IOException {
@@ -58,46 +63,72 @@ public class ReelController {
     req.setContent(content);
     req.setImage(imageFileUrl);
 
-    Reel reel = reelService.createReel(req, user);
-    ReelDto reelDto = reelConverter.toReelDto(reel, user);
 
-    return new ResponseEntity<>(reelDto, HttpStatus.CREATED);
+    try {
+      Reel reel = reelService.createReel(req, user);
+      ReelDto reelDto = reelConverter.toReelDto(reel, user);
+
+      return new ResponseData<>(HttpStatus.CREATED.value(), "Create reel successfully", reelDto);
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Create reel failed");
+
+    }
+
   }
 
   @GetMapping("/{reelId}")
-  public ResponseEntity<ReelDto> findReelById(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
+  public Object findReelById(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
     User user = userService.findUserProfileByJwt(jwt);
 
-    Reel reel = reelService.findReelById(reelId);
 
-    ReelDto reelDto = reelConverter.toReelDto(reel, user);
+    try {
+      Reel reel = reelService.findReelById(reelId);
 
-    return new ResponseEntity<>(reelDto, HttpStatus.OK);
+      ReelDto reelDto = reelConverter.toReelDto(reel, user);
+
+      return new ResponseData<>(HttpStatus.OK.value(), "Get reel by id" + reelId + " successfully", reelDto);
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.NOT_FOUND.value(), "Get reel by id" + reelId + " failed");
+
+    }
+
   }
 
   @DeleteMapping("/{reelId}")
-  public ResponseEntity<ApiResponse> deleteReel(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
+  public Object deleteReel(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
     User user = userService.findUserProfileByJwt(jwt);
 
-    reelService.deleteReelById(reelId, user.getId());
 
-    ApiResponse res = ApiResponse.successNoData("Reel deleted successfully", HttpStatus.OK);
-    return new ResponseEntity<>(res, HttpStatus.OK);
+    try {
+      reelService.deleteReelById(reelId, user.getId());
+
+      return new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete reel by id" + reelId + " successfully");
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Delete reel by id" + reelId + " failed");
+
+    }
   }
 
   @GetMapping("/")
-  public ResponseEntity<List<ReelDto>> getAllReels(@RequestHeader("Authorization") String jwt) throws UserException, ReelException {
+  public Object getAllReels(@RequestHeader("Authorization") String jwt) throws UserException, ReelException {
     User user = userService.findUserProfileByJwt(jwt);
 
-    List<Reel> reels = reelService.findAllReel();
 
-    List<ReelDto> reelDtos = new ArrayList<>();
+    try {
+      List<Reel> reels = reelService.findAllReel();
 
-    for (Reel reel : reels) {
-      ReelDto reelDto = reelConverter.toReelDto(reel, user);
-      reelDtos.add(reelDto);
+      List<ReelDto> reelDtos = new ArrayList<>();
+
+      for (Reel reel : reels) {
+        ReelDto reelDto = reelConverter.toReelDto(reel, user);
+        reelDtos.add(reelDto);
+      }
+
+      return new ResponseData<>(HttpStatus.OK.value(), "Get all reels successfully", reelDtos);
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all reels failed");
+
     }
 
-    return new ResponseEntity<>(reelDtos, HttpStatus.OK);
   }
 }

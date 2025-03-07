@@ -1,5 +1,6 @@
 package com.project.social_network.config;
 
+import com.project.social_network.exception.CustomAuthenticationEntryPoint;
 import java.util.Arrays;
 import java.util.Collections;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,9 @@ public class AppConfig {
             .anyRequest().permitAll()
         )
         .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+        )
         .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
