@@ -4,6 +4,8 @@ import com.project.social_network.converter.UserConverter;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.models.dtos.UserDto;
 import com.project.social_network.models.entities.User;
+import com.project.social_network.models.responses.ResponseData;
+import com.project.social_network.models.responses.ResponseError;
 import com.project.social_network.services.interfaces.UserService;
 import com.project.social_network.utils.UserUtil;
 import java.util.ArrayList;
@@ -32,79 +34,116 @@ public class UserController {
   private UserUtil userUtil;
 
   @GetMapping("/")
-  public ResponseEntity<List<UserDto>> getUser(@RequestHeader("Authorization") String jwt) throws UserException {
-    User user = userService.findUserProfileByJwt(jwt);
+  public Object getUser(@RequestHeader("Authorization") String jwt) throws UserException {
 
-    List<User> users = userService.findAllUsers();
-    List<UserDto> userDtos = new ArrayList<>();
+    try {
+      User user = userService.findUserProfileByJwt(jwt);
+      List<User> users = userService.findAllUsers();
+      List<UserDto> userDtos = new ArrayList<>();
 
-    for(User us:users) {
-      UserDto userDto = userConverter.toUserDto(us);
-      userDtos.add(userDto);
+      for(User us:users) {
+        UserDto userDto = userConverter.toUserDto(us);
+        userDtos.add(userDto);
+      }
+      return new ResponseData<>(HttpStatus.OK.value(), "Get user successfully", userDtos);
+    } catch (UserException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get user failed");
     }
-    return new ResponseEntity<>(userDtos, HttpStatus.OK);
   }
 
   @GetMapping("/random")
-  public ResponseEntity<List<UserDto>> getUserRandom(@RequestHeader("Authorization") String jwt) throws UserException {
-    User user = userService.findUserProfileByJwt(jwt);
+  public Object getUserRandom(@RequestHeader("Authorization") String jwt) throws UserException {
 
-    List<User> users = userService.findAllUsers();
-    List<UserDto> userDtos = new ArrayList<>();
+   try {
+     User user = userService.findUserProfileByJwt(jwt);
+     List<User> users = userService.findAllUsers();
+     List<UserDto> userDtos = new ArrayList<>();
 
-    for(User us:users) {
-      UserDto userDto = userConverter.toUserDto(us);
-      if(!user.getFollowings().contains(us) && !us.getId().equals(user.getId())) {
-        userDtos.add(userDto);
-      }
-    }
-    return new ResponseEntity<>(userDtos, HttpStatus.OK);
+     for(User us:users) {
+       UserDto userDto = userConverter.toUserDto(us);
+       if(!user.getFollowings().contains(us) && !us.getId().equals(user.getId())) {
+         userDtos.add(userDto);
+       }
+     }
+
+     return new ResponseData<>(HttpStatus.OK.value(), "Get random user successfully", userDtos);
+   } catch (UserException e) {
+     return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get random user failed");
+   }
   }
 
   @GetMapping("/profile")
-  public ResponseEntity<UserDto> getUserProfile(@RequestHeader("Authorization") String jwt) throws UserException {
-    User user = userService.findUserProfileByJwt(jwt);
-    UserDto userDto = userConverter.toUserDto(user);
-    userDto.setReq_user(true);
-    return new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
+  public Object getUserProfile(@RequestHeader("Authorization") String jwt) throws UserException {
+   try {
+     User user = userService.findUserProfileByJwt(jwt);
+     UserDto userDto = userConverter.toUserDto(user);
+     userDto.setReq_user(true);
+
+     return new ResponseData<>(HttpStatus.OK.value(), "Get user profile successfully", userDto);
+   } catch (UserException e) {
+     return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get user profile failed");
+   }
   }
 
   @GetMapping("/{userId}")
-  public ResponseEntity<UserDto> getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
-    User reqUser = userService.findUserProfileByJwt(jwt);
+  public Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
+    try {
+      User reqUser = userService.findUserProfileByJwt(jwt);
 
-    User user = userService.findUserById(userId);
-    UserDto userDto = userConverter.toUserDto(user);
-    userDto.setReq_user(userUtil.isReqUser(reqUser, user));
-    userDto.setFollowed(userUtil.isFollowedByReqUser(reqUser, user));
-    return new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
+      User user = userService.findUserById(userId);
+      UserDto userDto = userConverter.toUserDto(user);
+      userDto.setReq_user(userUtil.isReqUser(reqUser, user));
+      userDto.setFollowed(userUtil.isFollowedByReqUser(reqUser, user));
+
+      return new ResponseData<>(HttpStatus.OK.value(), "Get user by id successfully", userDto);
+    } catch (UserException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get user by id failed");
+    }
   }
 
   @GetMapping("/search")
-  public ResponseEntity<List<UserDto>> getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt) throws UserException {
-    User reqUser = userService.findUserProfileByJwt(jwt);
+  public Object getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt) throws UserException {
+   try {
+     User reqUser = userService.findUserProfileByJwt(jwt);
 
-    List<User> users = userService.searchUser(query, reqUser.getId());
-    List<UserDto> userDtos = userConverter.toUserDtos(users);
-    return new ResponseEntity<>(userDtos, HttpStatus.ACCEPTED);
+     List<User> users = userService.searchUser(query, reqUser.getId());
+     List<UserDto> userDtos = userConverter.toUserDtos(users);
+
+     return new ResponseData<>(HttpStatus.OK.value(), "Get user by query successfully", userDtos);
+   } catch (UserException e) {
+     return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get user by query failed");
+   }
   }
 
   @PutMapping("/update")
-  public ResponseEntity<UserDto> getUserById(@RequestBody User req, @RequestHeader("Authorization") String jwt) throws UserException {
-    User reqUser = userService.findUserProfileByJwt(jwt);
+  public Object getUserById(@RequestBody User req, @RequestHeader("Authorization") String jwt) throws UserException {
+   try {
+     User reqUser = userService.findUserProfileByJwt(jwt);
 
-    User user = userService.updateUser(reqUser.getId(), req);
-    UserDto userDto = userConverter.toUserDto(user);
-    return new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
+     User user = userService.updateUser(reqUser.getId(), req);
+     UserDto userDto = userConverter.toUserDto(user);
+
+     return new ResponseData<>(HttpStatus.OK.value(), "Update user successfully", userDto);
+
+   } catch (UserException e) {
+     return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Update user failed");
+   }
   }
 
   @PutMapping("/{userId}/follow")
-  public ResponseEntity<UserDto> followUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
-    User reqUser = userService.findUserProfileByJwt(jwt);
+  public Object followUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
+    try {
+      User reqUser = userService.findUserProfileByJwt(jwt);
 
-    User user = userService.followUser(userId, reqUser);
-    UserDto userDto = userConverter.toUserDto(user);
-    userDto.setFollowed(userUtil.isFollowedByReqUser(reqUser, user));
-    return new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
+      User user = userService.followUser(userId, reqUser);
+      UserDto userDto = userConverter.toUserDto(user);
+      userDto.setFollowed(userUtil.isFollowedByReqUser(reqUser, user));
+
+      return new ResponseData<>(HttpStatus.OK.value(), "Follow user successfully", userDto);
+
+    } catch (UserException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Follow user failed");
+
+    }
   }
 }

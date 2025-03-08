@@ -6,6 +6,8 @@ import com.project.social_network.exception.UserException;
 import com.project.social_network.models.dtos.LikeDto;
 import com.project.social_network.models.entities.Like;
 import com.project.social_network.models.entities.User;
+import com.project.social_network.models.responses.ResponseData;
+import com.project.social_network.models.responses.ResponseError;
 import com.project.social_network.services.interfaces.LikeService;
 import com.project.social_network.services.interfaces.UserService;
 import java.util.List;
@@ -30,22 +32,37 @@ public class LikeController {
   private LikeConverter likeConverter;
 
   @PostMapping("/{postId}/likes")
-  public ResponseEntity<LikeDto> likePost(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public Object likePost(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
     User user = userService.findUserProfileByJwt(jwt);
-    Like like = likeService.likePost(postId, user);
 
-    LikeDto likeDto = likeConverter.toLikeDto(like, user);
+    try {
+      Like like = likeService.likePost(postId, user);
 
-    return new ResponseEntity<>(likeDto, HttpStatus.CREATED);
+      LikeDto likeDto = likeConverter.toLikeDto(like, user);
+
+      return new ResponseData<>(HttpStatus.CREATED.value(), "Like post successfully", likeDto);
+
+    } catch (PostException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Like post failed");
+    }
+
+
   }
 
   @PostMapping("/post/{postId}")
-  public ResponseEntity<List<LikeDto>> getAllPosts(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public Object getAllPostsIsLiked(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
     User user = userService.findUserProfileByJwt(jwt);
-    List<Like> likes = likeService.getAllLikes(postId);
 
-    List<LikeDto> likeDtos = likeConverter.toLikeDtos(likes, user);
+    try {
+      List<Like> likes = likeService.getAllLikes(postId);
 
-    return new ResponseEntity<>(likeDtos, HttpStatus.OK);
+      List<LikeDto> likeDtos = likeConverter.toLikeDtos(likes, user);
+
+      return new ResponseData<>(HttpStatus.OK.value(), "Get all posts is liked successfully", likeDtos);
+    } catch (PostException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all posts is liked failed");
+
+    }
+
   }
 }
