@@ -1,0 +1,125 @@
+package com.project.social_network.controller;
+
+import com.project.social_network.converter.StoryConverter;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.StoryException;
+import com.project.social_network.exception.UserException;
+import com.project.social_network.model.dto.StoryDto;
+import com.project.social_network.model.entity.Story;
+import com.project.social_network.model.entity.User;
+import com.project.social_network.model.response.ResponseData;
+import com.project.social_network.model.response.ResponseError;
+import com.project.social_network.service.interfaces.StoryService;
+import com.project.social_network.service.interfaces.UploadImageFile;
+import com.project.social_network.service.interfaces.UserService;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping("/api/story")
+public class StoryController {
+  @Autowired
+  private StoryService storyService;
+
+  @Autowired
+  private UserService userService;
+
+  @Autowired
+  private StoryConverter storyConverter;
+
+  @Autowired
+  private UploadImageFile uploadImageFile;
+  @PostMapping("/create")
+  public Object createStory(
+      @RequestParam(value = "file") MultipartFile file,
+      @RequestParam("content") String content,
+      @RequestHeader("Authorization") String jwt) throws UserException, StoryException, IOException {
+
+    User user = userService.findUserProfileByJwt(jwt);
+
+    String imageFileUrl = null;
+    if (file != null && !file.isEmpty()) {
+      imageFileUrl = uploadImageFile.uploadImage(file);
+    }
+
+    Story req = new Story();
+    req.setContent(content);
+    req.setImage(imageFileUrl);
+
+    try {
+      Story story = storyService.createStory(req, user);
+      StoryDto storyDto = storyConverter.toStoryDto(story, user);
+
+      return new ResponseData<>(HttpStatus.CREATED.value(), "Create story successfully", storyDto);
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Create story failed");
+
+    }
+
+  }
+
+  @GetMapping("/{storyId}")
+  public Object findPostById(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    try {
+     Story story = storyService.findStoryById(storyId);
+
+     StoryDto storyDto = storyConverter.toStoryDto(story, user);
+
+     return new ResponseData<>(HttpStatus.OK.value(), "Get story by id" + storyId + " successfully", storyDto);
+   } catch (StoryException e) {
+     return new ResponseError(HttpStatus.NOT_FOUND.value(), "Get story by id" + storyId + " failed");
+
+   }
+
+  }
+
+  @DeleteMapping("/{storyId}")
+  public Object deletePost(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    try {
+      storyService.deleteStoryById(storyId, user.getId());
+
+      return new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete story by id" + storyId + " successfully");
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Delete story by id" + storyId + " failed");
+
+    }
+  }
+
+  @GetMapping("/")
+  public Object getAllStories(@RequestHeader("Authorization") String jwt) throws UserException, PostException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    try {
+      List<Story> stories = storyService.findAllStory();
+
+      List<StoryDto> storyDtos = new ArrayList<>();
+
+      for(Story story : stories) {
+        StoryDto storyDto = storyConverter.toStoryDto(story, user);
+        storyDtos.add(storyDto);
+      }
+
+      return new ResponseData<>(HttpStatus.OK.value(), "Get all stories successfully", storyDtos);
+    } catch (StoryException e) {
+      return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all stories failed");
+
+    }
+
+  }
+}

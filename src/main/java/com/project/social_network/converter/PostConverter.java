@@ -1,14 +1,14 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.models.dtos.CommentDto;
-import com.project.social_network.models.dtos.PostDto;
-import com.project.social_network.models.dtos.UserDto;
-import com.project.social_network.models.entities.Comment;
-import com.project.social_network.models.entities.Post;
-import com.project.social_network.models.entities.User;
-import com.project.social_network.models.requests.PostReplyRequest;
-import com.project.social_network.models.responses.UserCommentResponse;
-import com.project.social_network.utils.PostUtil;
+import com.project.social_network.model.dto.CommentDto;
+import com.project.social_network.model.dto.PostDto;
+import com.project.social_network.model.dto.UserDto;
+import com.project.social_network.model.entity.Comment;
+import com.project.social_network.model.entity.Post;
+import com.project.social_network.model.entity.User;
+import com.project.social_network.model.request.PostReplyRequest;
+import com.project.social_network.model.response.UserCommentResponse;
+import com.project.social_network.util.PostUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

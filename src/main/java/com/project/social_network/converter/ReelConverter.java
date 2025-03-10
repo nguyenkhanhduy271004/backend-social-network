@@ -1,10 +1,10 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.models.dtos.ReelDto;
-import com.project.social_network.models.dtos.UserDto;
-import com.project.social_network.models.entities.Reel;
-import com.project.social_network.models.entities.User;
-import com.project.social_network.utils.ReelUtil;
+import com.project.social_network.model.dto.ReelDto;
+import com.project.social_network.model.dto.UserDto;
+import com.project.social_network.model.entity.Reel;
+import com.project.social_network.model.entity.User;
+import com.project.social_network.util.ReelUtil;
 import java.time.ZoneId;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

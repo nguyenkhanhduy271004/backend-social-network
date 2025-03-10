@@ -24,7 +24,12 @@ public class AppConfig {
     http
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/**").permitAll()
+            .requestMatchers(
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/auth/**"
+            ).permitAll()
+
             .requestMatchers("/api/**").authenticated()
             .anyRequest().permitAll()
         )

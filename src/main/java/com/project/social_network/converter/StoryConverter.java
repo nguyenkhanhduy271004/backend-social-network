@@ -1,16 +1,11 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.models.dtos.PostDto;
-import com.project.social_network.models.dtos.StoryDto;
-import com.project.social_network.models.dtos.UserDto;
-import com.project.social_network.models.entities.Post;
-import com.project.social_network.models.entities.Story;
-import com.project.social_network.models.entities.User;
-import com.project.social_network.utils.StoryUtil;
-import java.time.LocalDateTime;
+import com.project.social_network.model.dto.StoryDto;
+import com.project.social_network.model.dto.UserDto;
+import com.project.social_network.model.entity.Story;
+import com.project.social_network.model.entity.User;
+import com.project.social_network.util.StoryUtil;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
