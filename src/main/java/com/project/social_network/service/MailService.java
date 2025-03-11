@@ -1,10 +1,15 @@
 package com.project.social_network.service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +21,9 @@ public class MailService {
   private JavaMailSender mailSender;
 
   @Autowired
+  private TemplateEngine templateEngine;
+
+  @Autowired
   private RedisTemplate<String, String> redisTemplate;
 
   public String generateOTP() {
@@ -24,15 +32,22 @@ public class MailService {
     return String.valueOf(otp);
   }
 
-  public void sendOTP(String email) {
+  public void sendOTP(String email) throws MessagingException {
     String otp = generateOTP();
 
     redisTemplate.opsForValue().set("OTP_" + email, otp, 5, TimeUnit.MINUTES);
 
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(email);
-    message.setSubject("Xác thực OTP - Đặt lại mật khẩu");
-    message.setText("Mã OTP của bạn là: " + otp + ". Mã này có hiệu lực trong 5 phút.");
+    Context context = new Context();
+    context.setVariable("otp", otp);
+
+    String htmlContent = templateEngine.process("email/otp-email", context);
+
+    MimeMessage message = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+    helper.setTo(email);
+    helper.setSubject("Xác thực OTP - Đặt lại mật khẩu");
+    helper.setText(htmlContent, true);
 
     mailSender.send(message);
   }

@@ -10,6 +10,7 @@ import com.project.social_network.repository.UserRepository;
 import com.project.social_network.model.response.AuthResponse;
 import com.project.social_network.service.MailService;
 import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -75,7 +76,7 @@ public class AuthController {
 
     AuthResponse res = new AuthResponse(token, true);
 
-    return new ResponseEntity<AuthResponse>(res, HttpStatus.CREATED);
+    return new ResponseEntity<>(res, HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
@@ -107,7 +108,7 @@ public class AuthController {
   }
 
   @PostMapping("/forgot-password")
-  public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+  public ResponseEntity<?> forgotPassword(@RequestParam String email) throws MessagingException {
     User user = userRepository.findByEmail(email);
     if (user == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email không tồn tại!");

@@ -1,12 +1,14 @@
 package com.project.social_network.config;
 
 import com.project.social_network.exception.CustomAuthenticationEntryPoint;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,17 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class AppConfig {
+
+  private static CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+    CorsConfiguration cfg = new CorsConfiguration();
+    cfg.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+    cfg.setAllowedMethods(Collections.singletonList("*"));
+    cfg.setAllowCredentials(true);
+    cfg.setAllowedHeaders(Collections.singletonList("*"));
+    cfg.setExposedHeaders(Arrays.asList("Authorization"));
+    cfg.setMaxAge(3600L);
+    return cfg;
+  }
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,23 +50,14 @@ public class AppConfig {
         .exceptionHandling(exception -> exception
             .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
         )
-        .csrf(csrf -> csrf.disable())
+        .csrf(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
     return http.build();
   }
 
   private CorsConfigurationSource corsConfigurationSource() {
-    return request -> {
-      CorsConfiguration cfg = new CorsConfiguration();
-      cfg.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-      cfg.setAllowedMethods(Collections.singletonList("*"));
-      cfg.setAllowCredentials(true);
-      cfg.setAllowedHeaders(Collections.singletonList("*"));
-      cfg.setExposedHeaders(Arrays.asList("Authorization"));
-      cfg.setMaxAge(3600L);
-      return cfg;
-    };
+    return AppConfig::getCorsConfiguration;
   }
 
   @Bean
