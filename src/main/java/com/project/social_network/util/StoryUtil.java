@@ -1,8 +1,8 @@
 package com.project.social_network.util;
 
-import com.project.social_network.model.entity.Like;
-import com.project.social_network.model.entity.Story;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.entity.Like;
+import com.project.social_network.entity.Story;
+import com.project.social_network.entity.User;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,6 +1,6 @@
 package com.project.social_network.util;
 
-import com.project.social_network.model.response.ApiResponse;
+import com.project.social_network.dto.response.ApiResponse;
 import java.util.List;
 
 public class ApiResponseUtils {

@@ -1,4 +1,4 @@
-package com.project.social_network.model.entity;
+package com.project.social_network.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

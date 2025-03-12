@@ -1,5 +1,6 @@
 package com.project.social_network.service;
 
+import com.project.social_network.service.interfaces.BaseRedisService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class MailService {
   private TemplateEngine templateEngine;
 
   @Autowired
-  private RedisTemplate<String, String> redisTemplate;
+  private BaseRedisService baseRedisService; // ✅ Đúng dependency
 
   public String generateOTP() {
     Random random = new Random();
@@ -35,7 +36,7 @@ public class MailService {
   public void sendOTP(String email) throws MessagingException {
     String otp = generateOTP();
 
-    redisTemplate.opsForValue().set("OTP_" + email, otp, 5, TimeUnit.MINUTES);
+    baseRedisService.setWithTTL("OTP_" + email, otp, 5, TimeUnit.MINUTES);
 
     Context context = new Context();
     context.setVariable("otp", otp);
@@ -53,10 +54,11 @@ public class MailService {
   }
 
   public String getOTP(String email) {
-    return redisTemplate.opsForValue().get("OTP_" + email);
+    return (String) baseRedisService.get("OTP_" + email);
   }
 
   public void deleteOTP(String email) {
-    redisTemplate.delete("OTP_" + email);
+    baseRedisService.delete("OTP_" + email);
   }
 }
+

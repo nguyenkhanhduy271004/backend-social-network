@@ -2,11 +2,11 @@ package com.project.social_network.service.interfaces;
 
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.model.entity.Comment;
-import com.project.social_network.model.entity.Post;
-import com.project.social_network.model.entity.User;
-import com.project.social_network.model.request.CommentRequest;
-import com.project.social_network.model.request.PostReplyRequest;
+import com.project.social_network.entity.Comment;
+import com.project.social_network.entity.Post;
+import com.project.social_network.entity.User;
+import com.project.social_network.dto.request.CommentRequest;
+import com.project.social_network.dto.request.PostReplyRequest;
 import java.util.List;
 
 public interface PostService {

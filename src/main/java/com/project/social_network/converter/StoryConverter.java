@@ -1,9 +1,9 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.model.dto.StoryDto;
-import com.project.social_network.model.dto.UserDto;
-import com.project.social_network.model.entity.Story;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.dto.StoryDto;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.entity.Story;
+import com.project.social_network.entity.User;
 import com.project.social_network.util.StoryUtil;
 import java.time.ZoneId;
 import org.modelmapper.ModelMapper;

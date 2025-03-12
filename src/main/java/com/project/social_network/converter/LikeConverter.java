@@ -1,10 +1,10 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.model.dto.LikeDto;
-import com.project.social_network.model.dto.PostDto;
-import com.project.social_network.model.dto.UserDto;
-import com.project.social_network.model.entity.Like;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.dto.LikeDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.entity.Like;
+import com.project.social_network.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

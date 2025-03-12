@@ -1,7 +1,7 @@
 package com.project.social_network.service.interfaces;
 
 import com.project.social_network.exception.UserException;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.entity.User;
 import java.util.List;
 
 public interface UserService {

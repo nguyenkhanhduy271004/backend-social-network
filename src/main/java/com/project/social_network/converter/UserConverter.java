@@ -1,7 +1,7 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.model.dto.UserDto;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 import org.modelmapper.ModelMapper;

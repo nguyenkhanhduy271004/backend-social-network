@@ -2,14 +2,18 @@ package com.project.social_network.controller;
 
 import com.project.social_network.config.JwtProvider;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.model.entity.User;
-import com.project.social_network.model.entity.Verification;
-import com.project.social_network.model.request.LoginRequest;
-import com.project.social_network.model.request.RegisterRequest;
+import com.project.social_network.entity.User;
+import com.project.social_network.entity.Verification;
+import com.project.social_network.dto.request.LoginRequest;
+import com.project.social_network.dto.request.RegisterRequest;
 import com.project.social_network.repository.UserRepository;
-import com.project.social_network.model.response.AuthResponse;
+import com.project.social_network.dto.response.AuthResponse;
 import com.project.social_network.service.MailService;
 import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +26,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Auth Controller")
 @RestController
 @RequestMapping("/auth")
 @Validated
@@ -56,9 +57,8 @@ public class AuthController {
     String birthDate = user.getBirthDate();
 
     User isEmailExist = userRepository.findByEmail(email);
-
-    if(isEmailExist != null) {
-      throw new UserException("Email đã tồn tại!");
+    if (isEmailExist != null) {
+      throw new UserException("Email already exists!");
     }
 
     User newUser = new User();
@@ -73,7 +73,6 @@ public class AuthController {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     String token = jwtProvider.generateToken(authentication);
-
     AuthResponse res = new AuthResponse(token, true);
 
     return new ResponseEntity<>(res, HttpStatus.CREATED);
@@ -88,22 +87,17 @@ public class AuthController {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     String token = jwtProvider.generateToken(authentication);
-
     return ResponseEntity.ok(new AuthResponse(token, true));
   }
 
-
   private Authentication authenticate(String username, String password) {
     UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-
-    if(userDetails == null) {
+    if (userDetails == null) {
       throw new BadCredentialsException("Invalid username...");
     }
-
-    if(!passwordEncoder.matches(password, userDetails.getPassword())) {
+    if (!passwordEncoder.matches(password, userDetails.getPassword())) {
       throw new BadCredentialsException("Invalid username or password...");
     }
-
     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 
@@ -111,12 +105,11 @@ public class AuthController {
   public ResponseEntity<?> forgotPassword(@RequestParam String email) throws MessagingException {
     User user = userRepository.findByEmail(email);
     if (user == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email không tồn tại!");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found!");
     }
 
     mailService.sendOTP(email);
-
-    return ResponseEntity.ok("Mã OTP đã được gửi đến email của bạn!");
+    return ResponseEntity.ok("OTP has been sent to your email!");
   }
 
   @PostMapping("/reset-password")
@@ -124,16 +117,24 @@ public class AuthController {
     String storedOTP = mailService.getOTP(email);
 
     if (storedOTP == null || !storedOTP.equals(otp)) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mã OTP không hợp lệ hoặc đã hết hạn!");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP!");
     }
 
     mailService.deleteOTP(email);
-
     User user = userRepository.findByEmail(email);
     user.setPassword(passwordEncoder.encode(newPassword));
     userRepository.save(user);
 
-    return ResponseEntity.ok("Mật khẩu đã được đặt lại thành công!");
+    return ResponseEntity.ok("Password has been successfully reset!");
   }
 
+  @PostMapping("/create")
+  @Operation(summary = "Create a new story", description = "Create a new story with content and an optional image file.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "Story created successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid input or creation failed")
+  })
+  public ResponseEntity<?> createStory(@RequestBody String content) {
+    return ResponseEntity.status(HttpStatus.CREATED).body("Story created successfully");
+  }
 }

@@ -1,4 +1,4 @@
-package com.project.social_network.model.response;
+package com.project.social_network.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

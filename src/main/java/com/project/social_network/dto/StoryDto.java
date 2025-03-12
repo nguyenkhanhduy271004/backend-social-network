@@ -1,4 +1,4 @@
-package com.project.social_network.model.dto;
+package com.project.social_network.dto;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReelDto {
+public class StoryDto {
   private Long id;
 
   private String content;
@@ -20,4 +20,5 @@ public class ReelDto {
   private int totalLikes;
 
   private boolean isLiked;
+
 }

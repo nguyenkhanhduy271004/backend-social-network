@@ -1,7 +1,7 @@
 package com.project.social_network.repository;
 
-import com.project.social_network.model.entity.Reel;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.entity.Reel;
+import com.project.social_network.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

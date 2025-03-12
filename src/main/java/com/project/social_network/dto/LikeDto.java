@@ -1,4 +1,4 @@
-package com.project.social_network.model.dto;
+package com.project.social_network.dto;
 
 import lombok.Getter;
 import lombok.Setter;

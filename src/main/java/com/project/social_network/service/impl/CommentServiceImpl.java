@@ -2,9 +2,9 @@ package com.project.social_network.service.impl;
 
 import com.project.social_network.exception.CommentException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.model.entity.Comment;
-import com.project.social_network.model.entity.User;
-import com.project.social_network.model.request.CommentRequest;
+import com.project.social_network.entity.Comment;
+import com.project.social_network.entity.User;
+import com.project.social_network.dto.request.CommentRequest;
 import com.project.social_network.repository.CommentRepository;
 import com.project.social_network.service.interfaces.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.project.social_network.model.entity;
+package com.project.social_network.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

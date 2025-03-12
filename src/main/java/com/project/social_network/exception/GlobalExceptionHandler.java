@@ -1,5 +1,5 @@
 package com.project.social_network.exception;
-import com.project.social_network.model.response.ErrorResponse;
+import com.project.social_network.dto.response.ErrorResponse;
 import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;

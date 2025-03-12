@@ -3,14 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <title>Xác thực OTP</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 500px;
+      margin: 20px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .email-header {
+      text-align: center;
+      padding-bottom: 20px;
+    }
+    .email-header img {
+      width: 120px;
+    }
+    .otp-code {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff5733;
+      text-align: center;
+      padding: 10px;
+      border: 2px dashed #ff5733;
+      display: inline-block;
+      margin: 20px auto;
+      border-radius: 5px;
+    }
+    .email-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
-<h3>Chào bạn,</h3>
-<p>Mã OTP của bạn là: <strong th:text="${otp}"></strong></p>
-<p>Mã này có hiệu lực trong <strong>5 phút</strong>.</p>
-<p>Nếu bạn không yêu cầu mã OTP này, vui lòng bỏ qua email này.</p>
-<br>
-<p>Trân trọng,</p>
-<p><strong>Đội ngũ hỗ trợ</strong></p>
+
+<div class="email-container">
+  <div class="email-header">
+    <img src="https://simg.zalopay.com.vn/zlp-website/assets/otp_la_gi_1_290bba7bb4.jpg" alt="Logo">
+    <h2>Xác thực OTP</h2>
+  </div>
+
+  <p>Chào bạn,</p>
+  <p>Bạn vừa yêu cầu mã OTP để xác thực tài khoản. Vui lòng sử dụng mã sau để hoàn tất quá trình đăng nhập:</p>
+
+  <div class="otp-code" th:text="${otp}">123456</div>
+
+  <p>Mã này có hiệu lực trong <strong>5 phút</strong>. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>
+
+  <div class="email-footer">
+    <p>Trân trọng,</p>
+    <p><strong>Đội ngũ hỗ trợ</strong></p>
+  </div>
+</div>
+
 </body>
 </html>

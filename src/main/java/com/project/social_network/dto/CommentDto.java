@@ -1,6 +1,6 @@
-package com.project.social_network.model.dto;
+package com.project.social_network.dto;
 
-import com.project.social_network.model.response.UserCommentResponse;
+import com.project.social_network.dto.response.UserCommentResponse;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;

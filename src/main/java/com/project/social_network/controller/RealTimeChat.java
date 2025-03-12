@@ -1,6 +1,6 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.model.request.MessageRequest;
+import com.project.social_network.dto.request.MessageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
