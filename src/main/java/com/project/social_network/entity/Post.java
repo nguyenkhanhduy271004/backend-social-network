@@ -2,6 +2,7 @@ package com.project.social_network.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
@@ -21,6 +22,11 @@ public class Post extends BaseEntity{
   private String content;
   private String image;
   private String video;
+  private boolean isReply;
+  private boolean isPost;
+
+  @ManyToOne
+  private Post replyFor;
 
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
   private List<Like> likes = new ArrayList<>();
@@ -31,14 +37,13 @@ public class Post extends BaseEntity{
   @OneToMany
   private List<User> rePostUsers = new ArrayList<>();
 
-  @ManyToOne
-  private Post replyFor;
-
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Comment> comments = new ArrayList<>();
 
-  private boolean isReply;
-  private boolean isPost;
+  @ManyToOne
+  @JoinColumn(name = "group_id", nullable = false)
+  private Group group;
+
 
   private LocalDateTime createdAt;
 

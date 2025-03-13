@@ -1,7 +1,7 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.UserConverter;
-import com.project.social_network.dto.UserDto;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Message;
 import com.project.social_network.entity.User;
 import com.project.social_network.repository.MessageRepository;

@@ -1,4 +1,4 @@
-package com.project.social_network.dto;
+package com.project.social_network.dto.response;
 
 import java.util.ArrayList;
 import java.util.List;

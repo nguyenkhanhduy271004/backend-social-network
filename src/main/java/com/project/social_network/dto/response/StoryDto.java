@@ -1,4 +1,4 @@
-package com.project.social_network.dto;
+package com.project.social_network.dto.response;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

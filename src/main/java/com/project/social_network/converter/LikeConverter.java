@@ -1,8 +1,8 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.LikeDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.dto.UserDto;
+import com.project.social_network.dto.response.LikeDto;
+import com.project.social_network.dto.response.PostDto;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Like;
 import com.project.social_network.entity.User;
 import java.util.ArrayList;

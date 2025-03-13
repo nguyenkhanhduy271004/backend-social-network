@@ -1,6 +1,6 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.UserDto;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.User;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.dto.UserDto;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Message;
 import java.util.List;
 

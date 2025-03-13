@@ -3,7 +3,7 @@ package com.project.social_network.controller;
 import com.project.social_network.converter.LikeConverter;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.dto.LikeDto;
+import com.project.social_network.dto.response.LikeDto;
 import com.project.social_network.entity.Like;
 import com.project.social_network.entity.User;
 import com.project.social_network.dto.response.ResponseData;

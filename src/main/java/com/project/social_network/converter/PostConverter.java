@@ -1,8 +1,8 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.CommentDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.dto.UserDto;
+import com.project.social_network.dto.response.CommentDto;
+import com.project.social_network.dto.response.PostDto;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Comment;
 import com.project.social_network.entity.Post;
 import com.project.social_network.entity.User;

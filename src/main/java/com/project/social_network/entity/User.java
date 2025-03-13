@@ -58,4 +58,8 @@ public class User extends BaseEntity{
   @ManyToMany
   private List<User> followings = new ArrayList<>();
 
+  @JsonIgnore
+  @ManyToMany
+  private List<Group> groups = new ArrayList<>();
+
 }

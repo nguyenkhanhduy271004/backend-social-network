@@ -14,33 +14,28 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-  @Value("6379")
-  private String redisPort;
-
-  @Value("localhost")
+  @Value("${SPRING_REDIS_HOST:redis}")
   private String redisHost;
 
-  @Bean
-  JedisConnectionFactory jedisConnectionFactory() {
-    RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-    redisStandaloneConfiguration.setHostName(redisHost);
-    redisStandaloneConfiguration.setPort(Integer.parseInt(redisPort));
+  @Value("${SPRING_REDIS_PORT:6379}")
+  private int redisPort;
 
-    return new JedisConnectionFactory(redisStandaloneConfiguration);
+  @Bean
+  public RedisConnectionFactory redisConnectionFactory() {
+    return new LettuceConnectionFactory(redisHost, redisPort);
   }
 
   @Bean
-  RedisTemplate<String, Object> redisTemplate() {
-    RedisTemplate<String, Object> redisTemplate= new RedisTemplate<>();
-
-    redisTemplate.setConnectionFactory(jedisConnectionFactory());
-    redisTemplate.setKeySerializer(new StringRedisSerializer());
-    redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-    redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-    redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-    return redisTemplate;
+  public RedisTemplate<String, Object> redisTemplate() {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(redisConnectionFactory());
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setHashKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+    return template;
   }
+
 
 
 }

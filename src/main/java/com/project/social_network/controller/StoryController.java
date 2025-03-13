@@ -4,7 +4,7 @@ import com.project.social_network.converter.StoryConverter;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.StoryException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.dto.StoryDto;
+import com.project.social_network.dto.response.StoryDto;
 import com.project.social_network.entity.Story;
 import com.project.social_network.entity.User;
 import com.project.social_network.dto.response.ResponseData;

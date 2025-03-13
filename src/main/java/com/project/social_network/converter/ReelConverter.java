@@ -1,7 +1,7 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.ReelDto;
-import com.project.social_network.dto.UserDto;
+import com.project.social_network.dto.response.ReelDto;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Reel;
 import com.project.social_network.entity.User;
 import com.project.social_network.util.ReelUtil;

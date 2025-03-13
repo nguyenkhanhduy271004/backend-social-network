@@ -1,9 +1,14 @@
+# Sử dụng OpenJDK 17
 FROM openjdk:17
 
+# Định nghĩa biến ARG cho file JAR
 ARG FILE_JAR=target/*.jar
 
-ADD ${FILE_JAR} api-service.jar
+# Copy file JAR vào container
+COPY ${FILE_JAR} app.jar
 
-ENTRYPOINT ["java", "-jar", "api-service.jar"]
+# Cấu hình lệnh chạy ứng dụng
+ENTRYPOINT ["java", "-jar", "app.jar"]
 
+# Mở cổng 8080
 EXPOSE 8080

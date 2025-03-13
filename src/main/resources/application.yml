@@ -1,9 +1,12 @@
 server:
   port: 8080
+
 spring:
   application:
     name: nguyen-duy-dev
   profiles:
-    active: @spring.profiles.active@
-
-
+    active: dev
+  data:
+    redis:
+      host: redis
+      port: 6379
