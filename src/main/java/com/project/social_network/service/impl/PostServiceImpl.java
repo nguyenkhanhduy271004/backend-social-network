@@ -1,6 +1,7 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.PostConverter;
+import com.project.social_network.entity.Group;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.entity.Comment;
@@ -9,6 +10,7 @@ import com.project.social_network.entity.User;
 import com.project.social_network.dto.request.CommentRequest;
 import com.project.social_network.dto.request.PostReplyRequest;
 import com.project.social_network.repository.CommentRepository;
+import com.project.social_network.repository.GroupRepository;
 import com.project.social_network.repository.PostRepository;
 import com.project.social_network.service.interfaces.PostService;
 import java.util.List;
@@ -26,10 +28,21 @@ public class PostServiceImpl implements PostService {
   private PostConverter postConverter;
   @Autowired
   private CommentRepository commentRepository;
+  @Autowired
+  private GroupRepository groupRepository;
 
   @Override
   public Post createPost(Post req, User user) throws UserException {
     Post post = postConverter.postConverter(req, user);
+    return postRepository.save(post);
+  }
+
+  @Override
+  public Post createPostForGroup(Post req, User user, Long groupId) throws UserException {
+    Post post = postConverter.postConverter(req, user);
+
+    Group group = groupRepository.findById(groupId).orElseThrow(() -> new PostException("Not found group"));
+    post.setGroup(group);
     return postRepository.save(post);
   }
 

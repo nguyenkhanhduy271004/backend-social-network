@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface PostService {
   Post createPost(Post req, User user) throws UserException;
+  Post createPostForGroup(Post req, User user, Long groupId) throws UserException;
   List<Post> findAllPost();
   Post rePost(Long postId, User user) throws UserException, PostException;
   Post findById(Long postId) throws PostException;

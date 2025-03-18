@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
@@ -58,8 +60,10 @@ public class User extends BaseEntity{
   @ManyToMany
   private List<User> followings = new ArrayList<>();
 
-  @JsonIgnore
-  @ManyToMany
+  @ManyToMany(mappedBy = "users")
   private List<Group> groups = new ArrayList<>();
+
+
+
 
 }
