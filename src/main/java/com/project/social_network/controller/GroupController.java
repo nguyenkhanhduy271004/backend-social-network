@@ -135,4 +135,14 @@ public class GroupController {
     }
   }
 
+  @Operation(summary = "Get user's joined groups", description = "API to retrieve the groups that the authenticated user has joined")
+  @GetMapping("/my-groups")
+  public ResponseEntity<List<GroupDto>> getUserJoinedGroups(@RequestHeader("Authorization") String jwt) {
+    User user = userService.findUserProfileByJwt(jwt);
+    List<Group> joinedGroups = groupService.getGroupsByUser(user);
+    List<GroupDto> groupDtos = groupConverter.toGroupDtos(joinedGroups);
+    return ResponseEntity.ok(groupDtos);
+  }
+
+
 }

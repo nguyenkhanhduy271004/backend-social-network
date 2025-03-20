@@ -1,9 +1,12 @@
 package com.project.social_network.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.social_network.enums.AuthProvider;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -63,7 +66,8 @@ public class User extends BaseEntity{
   @ManyToMany(mappedBy = "users")
   private List<Group> groups = new ArrayList<>();
 
-
+  @Enumerated(EnumType.STRING)
+  private AuthProvider authProvider;
 
 
 }

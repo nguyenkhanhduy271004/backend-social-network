@@ -14,5 +14,6 @@ public interface GroupService {
   void promoteToAdmin(Long groupId, Long userId, User admin);
   List<Group> getAllGroups();
   Group getGroupById(Long groupId);
+  List<Group> getGroupsByUser(User user);
 
 }

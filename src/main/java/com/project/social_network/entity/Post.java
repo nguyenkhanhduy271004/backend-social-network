@@ -41,7 +41,7 @@ public class Post extends BaseEntity{
   private List<Comment> comments = new ArrayList<>();
 
   @ManyToOne
-  @JoinColumn(name = "group_id", referencedColumnName = "id")
+  @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = true)
   private Group group;
 
   private LocalDateTime createdAt;

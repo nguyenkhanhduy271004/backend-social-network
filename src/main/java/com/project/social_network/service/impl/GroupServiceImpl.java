@@ -124,4 +124,10 @@ public class GroupServiceImpl implements GroupService {
       throw new GroupException("User is not the admin of this group");
     }
   }
+
+  @Override
+  public List<Group> getGroupsByUser(User user) {
+    return groupRepository.findByUsersContaining(user);
+  }
+
 }
