@@ -5,6 +5,7 @@ import com.project.social_network.dto.response.PostDto;
 import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Group;
 import com.project.social_network.entity.Post;
+import com.project.social_network.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 import org.modelmapper.ModelMapper;
@@ -31,6 +32,7 @@ public class GroupConverter {
 
     user.setId(group.getAdmin().getId());
     user.setName(group.getAdmin().getFullName());
+
     List<PostDto> postDtos = new ArrayList<>();
 
     for(Post post:group.getPosts()) {
@@ -38,10 +40,26 @@ public class GroupConverter {
       postDtos.add(postDto);
     }
 
+    List<GroupDto.User> members = new ArrayList<>();
+
+
+    for(User user1 : group.getUsers()) {
+      GroupDto.User userDto = groupDto.new User();
+
+      userDto.setId(user1.getId());
+      userDto.setName(user1.getFullName());
+
+      members.add(userDto);
+    }
+
+
+
     groupDto.setId(group.getId());
-    groupDto.setName(groupDto.getName());
+    groupDto.setName(group.getName());
     groupDto.setAdmin(user);
     groupDto.setPosts(postDtos);
+    groupDto.setMembers(members);
+    groupDto.setCreatedDate(group.getCreatedDate());
 
     return groupDto;
 

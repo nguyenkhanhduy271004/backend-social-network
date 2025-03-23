@@ -53,7 +53,10 @@ public class PostConverter {
 
 
   public PostDto toPostDto(Post post, User reqUser) {
-    UserDto user = userConverter.toUserDto(post.getUser());
+    PostDto.User user = new PostDto.User();
+
+    user.setId(post.getUser().getId());
+    user.setFullName(post.getUser().getFullName());
 
     boolean isLiked = postUtil.isLikedByReqUser(reqUser, post);
     boolean isReposted = postUtil.isRePostByReqUser(reqUser, post);
@@ -95,7 +98,10 @@ public class PostConverter {
   }
 
   private PostDto toReplyPostDto(Post post, User reqUser) {
-    UserDto user = userConverter.toUserDto(post.getUser());
+    PostDto.User user = new PostDto.User();
+
+    user.setId(post.getUser().getId());
+    user.setFullName(post.getUser().getFullName());
 
     boolean isLiked = postUtil.isLikedByReqUser(reqUser, post);
     boolean isReposted = postUtil.isRePostByReqUser(reqUser, post);

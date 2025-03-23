@@ -42,7 +42,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/social_network?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
-      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_HOST: localhost
       SPRING_REDIS_PORT: 6379
     ports:
       - "8080:8080"

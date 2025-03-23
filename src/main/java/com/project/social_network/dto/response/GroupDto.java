@@ -19,6 +19,7 @@ public class GroupDto {
   private String name;
   private User admin;
   private List<PostDto> posts = new ArrayList<>();
+  private List<User> members = new ArrayList<>();
   private Date createdDate;
 
 

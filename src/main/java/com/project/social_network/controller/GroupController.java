@@ -55,7 +55,9 @@ public class GroupController {
   @PostMapping
   public ResponseEntity<GroupDto> createGroup(@RequestParam String name, @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
-    return ResponseEntity.ok(groupConverter.toGroupDto(groupService.createGroup(name, user)));
+
+    Group group = groupService.createGroup(name, user);
+    return ResponseEntity.ok(groupConverter.toGroupDto(group));
   }
 
   @Operation(summary = "Update group", description = "API to update group information")

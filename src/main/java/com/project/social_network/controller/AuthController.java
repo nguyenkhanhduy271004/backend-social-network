@@ -128,13 +128,5 @@ public class AuthController {
     return ResponseEntity.ok("Password has been successfully reset!");
   }
 
-  @PostMapping("/create")
-  @Operation(summary = "Create a new story", description = "Create a new story with content and an optional image file.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "Story created successfully"),
-      @ApiResponse(responseCode = "400", description = "Invalid input or creation failed")
-  })
-  public ResponseEntity<?> createStory(@RequestBody String content) {
-    return ResponseEntity.status(HttpStatus.CREATED).body("Story created successfully");
-  }
+
 }

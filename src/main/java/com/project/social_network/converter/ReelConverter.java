@@ -26,7 +26,9 @@ public class ReelConverter {
   }
 
   public ReelDto toReelDto(Reel reel, User reqUser) {
-    UserDto user = userConverter.toUserDto(reel.getUser());
+    ReelDto.User user = new ReelDto.User();
+    user.setId(reqUser.getId());
+    user.setFullName(reqUser.getFullName());
 
     boolean isLiked = reelUtil.isLikedByReqUser(reqUser, reel);
 

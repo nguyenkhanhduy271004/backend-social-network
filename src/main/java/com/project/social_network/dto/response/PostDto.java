@@ -2,7 +2,9 @@ package com.project.social_network.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -17,7 +19,7 @@ public class PostDto {
 
   private String video;
 
-  private UserDto user;
+  private User user;
 
   private LocalDateTime createdAt;
 
@@ -33,4 +35,14 @@ public class PostDto {
 
   private List<Long> rePostUserId;
   private List<PostDto> replyPosts;
+
+
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class User {
+    private Long id;
+    private String fullName;
+  }
 }
