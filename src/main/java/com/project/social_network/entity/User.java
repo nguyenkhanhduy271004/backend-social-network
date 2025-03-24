@@ -1,6 +1,7 @@
 package com.project.social_network.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.social_network.enums.AuthProvider;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
@@ -34,22 +35,24 @@ public class User extends BaseEntity{
   private boolean req_user;
   private boolean loginWithGoogle;
 
-  @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<Post> posts = new ArrayList<>();
 
-  @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<Story> stories = new ArrayList<>();
 
-  @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<Reel> reels = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<Like> likes = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<Comment> comments = new ArrayList<>();
 
   @Embedded

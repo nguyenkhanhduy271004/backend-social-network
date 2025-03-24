@@ -1,5 +1,6 @@
 package com.project.social_network.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +18,7 @@ import lombok.Setter;
 public class Story extends BaseEntity{
 
   @ManyToOne
+  @JsonBackReference
   private User user;
 
   private String content;
