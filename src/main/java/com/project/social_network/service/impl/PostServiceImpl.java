@@ -1,77 +1,115 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.PostConverter;
-import com.project.social_network.entity.Group;
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
-import com.project.social_network.entity.Comment;
-import com.project.social_network.entity.Post;
-import com.project.social_network.entity.User;
 import com.project.social_network.dto.request.CommentRequest;
 import com.project.social_network.dto.request.PostReplyRequest;
+import com.project.social_network.dto.response.PostDto;
+import com.project.social_network.entity.Comment;
+import com.project.social_network.entity.Group;
+import com.project.social_network.entity.Post;
+import com.project.social_network.entity.User;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.CommentRepository;
 import com.project.social_network.repository.GroupRepository;
 import com.project.social_network.repository.PostRepository;
 import com.project.social_network.service.interfaces.PostService;
+import com.project.social_network.service.interfaces.UploadImageFile;
+import com.project.social_network.service.interfaces.UserService;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional
 public class PostServiceImpl implements PostService {
 
   @Autowired
+  private PostConverter postConverter;
+  @Autowired
   private PostRepository postRepository;
   @Autowired
-  private PostConverter postConverter;
+  private UserService userService;
+  @Autowired
+  private GroupRepository groupRepository;
   @Autowired
   private CommentRepository commentRepository;
   @Autowired
-  private GroupRepository groupRepository;
+  private UploadImageFile uploadImageFile;
 
   @Override
-  public Post createPost(Post req, User user) throws UserException {
-    Post post = postConverter.postConverter(req, user);
-    return postRepository.save(post);
+  public PostDto createPost(String content, MultipartFile file, String jwt) throws UserException {
+    User user = userService.findUserProfileByJwt(jwt);
+    String imageFileUrl = null;
+    if (file != null && !file.isEmpty()) {
+      try {
+        imageFileUrl = uploadImageFile.uploadImage(file);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    Post req = new Post();
+    req.setContent(content);
+    req.setImage(imageFileUrl);
+    return postConverter.toPostDto(postRepository.save(postConverter.postConverter(req, user)), user);
   }
 
   @Override
-  public Post createPostForGroup(Post req, User user, Long groupId) throws UserException {
+  public PostDto createPostForGroup(String content, MultipartFile file, String jwt, Long groupId) throws UserException {
+    User user = userService.findUserProfileByJwt(jwt);
+    String imageFileUrl = null;
+    if (file != null && !file.isEmpty()) {
+      try {
+        imageFileUrl = uploadImageFile.uploadImage(file);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    Post req = new Post();
+    req.setContent(content);
+    req.setImage(imageFileUrl);
     Post post = postConverter.postConverter(req, user);
 
     Group group = groupRepository.findById(groupId).orElseThrow(() -> new PostException("Not found group"));
     post.setGroup(group);
-    return postRepository.save(post);
+
+    return postConverter.toPostDto(postRepository.save(post), user);
   }
 
   @Override
-  public List<Post> findAllPost() {
-    return postRepository.findAllByIsPostTrueOrderByCreatedAtDesc();
+  public List<PostDto> findAllPost() {
+    return postRepository.findAllByIsPostTrueOrderByCreatedAtDesc().stream()
+        .map(post -> postConverter.toPostDto(post, post.getUser()))
+        .collect(Collectors.toList());
   }
 
   @Override
-  public Post rePost(Long postId, User user) throws UserException, PostException {
-    Post post = findById(postId);
+  public PostDto rePost(Long postId, User user) throws UserException, PostException {
+    Post post = findByPostId(postId);
     if (post.getRePostUsers().contains(user)) {
       post.getRePostUsers().remove(user);
     } else {
       post.getRePostUsers().add(user);
     }
-    postRepository.save(post);
-    return post;
+
+    return postConverter.toPostDto(postRepository.save(post), post.getUser());
   }
 
   @Override
-  public Post findById(Long postId) throws PostException {
+  public PostDto findById(Long postId) throws PostException {
     Post post = postRepository.findById(postId).orElseThrow(() -> new PostException("Post not found with id: " + postId));
-    return post;
+    return postConverter.toPostDto(post, post.getUser());
   }
+
 
   @Override
   public void deletePostById(Long postId, Long userId) throws UserException, PostException {
-    Post post = findById(postId);
+    Post post = findByPostId(postId);
 
     if(!userId.equals(post.getUser().getId())) {
       throw new UserException("You can't delete another user's post");
@@ -81,13 +119,13 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Post removeFromRePost(Long postId, User user) throws UserException, PostException {
+  public PostDto removeFromRePost(Long postId, User user) throws UserException, PostException {
     return null;
   }
 
   @Override
-  public Post createdReply(PostReplyRequest req, User user) throws UserException, PostException {
-    Post replyFor = findById(req.getPostId());
+  public PostDto createdReply(PostReplyRequest req, User user) throws UserException, PostException {
+    Post replyFor = findByPostId(req.getPostId());
 
     Post post = postConverter.postReplyConverter(req, user);
     post.setReplyFor(replyFor);
@@ -97,28 +135,52 @@ public class PostServiceImpl implements PostService {
     replyFor.getReplyPost().add(savedPost);
     postRepository.save(replyFor);
 
-    return savedPost;
+    return postConverter.toPostDto(savedPost, user);
   }
 
 
   @Override
-  public List<Post> getUserPost(User user) {
-    return postRepository.findByRePostUsersContainsOrUser_IdAndIsPostTrueOrderByCreatedAtDesc(user, user.getId());
+  public List<PostDto> getUserPost(User user) {
+    return postRepository.findByRePostUsersContainsOrUser_IdAndIsPostTrueOrderByCreatedAtDesc(user, user.getId())
+        .stream()
+        .map((post) -> postConverter.toPostDto(post, post.getUser()))
+        .collect(Collectors.toList());
   }
 
   @Override
-  public List<Post> findByLikesContainsUser(User user) {
-    return postRepository.findByLikesUser_id(user.getId());
+  public List<PostDto> findByLikesContainsUser(User user) {
+    return postRepository.findByLikesUser_id(user.getId())
+        .stream()
+        .map((post) -> postConverter.toPostDto(post, post.getUser()))
+        .collect(Collectors.toList());
   }
 
   @Override
-  public Post updatePost(Post post) {
-    return postRepository.save(post);
+  public PostDto updatePost(Long postId, MultipartFile file, String content, String jwt) {
+    User user = userService.findUserProfileByJwt(jwt);
+    Post post = findByPostId(postId);
+
+    if (!post.getUser().getId().equals(user.getId())) {
+      throw new PostException("You do not have permission to edit this post.");
+    }
+
+    String imageFileUrl = post.getImage();
+    if (file != null && !file.isEmpty()) {
+      try {
+        imageFileUrl = uploadImageFile.uploadImage(file);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    post.setContent(content);
+    post.setImage(imageFileUrl);
+    return postConverter.toPostDto(postRepository.save(post), post.getUser());
   }
 
   @Override
-  public Post createComment(CommentRequest commentRequest, User user) throws UserException, PostException {
-    Post post = findById(commentRequest.getPostId());
+  public PostDto createComment(CommentRequest commentRequest, User user) throws UserException, PostException {
+    Post post = findByPostId(commentRequest.getPostId());
 
     Comment comment = new Comment();
     comment.setUser(user);
@@ -127,7 +189,7 @@ public class PostServiceImpl implements PostService {
 
     post.getComments().add(comment);
 
-    return postRepository.save(post);
+    return postConverter.toPostDto(postRepository.save(post), user);
   }
 
 
@@ -138,8 +200,17 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<Post> getRepostedPostsByUserId(Long userId) {
-    return postRepository.findRepostedPostsByUserId(userId);
+  public List<PostDto> getRepostedPostsByUserId(Long userId) {
+    return postRepository.findRepostedPostsByUserId(userId)
+        .stream()
+        .map((post) -> postConverter.toPostDto(post, post.getUser()))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public Post findByPostId(Long postId) throws PostException {
+    Post post = postRepository.findById(postId).orElseThrow(() -> new PostException("Post not found with id: " + postId));
+    return post;
   }
 
 }

@@ -1,23 +1,22 @@
 package com.project.social_network.controller;
 
 import com.project.social_network.converter.ReelConverter;
-import com.project.social_network.exception.ReelException;
-import com.project.social_network.exception.StoryException;
-import com.project.social_network.exception.UserException;
 import com.project.social_network.dto.response.ReelDto;
-import com.project.social_network.entity.Reel;
-import com.project.social_network.entity.User;
 import com.project.social_network.dto.response.ResponseData;
 import com.project.social_network.dto.response.ResponseError;
+import com.project.social_network.entity.User;
+import com.project.social_network.exception.ReelException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.service.interfaces.ReelService;
 import com.project.social_network.service.interfaces.UploadImageFile;
 import com.project.social_network.service.interfaces.UserService;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/reel")
@@ -59,27 +54,17 @@ public class ReelController {
       @ApiResponse(code = 400, message = "Invalid input or creation failed")
   })
   public ResponseEntity<?> createReel(
-      @ApiParam(value = "Image file to upload", required = false) @RequestParam(value = "file", required = false) MultipartFile file,
+      @ApiParam(value = "Image file to upload", required = true) @RequestParam(value = "file") MultipartFile file,
       @ApiParam(value = "Content of the reel", required = true) @RequestParam("content") String content,
       @ApiParam(value = "JWT token for authentication", required = true) @RequestHeader("Authorization") String jwt) throws UserException, ReelException, IOException {
 
     User user = userService.findUserProfileByJwt(jwt);
 
-    String imageFileUrl = null;
-    if (file != null && !file.isEmpty()) {
-      imageFileUrl = uploadImageFile.uploadImage(file);
-    }
-
-    Reel req = new Reel();
-    req.setContent(content);
-    req.setImage(imageFileUrl);
-
     try {
-      Reel reel = reelService.createReel(req, user);
-      ReelDto reelDto = reelConverter.toReelDto(reel, user);
+      ReelDto reelDto = reelService.createReel(file, content);
 
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.CREATED.value(), "Create reel successfully", reelDto), HttpStatus.CREATED);
-    } catch (StoryException e) {
+    } catch (ReelException e) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Create reel failed"), HttpStatus.BAD_REQUEST);
     }
   }
@@ -97,11 +82,10 @@ public class ReelController {
     User user = userService.findUserProfileByJwt(jwt);
 
     try {
-      Reel reel = reelService.findReelById(reelId);
-      ReelDto reelDto = reelConverter.toReelDto(reel, user);
+      ReelDto reelDto = reelService.findReelById(reelId);
 
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get reel by id " + reelId + " successfully", reelDto), HttpStatus.OK);
-    } catch (StoryException e) {
+    } catch (ReelException e) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.NOT_FOUND.value(), "Get reel by id " + reelId + " failed"), HttpStatus.NOT_FOUND);
     }
   }
@@ -121,7 +105,7 @@ public class ReelController {
     try {
       reelService.deleteReelById(reelId, user.getId());
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete reel by id " + reelId + " successfully"), HttpStatus.NO_CONTENT);
-    } catch (StoryException e) {
+    } catch (ReelException e) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Delete reel by id " + reelId + " failed"), HttpStatus.BAD_REQUEST);
     }
   }
@@ -138,16 +122,10 @@ public class ReelController {
     User user = userService.findUserProfileByJwt(jwt);
 
     try {
-      List<Reel> reels = reelService.findAllReel();
-      List<ReelDto> reelDtos = new ArrayList<>();
-
-      for (Reel reel : reels) {
-        ReelDto reelDto = reelConverter.toReelDto(reel, user);
-        reelDtos.add(reelDto);
-      }
+      List<ReelDto> reelDtos = reelService.findAllReel();
 
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get all reels successfully", reelDtos), HttpStatus.OK);
-    } catch (StoryException e) {
+    } catch (ReelException e) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all reels failed"), HttpStatus.BAD_REQUEST);
     }
   }

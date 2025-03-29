@@ -2,21 +2,19 @@ package com.project.social_network.controller;
 
 import com.project.social_network.config.Translator;
 import com.project.social_network.converter.PostConverter;
+import com.project.social_network.dto.request.CommentRequest;
+import com.project.social_network.dto.request.PostReplyRequest;
+import com.project.social_network.dto.response.CommentDto;
+import com.project.social_network.dto.response.PostDto;
+import com.project.social_network.dto.response.ResponseData;
+import com.project.social_network.dto.response.ResponseError;
+import com.project.social_network.entity.Comment;
+import com.project.social_network.entity.User;
 import com.project.social_network.exception.CommentException;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.dto.response.CommentDto;
-import com.project.social_network.dto.response.PostDto;
-import com.project.social_network.entity.Comment;
-import com.project.social_network.entity.Post;
-import com.project.social_network.entity.User;
-import com.project.social_network.dto.request.CommentRequest;
-import com.project.social_network.dto.request.PostReplyRequest;
-import com.project.social_network.dto.response.ResponseData;
-import com.project.social_network.dto.response.ResponseError;
 import com.project.social_network.service.interfaces.CommentService;
 import com.project.social_network.service.interfaces.PostService;
-import com.project.social_network.service.interfaces.UploadImageFile;
 import com.project.social_network.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,7 +26,16 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -49,8 +56,6 @@ public class PostController {
   @Autowired
   private PostConverter postConverter;
 
-  @Autowired
-  private UploadImageFile uploadImageFile;
 
   @PostMapping("/create")
   @Operation(summary = "Create post", description = "API create new post")
@@ -59,24 +64,36 @@ public class PostController {
       @RequestParam("content") String content,
       @RequestHeader("Authorization") String jwt) throws UserException, PostException, IOException {
 
-    User user = userService.findUserProfileByJwt(jwt);
-    String imageFileUrl = null;
-    if (file != null && !file.isEmpty()) {
-      imageFileUrl = uploadImageFile.uploadImage(file);
-    }
-
-    Post req = new Post();
-    req.setContent(content);
-    req.setImage(imageFileUrl);
 
     try {
-      Post post = postService.createPost(req, user);
-      PostDto postDto = postConverter.toPostDto(post, user);
+      PostDto postDto = postService.createPost(content, file, jwt);
       return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), Translator.toLocale("post.create.success"), postDto));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
     }
   }
+
+  @PostMapping("/{groupId}/groups")
+  @Operation(summary = "Create post for group", description = "API to create a new post in a specific group")
+  public ResponseEntity<?> createPostForGroup(
+      @PathVariable Long groupId,
+      @RequestParam(value = "file", required = false) MultipartFile file,
+      @RequestParam("content") String content,
+      @RequestHeader("Authorization") String jwt) {
+    try {
+      User user = userService.findUserProfileByJwt(jwt);
+      PostDto postDto = postService.createPostForGroup(content, file, jwt, groupId);
+      return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
+          Translator.toLocale("post.create.success"), postDto));
+    } catch (UserException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ResponseError(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
+    } catch (PostException e) {
+      return ResponseEntity.badRequest()
+          .body(new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+    }
+  }
+
 
   @PutMapping("/{postId}/edit")
   @Operation(summary = "Edit post", description = "API edit existing post")
@@ -86,25 +103,9 @@ public class PostController {
       @RequestParam("content") String content,
       @RequestHeader("Authorization") String jwt) throws UserException, PostException, IOException {
 
-    User user = userService.findUserProfileByJwt(jwt);
-    Post post = postService.findById(postId);
-
-    if (!post.getUser().getId().equals(user.getId())) {
-      throw new PostException("You do not have permission to edit this post.");
-    }
-
-    String imageFileUrl = post.getImage();
-    if (file != null && !file.isEmpty()) {
-      imageFileUrl = uploadImageFile.uploadImage(file);
-    }
-
-    post.setContent(content);
-    post.setImage(imageFileUrl);
-
     try {
-      Post updatedPost = postService.updatePost(post);
-      PostDto postDto = postConverter.toPostDto(updatedPost, user);
-      return ResponseEntity.accepted().body(new ResponseData<>(HttpStatus.ACCEPTED.value(), "Edit post successfully", postDto));
+      PostDto updatedPost = postService.updatePost(postId, file, content, jwt);
+      return ResponseEntity.accepted().body(new ResponseData<>(HttpStatus.ACCEPTED.value(), "Edit post successfully", updatedPost));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Edit post failed"));
     }
@@ -118,8 +119,7 @@ public class PostController {
 
     User user = userService.findUserProfileByJwt(jwt);
     try {
-      Post post = postService.createdReply(req, user);
-      PostDto postDto = postConverter.toPostDto(post, user);
+      PostDto postDto = postService.createdReply(req, user);
       return ResponseEntity.accepted().body(new ResponseData<>(HttpStatus.ACCEPTED.value(), "Reply post successfully", postDto));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Reply post failed"));
@@ -134,8 +134,7 @@ public class PostController {
 
     User user = userService.findUserProfileByJwt(jwt);
     try {
-      Post post = postService.rePost(postId, user);
-      PostDto postDto = postConverter.toPostDto(post, user);
+      PostDto postDto = postService.rePost(postId, user);
       return ResponseEntity.accepted().body(new ResponseData<>(HttpStatus.ACCEPTED.value(), "Repost post successfully", postDto));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Repost post failed"));
@@ -149,9 +148,9 @@ public class PostController {
       @RequestHeader("Authorization") String jwt) throws UserException, PostException {
 
     User user = userService.findUserProfileByJwt(jwt);
+
     try {
-      Post post = postService.findById(postId);
-      PostDto postDto = postConverter.toPostDto(post, user);
+      PostDto postDto = postService.findById(postId);
       return ResponseEntity.accepted().body(new ResponseData<>(HttpStatus.ACCEPTED.value(), "Find post by id: " + postId, postDto));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Find post by id: " + postId + " failed"));
@@ -180,8 +179,7 @@ public class PostController {
 
     User user = userService.findUserProfileByJwt(jwt);
     try {
-      List<Post> posts = postService.findAllPost();
-      List<PostDto> postDtos = postConverter.toPostDtos(posts, user);
+      List<PostDto> postDtos = postService.findAllPost();
       return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Get all posts successfully", postDtos));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all posts failed"));
@@ -197,8 +195,7 @@ public class PostController {
     User user = userService.findUserProfileByJwt(jwt);
     try {
       User postUser = userService.findUserById(userId);
-      List<Post> posts = postService.getUserPost(postUser);
-      List<PostDto> postDtos = postConverter.toPostDtos(posts, user);
+      List<PostDto> postDtos = postService.getUserPost(postUser);
       return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Get all user posts successfully", postDtos));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all user posts failed"));
@@ -213,8 +210,7 @@ public class PostController {
 
     User user = userService.findUserProfileByJwt(jwt);
     try {
-      List<Post> posts = postService.findByLikesContainsUser(user);
-      List<PostDto> postDtos = postConverter.toPostDtos(posts, user);
+      List<PostDto> postDtos = postService.findByLikesContainsUser(user);
       return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Get all liked posts successfully", postDtos));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get liked posts failed"));
@@ -250,8 +246,7 @@ public class PostController {
 
     User user = userService.findUserProfileByJwt(jwt);
     try {
-      Post post = postService.createComment(commentRequest, user);
-      PostDto postDto = postConverter.toPostDto(post, post.getUser());
+      PostDto postDto = postService.createComment(commentRequest, user);
       return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Create comment successfully", postDto));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Create comment failed"));
@@ -296,12 +291,7 @@ public class PostController {
 
     User user = userService.findUserProfileByJwt(jwt);
     try {
-      List<Post> posts = postService.getRepostedPostsByUserId(user.getId());
-      List<PostDto> postDtos = new ArrayList<>();
-      for (Post post : posts) {
-        PostDto postDto = postConverter.toPostDto(post, user);
-        postDtos.add(postDto);
-      }
+      List<PostDto> postDtos = postService.getRepostedPostsByUserId(user.getId());
       return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Get reposted posts successfully", postDtos));
     } catch (PostException e) {
       return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get reposted posts failed"));

@@ -27,9 +27,9 @@ public class GroupDto {
   @Setter
   @NoArgsConstructor
   @AllArgsConstructor
-  public class User {
+  public static class User {
     private Long id;
-    private String name;
+    private String fullName;
   }
 
 }

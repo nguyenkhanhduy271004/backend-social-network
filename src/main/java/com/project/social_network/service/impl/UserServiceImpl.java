@@ -1,6 +1,8 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.config.JwtProvider;
+import com.project.social_network.converter.UserConverter;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.entity.User;
 import com.project.social_network.repository.UserRepository;
@@ -19,12 +21,15 @@ public class UserServiceImpl implements UserService {
   @Autowired
   private JwtProvider jwtProvider;
 
+  @Autowired
+  private UserConverter userConverter;
+
   @Override
   public User findUserById(Long userId) throws UserException {
-    User user = userRepository.findById(userId)
+    return userRepository.findById(userId)
         .orElseThrow(() -> new UserException("User not found with id: " + userId));
-    return user;
   }
+
 
   @Override
   public User findUserProfileByJwt(String jwt) throws UserException {
@@ -38,7 +43,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User updateUser(Long userId, User user) throws UserException {
+  public UserDto updateUser(Long userId, User user) throws UserException {
     User existUser = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found with id: " + userId));
 
     if (user.getFullName() != null) {
@@ -69,11 +74,11 @@ public class UserServiceImpl implements UserService {
       existUser.setWebsite(user.getWebsite());
     }
 
-    return userRepository.save(existUser);
+    return userConverter.toUserDto(userRepository.save(existUser));
   }
 
   @Override
-  public User followUser(Long userId, User user) throws UserException {
+  public UserDto followUser(Long userId, User user) throws UserException {
     User followToUser = findUserById(userId);
 
     if(user.getFollowings().contains(followToUser) && followToUser.getFollowers().contains(user)) {
@@ -86,19 +91,23 @@ public class UserServiceImpl implements UserService {
 
     userRepository.save(followToUser);
     userRepository.save(user);
-    return followToUser;
+    return userConverter.toUserDto(followToUser);
   }
 
   @Override
-  public List<User> searchUser(String query, Long userId) {
+  public List<UserDto> searchUser(String query, Long userId) {
     return userRepository.searchUser(query)
         .stream()
         .filter(user -> !user.getId().equals(userId))
+        .map((user) -> userConverter.toUserDto(user))
         .collect(Collectors.toList());
   }
 
   @Override
-  public List<User> findAllUsers() {
-    return userRepository.findAll();
+  public List<UserDto> findAllUsers() {
+    return userRepository.findAll()
+        .stream()
+        .map((user) -> userConverter.toUserDto(user))
+        .collect(Collectors.toList());
   }
 }

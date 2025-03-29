@@ -15,23 +15,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class GroupConverter {
 
-  @Autowired
-  private UserConverter userConverter;
 
   @Autowired
   private PostConverter postConverter;
-
-
 
 
   public GroupDto toGroupDto(Group group) {
 
     GroupDto groupDto = new GroupDto();
 
-    GroupDto.User user = groupDto.new User();
+    GroupDto.User user = new GroupDto.User();
 
     user.setId(group.getAdmin().getId());
-    user.setName(group.getAdmin().getFullName());
+    user.setFullName(group.getAdmin().getFullName());
 
     List<PostDto> postDtos = new ArrayList<>();
 
@@ -44,10 +40,10 @@ public class GroupConverter {
 
 
     for(User user1 : group.getUsers()) {
-      GroupDto.User userDto = groupDto.new User();
+      GroupDto.User userDto = new GroupDto.User();
 
       userDto.setId(user1.getId());
-      userDto.setName(user1.getFullName());
+      userDto.setFullName(user1.getFullName());
 
       members.add(userDto);
     }

@@ -1,16 +1,19 @@
 package com.project.social_network.service.interfaces;
 
+import com.project.social_network.dto.response.ReelDto;
 import com.project.social_network.exception.ReelException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.entity.Reel;
 import com.project.social_network.entity.User;
+import java.io.IOException;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ReelService {
-  Reel createReel(Reel req, User user) throws UserException;
-  List<Reel> findAllReel();
-  Reel findReelById(Long reelId);
+  ReelDto createReel(MultipartFile file, String content) throws UserException, IOException;
+  List<ReelDto> findAllReel();
+  ReelDto findReelById(Long reelId);
   void deleteReelById(Long reelId, Long userId) throws UserException, ReelException;
-  List<Reel> getUserReel(User user);
+  List<ReelDto> getUserReel(User user);
 
 }

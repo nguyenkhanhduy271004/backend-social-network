@@ -1,5 +1,8 @@
 package com.project.social_network.service.interfaces;
 
+import com.project.social_network.dto.response.GroupDto;
+import com.project.social_network.dto.response.PostDto;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Group;
 import com.project.social_network.entity.User;
 import java.util.List;
@@ -15,5 +18,8 @@ public interface GroupService {
   List<Group> getAllGroups();
   Group getGroupById(Long groupId);
   List<Group> getGroupsByUser(User user);
+  List<GroupDto.User> getUsersByGroupId(Long groupId);
+  List<PostDto> getPostsFromAllGroups();
+  List<PostDto> getPostsByGroupId(Long groupId);
 
 }

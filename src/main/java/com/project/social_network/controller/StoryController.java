@@ -62,18 +62,8 @@ public class StoryController {
 
     User user = userService.findUserProfileByJwt(jwt);
 
-    String imageFileUrl = null;
-    if (file != null && !file.isEmpty()) {
-      imageFileUrl = uploadImageFile.uploadImage(file);
-    }
-
-    Story req = new Story();
-    req.setContent(content);
-    req.setImage(imageFileUrl);
-
     try {
-      Story story = storyService.createStory(req, user);
-      StoryDto storyDto = storyConverter.toStoryDto(story, user);
+      StoryDto storyDto = storyService.createStory(file, content);
 
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.CREATED.value(), "Create story successfully", storyDto), HttpStatus.CREATED);
     } catch (StoryException e) {
@@ -96,8 +86,7 @@ public class StoryController {
     User user = userService.findUserProfileByJwt(jwt);
 
     try {
-      Story story = storyService.findStoryById(storyId);
-      StoryDto storyDto = storyConverter.toStoryDto(story, user);
+      StoryDto storyDto = storyService.findStoryById(storyId);
 
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get story by id " + storyId + " successfully", storyDto), HttpStatus.OK);
     } catch (StoryException e) {
@@ -140,14 +129,7 @@ public class StoryController {
     User user = userService.findUserProfileByJwt(jwt);
 
     try {
-      List<Story> stories = storyService.findAllStory();
-      List<StoryDto> storyDtos = new ArrayList<>();
-
-      for (Story story : stories) {
-        StoryDto storyDto = storyConverter.toStoryDto(story, user);
-        storyDtos.add(storyDto);
-      }
-
+      List<StoryDto> storyDtos = storyService.findAllStory();
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get all stories successfully", storyDtos), HttpStatus.OK);
     } catch (StoryException e) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all stories failed"), HttpStatus.BAD_REQUEST);

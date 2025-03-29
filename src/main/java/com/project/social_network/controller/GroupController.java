@@ -7,6 +7,7 @@ import com.project.social_network.dto.response.GroupDto;
 import com.project.social_network.dto.response.PostDto;
 import com.project.social_network.dto.response.ResponseData;
 import com.project.social_network.dto.response.ResponseError;
+import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Group;
 import com.project.social_network.entity.Post;
 import com.project.social_network.entity.User;
@@ -108,42 +109,36 @@ public class GroupController {
 
   @Operation(summary = "Get group by ID", description = "API to retrieve a group by its ID")
   @GetMapping("/{groupId}")
-  public ResponseEntity<Group> getGroupById(@PathVariable Long groupId) {
-    return ResponseEntity.ok(groupService.getGroupById(groupId));
-  }
-
-  public ResponseEntity<?> createPost(
-      @RequestParam(value = "file", required = false) MultipartFile file,
-      @RequestParam("content") String content,
-      @RequestHeader("Authorization") String jwt,
-      @RequestParam("groupId") Long groupId) throws UserException, PostException, IOException {
-
-    User user = userService.findUserProfileByJwt(jwt);
-    String imageFileUrl = null;
-    if (file != null && !file.isEmpty()) {
-      imageFileUrl = uploadImageFile.uploadImage(file);
-    }
-
-    Post req = new Post();
-    req.setContent(content);
-    req.setImage(imageFileUrl);
-
-    try {
-      Post post = postService.createPostForGroup(req, user, groupId);
-      PostDto postDto = postConverter.toPostDto(post, user);
-      return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), Translator.toLocale("post.create.success"), postDto));
-    } catch (PostException e) {
-      return ResponseEntity.badRequest().body(new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
-    }
+  public ResponseEntity<GroupDto> getGroupById(@PathVariable Long groupId) {
+    return ResponseEntity.ok(groupConverter.toGroupDto(groupService.getGroupById(groupId)));
   }
 
   @Operation(summary = "Get user's joined groups", description = "API to retrieve the groups that the authenticated user has joined")
   @GetMapping("/my-groups")
-  public ResponseEntity<List<GroupDto>> getUserJoinedGroups(@RequestHeader("Authorization") String jwt) {
+  public ResponseEntity<List<GroupDto>> getGroupsByUser(@RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     List<Group> joinedGroups = groupService.getGroupsByUser(user);
     List<GroupDto> groupDtos = groupConverter.toGroupDtos(joinedGroups);
     return ResponseEntity.ok(groupDtos);
+  }
+
+  @GetMapping("/users")
+  public ResponseEntity<List<GroupDto.User>> getUserByGroupId(@RequestParam(value = "groupId") Long groupId) {
+    return ResponseEntity.ok(groupService.getUsersByGroupId(groupId));
+  }
+
+  @GetMapping("/posts")
+  public ResponseEntity<List<PostDto>> getPostsFromAllGroups() {
+    return ResponseEntity.ok(groupService.getPostsFromAllGroups());
+  }
+
+  @GetMapping("/{groupId}/posts")
+  public ResponseEntity<List<PostDto>> getPostsByGroupId(@PathVariable Long groupId) {
+    List<PostDto> posts = groupService.getPostsByGroupId(groupId);
+    if (posts.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(posts);
   }
 
 

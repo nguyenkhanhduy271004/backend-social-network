@@ -41,13 +41,8 @@ public class UserController {
   public Object getUser(@RequestHeader("Authorization") String jwt) throws UserException {
     try {
       User user = userService.findUserProfileByJwt(jwt);
-      List<User> users = userService.findAllUsers();
-      List<UserDto> userDtos = new ArrayList<>();
+      List<UserDto> userDtos = userService.findAllUsers();
 
-      for (User us : users) {
-        UserDto userDto = userConverter.toUserDto(us);
-        userDtos.add(userDto);
-      }
       return new ResponseData<>(HttpStatus.OK.value(), "Get user successfully", userDtos);
     } catch (UserException e) {
       return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get user failed");
@@ -63,15 +58,7 @@ public class UserController {
   public Object getUserRandom(@RequestHeader("Authorization") String jwt) throws UserException {
     try {
       User user = userService.findUserProfileByJwt(jwt);
-      List<User> users = userService.findAllUsers();
-      List<UserDto> userDtos = new ArrayList<>();
-
-      for (User us : users) {
-        UserDto userDto = userConverter.toUserDto(us);
-        if (!user.getFollowings().contains(us) && !us.getId().equals(user.getId())) {
-          userDtos.add(userDto);
-        }
-      }
+      List<UserDto> userDtos = userService.findAllUsers();
 
       return new ResponseData<>(HttpStatus.OK.value(), "Get random user successfully", userDtos);
     } catch (UserException e) {
@@ -126,8 +113,7 @@ public class UserController {
   public Object getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt) throws UserException {
     try {
       User reqUser = userService.findUserProfileByJwt(jwt);
-      List<User> users = userService.searchUser(query, reqUser.getId());
-      List<UserDto> userDtos = userConverter.toUserDtos(users);
+      List<UserDto> userDtos = userService.searchUser(query, reqUser.getId());
 
       return new ResponseData<>(HttpStatus.OK.value(), "Get user by query successfully", userDtos);
     } catch (UserException e) {
@@ -144,8 +130,7 @@ public class UserController {
   public Object updateUser(@RequestBody User req, @RequestHeader("Authorization") String jwt) throws UserException {
     try {
       User reqUser = userService.findUserProfileByJwt(jwt);
-      User user = userService.updateUser(reqUser.getId(), req);
-      UserDto userDto = userConverter.toUserDto(user);
+      UserDto userDto = userService.updateUser(reqUser.getId(), req);
 
       return new ResponseData<>(HttpStatus.OK.value(), "Update user successfully", userDto);
     } catch (UserException e) {
@@ -162,9 +147,7 @@ public class UserController {
   public Object followUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
     try {
       User reqUser = userService.findUserProfileByJwt(jwt);
-      User user = userService.followUser(userId, reqUser);
-      UserDto userDto = userConverter.toUserDto(user);
-      userDto.setFollowed(userUtil.isFollowedByReqUser(reqUser, user));
+      UserDto userDto = userService.followUser(userId, reqUser);
 
       return new ResponseData<>(HttpStatus.OK.value(), "Follow user successfully", userDto);
     } catch (UserException e) {

@@ -32,7 +32,7 @@ public class LikeServiceImpl implements LikeService {
       return isLikeExist;
     }
 
-    Post post = postService.findById(postId);
+    Post post = postService.findByPostId(postId);
 
     Like like = new Like();
     like.setPost(post);
@@ -48,7 +48,7 @@ public class LikeServiceImpl implements LikeService {
   @Override
   public List<Like> getAllLikes(Long postId) throws PostException {
 
-    Post post = postService.findById(postId);
+    Post post = postService.findByPostId(postId);
 
     List<Like> likes = likeRepository.findByPostId(postId);
 
