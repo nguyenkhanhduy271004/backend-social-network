@@ -76,9 +76,12 @@ public class PostServiceImpl implements PostService {
     Post post = postConverter.postConverter(req, user);
 
     Group group = groupRepository.findById(groupId).orElseThrow(() -> new PostException("Not found group"));
+    List<Post> oldPost = group.getPosts();
+    oldPost.add(req);
+    group.setPosts(oldPost);
     post.setGroup(group);
 
-    return postConverter.toPostDto(postRepository.save(post), user);
+    return postConverter.toPostDtoForGroup(postRepository.save(post), user, group.getName(), post.getGroup().getId());
   }
 
   @Override

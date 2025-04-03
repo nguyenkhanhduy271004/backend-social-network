@@ -61,7 +61,7 @@ public class ReelController {
     User user = userService.findUserProfileByJwt(jwt);
 
     try {
-      ReelDto reelDto = reelService.createReel(file, content);
+      ReelDto reelDto = reelService.createReel(file, content, user);
 
       return new ResponseEntity<>(new ResponseData<>(HttpStatus.CREATED.value(), "Create reel successfully", reelDto), HttpStatus.CREATED);
     } catch (ReelException e) {

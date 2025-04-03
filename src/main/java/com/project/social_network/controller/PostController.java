@@ -73,7 +73,7 @@ public class PostController {
     }
   }
 
-  @PostMapping("/{groupId}/groups")
+  @PostMapping("/{groupId}")
   @Operation(summary = "Create post for group", description = "API to create a new post in a specific group")
   public ResponseEntity<?> createPostForGroup(
       @PathVariable Long groupId,

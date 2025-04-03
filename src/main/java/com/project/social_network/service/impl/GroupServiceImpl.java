@@ -1,34 +1,33 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.PostConverter;
-import com.project.social_network.converter.UserConverter;
 import com.project.social_network.dto.response.GroupDto;
+import com.project.social_network.dto.response.GroupUserDto;
 import com.project.social_network.dto.response.PostDto;
-import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Group;
 import com.project.social_network.entity.User;
 import com.project.social_network.exception.GroupException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.GroupRepository;
+import com.project.social_network.repository.UserRepository;
 import com.project.social_network.service.interfaces.GroupService;
-import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
 @Service
 public class GroupServiceImpl implements GroupService {
 
-  private final GroupRepository groupRepository;
-  private final UserConverter userConverter;
-  private final PostConverter postConverter;
+  @Autowired
+  private GroupRepository groupRepository;
 
-  public GroupServiceImpl(GroupRepository groupRepository, UserConverter userConverter,
-      PostConverter postConverter) {
-    this.groupRepository = groupRepository;
-    this.userConverter = userConverter;
-    this.postConverter = postConverter;
-  }
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
+  private PostConverter postConverter;
 
   @Override
   public Group createGroup(String name, User owner) {
@@ -65,7 +64,10 @@ public class GroupServiceImpl implements GroupService {
     Group group = groupRepository.findById(groupId)
         .orElseThrow(() -> new GroupException("Group not found"));
 
-    if (!group.getUsers().contains(user)) {
+    boolean isMember = group.getUsers().stream()
+        .anyMatch(u -> u.getId().equals(user.getId()));
+
+    if (!isMember) {
       group.getUsers().add(user);
       groupRepository.save(group);
     }
@@ -98,8 +100,15 @@ public class GroupServiceImpl implements GroupService {
 
     checkIfAdmin(group, admin);
 
-    group.getUsers().removeIf(user -> user.getId().equals(userId));
+    User userToRemove = group.getUsers().stream()
+        .filter(user -> user.getId().equals(userId))
+        .findFirst()
+        .orElseThrow(() -> new UserException("User not found in the group"));
 
+    group.getUsers().remove(userToRemove);
+    userToRemove.getGroups().remove(group);
+
+    userRepository.save(userToRemove);
     groupRepository.save(group);
   }
 
@@ -130,27 +139,14 @@ public class GroupServiceImpl implements GroupService {
         .orElseThrow(() -> new GroupException("Group not found"));
   }
 
-
-  private void checkIfAdmin(Group group, User user) {
-    if (!group.getAdmin().equals(user)) {
-      throw new GroupException("User is not the admin of this group");
-    }
-  }
-
   @Override
   public List<Group> getGroupsByUser(User user) {
     return groupRepository.findByUsersContaining(user);
   }
 
   @Override
-  public List<GroupDto.User> getUsersByGroupId(Long groupId) {
-    return groupRepository.findById(groupId)
-        .map(group -> group.getUsers().stream()
-            .map((user -> {
-               return new GroupDto.User(user.getId(), user.getFullName());
-            }))
-            .collect(Collectors.toList()))
-        .orElse(Collections.emptyList());
+  public List<GroupUserDto> getUsersByGroupId(Long groupId) {
+    return groupRepository.findUsersByGroupId(groupId);
   }
 
   @Transactional(readOnly = true)
@@ -158,17 +154,23 @@ public class GroupServiceImpl implements GroupService {
     List<Group> groups = groupRepository.findAll();
     return groups.stream()
         .flatMap(group -> group.getPosts().stream())
-        .map(post -> postConverter.toPostDto(post, post.getUser()))
+        .map(post -> postConverter.toPostDtoForGroup(post, post.getUser(), post.getGroup().getName(), post.getGroup().getId()))
         .collect(Collectors.toList());
   }
 
   @Override
   public List<PostDto> getPostsByGroupId(Long groupId) {
-    return groupRepository.findById(groupId)
-        .stream()
-        .flatMap(group -> group.getPosts().stream())
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new GroupException("Group not found"));
+
+    return group.getPosts().stream()
         .map(post -> postConverter.toPostDto(post, post.getUser()))
         .collect(Collectors.toList());
   }
 
+  private void checkIfAdmin(Group group, User user) {
+    if (user == null || group.getAdmin() == null || !group.getAdmin().getId().equals(user.getId())) {
+      throw new GroupException("User is not the admin of this group");
+    }
+  }
 }

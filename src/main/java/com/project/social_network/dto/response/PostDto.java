@@ -13,6 +13,10 @@ public class PostDto {
 
   private Long id;
 
+  private Long groupId;
+
+  private String nameGroup;
+
   private String content;
 
   private String image;

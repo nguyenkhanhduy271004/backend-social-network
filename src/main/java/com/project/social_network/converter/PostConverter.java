@@ -86,6 +86,42 @@ public class PostConverter {
     return postDto;
   }
 
+  public PostDto toPostDtoForGroup(Post post, User reqUser, String nameGroup, Long groupId) {
+    PostDto.User user = new PostDto.User();
+
+    user.setId(post.getUser().getId());
+    user.setFullName(post.getUser().getFullName());
+
+    boolean isLiked = postUtil.isLikedByReqUser(reqUser, post);
+    boolean isReposted = postUtil.isRePostByReqUser(reqUser, post);
+
+
+    List<Long> rePostUserId = new ArrayList<>();
+
+    for(User user1:post.getRePostUsers()) {
+      rePostUserId.add(user1.getId());
+    }
+
+    PostDto postDto = new PostDto();
+    postDto.setId(post.getId());
+    postDto.setContent(post.getContent());
+    postDto.setCreatedAt(post.getCreatedAt());
+    postDto.setImage(post.getImage());
+    postDto.setTotalLikes(post.getLikes().size());
+    postDto.setTotalReplies(post.getRePostUsers().size());
+    postDto.setTotalComments(post.getComments().size());
+    postDto.setUser(user);
+    postDto.setLiked(isLiked);
+    postDto.setRePost(isReposted);
+    postDto.setRePostUserId(rePostUserId);
+    postDto.setReplyPosts(toPostDtos(post.getReplyPost(), reqUser));
+    postDto.setVideo(post.getVideo());
+    postDto.setNameGroup(nameGroup);
+    postDto.setGroupId(groupId);
+
+    return postDto;
+  }
+
   public List<PostDto> toPostDtos(List<Post> posts, User reqUser) {
     List<PostDto> postDtos = new ArrayList<>();
 

@@ -23,14 +23,15 @@ public class Group extends BaseEntity {
   private User admin;
 
 
-  @JsonIgnore
   @ManyToMany
   @JoinTable(
       name = "user_groups",
       joinColumns = @JoinColumn(name = "group_id"),
       inverseJoinColumns = @JoinColumn(name = "user_id")
   )
+  @JsonIgnore
   private List<User> users = new ArrayList<>();
+
 
   @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
   private List<Post> posts = new ArrayList<>();

@@ -1,15 +1,16 @@
 package com.project.social_network.service.interfaces;
 
 import com.project.social_network.dto.response.GroupDto;
+import com.project.social_network.dto.response.GroupUserDto;
 import com.project.social_network.dto.response.PostDto;
-import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Group;
 import com.project.social_network.entity.User;
+import com.project.social_network.exception.GroupException;
 import java.util.List;
 
 public interface GroupService {
   Group createGroup(String name, User owner);
-  Group updateGroup(Long groupId, String name, User admin);
+  Group updateGroup(Long groupId, String name, User admin) throws GroupException;
   void deleteGroup(Long groupId, User admin);
   void joinGroup(Long groupId, User user);
   void leaveGroup(Long groupId, User user);
@@ -18,8 +19,7 @@ public interface GroupService {
   List<Group> getAllGroups();
   Group getGroupById(Long groupId);
   List<Group> getGroupsByUser(User user);
-  List<GroupDto.User> getUsersByGroupId(Long groupId);
+  List<GroupUserDto> getUsersByGroupId(Long groupId);
   List<PostDto> getPostsFromAllGroups();
   List<PostDto> getPostsByGroupId(Long groupId);
-
 }

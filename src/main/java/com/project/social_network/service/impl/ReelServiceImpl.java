@@ -28,7 +28,7 @@ public class ReelServiceImpl implements ReelService {
   private UploadImageFile uploadImageFile;
 
   @Override
-  public ReelDto createReel(MultipartFile file, String content) throws UserException, IOException {
+  public ReelDto createReel(MultipartFile file, String content, User user) throws UserException, IOException {
     String imageFileUrl = null;
     if (file != null && !file.isEmpty()) {
       imageFileUrl = uploadImageFile.uploadImage(file);
@@ -36,6 +36,7 @@ public class ReelServiceImpl implements ReelService {
     Reel reel = new Reel();
     reel.setContent(content);
     reel.setImage(imageFileUrl);
+    reel.setUser(user);
 
     Reel savedReel = reelRepository.save(reel);
     return reelConverter.toReelDto(savedReel, savedReel.getUser());
