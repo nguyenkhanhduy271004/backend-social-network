@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,15 +80,27 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user) throws UserException {
+  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user, HttpServletRequest request) throws UserException {
     String username = user.getEmail();
     String password = user.getPassword();
 
     Authentication authentication = authenticate(username, password);
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
+    String ipAddress = getClientIp(request);
+    System.out.println("User logged in from IP: " + ipAddress);
+
     String token = jwtProvider.generateToken(authentication);
+
     return ResponseEntity.ok(new AuthResponse(token, true));
+  }
+
+  private String getClientIp(HttpServletRequest request) {
+    String ipAddress = request.getHeader("X-Forwarded-For");
+    if (ipAddress == null || ipAddress.isEmpty()) {
+      ipAddress = request.getRemoteAddr();
+    }
+    return ipAddress;
   }
 
   private Authentication authenticate(String username, String password) {

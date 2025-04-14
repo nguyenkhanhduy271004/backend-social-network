@@ -4,6 +4,7 @@ import com.project.social_network.exception.CustomAuthenticationEntryPoint;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,13 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class AppConfig {
+
+  @Bean
+  public ModelMapper modelMapper() {
+    ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration().setAmbiguityIgnored(true);
+    return modelMapper;
+  }
 
   private static CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
     CorsConfiguration cfg = new CorsConfiguration();

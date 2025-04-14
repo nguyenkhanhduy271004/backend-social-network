@@ -10,6 +10,7 @@ import com.project.social_network.entity.User;
 import com.project.social_network.exception.GroupException;
 import com.project.social_network.service.interfaces.GroupService;
 import com.project.social_network.service.interfaces.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -101,7 +102,7 @@ public class GroupController {
   public ResponseEntity<?> getAllGroups() {
     try {
       List<GroupDto> groupDtos = groupConverter.toGroupDtos(groupService.getAllGroups());
-      return ResponseEntity.ok(groupDtos);
+      return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get groups successfully", groupDtos), HttpStatus.OK);
     } catch (Exception e) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get groups failed"), HttpStatus.BAD_REQUEST);
     }
@@ -123,9 +124,32 @@ public class GroupController {
       if (posts.isEmpty()) {
         return new ResponseEntity<>(new ResponseError(HttpStatus.NOT_FOUND.value(), "No posts found"), HttpStatus.NOT_FOUND);
       }
-      return ResponseEntity.ok(posts);
+      return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get posts for group successfully", posts), HttpStatus.OK);
     } catch (Exception e) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get posts failed"), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Operation(summary = "Get user's joined groups", description = "API to retrieve the groups that the authenticated user has joined")
+  @GetMapping("/my-groups")
+  public ResponseEntity<?> getGroupsByUser(@RequestHeader("Authorization") String jwt) {
+   try {
+     User user = userService.findUserProfileByJwt(jwt);
+     List<Group> joinedGroups = groupService.getGroupsByUser(user);
+     List<GroupDto> groupDtos = groupConverter.toGroupDtos(joinedGroups);
+     return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get my groups successfully", groupDtos), HttpStatus.OK);
+   } catch (GroupException e) {
+     return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get my groups failed"), HttpStatus.BAD_REQUEST);
+   }
+  }
+
+  @GetMapping("/posts")
+  public ResponseEntity<?> getPostsFromAllGroups() {
+    try {
+      return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get posts from all groups successfully", groupService.getPostsFromAllGroups()), HttpStatus.OK);
+    } catch (GroupException e) {
+      return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get posts from all groups failed"), HttpStatus.BAD_REQUEST);
+
     }
   }
 }

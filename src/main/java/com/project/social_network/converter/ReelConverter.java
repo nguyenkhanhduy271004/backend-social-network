@@ -1,47 +1,51 @@
 package com.project.social_network.converter;
 
 import com.project.social_network.dto.response.ReelDto;
-import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Reel;
 import com.project.social_network.entity.User;
 import com.project.social_network.util.ReelUtil;
-import java.time.ZoneId;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
 
 @Component
 public class ReelConverter {
 
-  @Autowired
-  private UserConverter userConverter;
-  @Autowired
-  private ReelUtil reelUtil;
+  private final UserConverter userConverter;
+  private final ReelUtil reelUtil;
+  private final ModelMapper modelMapper;
+
+  public ReelConverter(UserConverter userConverter, ReelUtil reelUtil, ModelMapper modelMapper) {
+    this.userConverter = userConverter;
+    this.reelUtil = reelUtil;
+    this.modelMapper = modelMapper;
+  }
 
   public Reel reelConverter(Reel reel, User user) {
-    ModelMapper modelMapper = new ModelMapper();
+    if (reel == null || user == null) {
+      return null;
+    }
+
     Reel newReel = modelMapper.map(reel, Reel.class);
     newReel.setUser(user);
     return newReel;
   }
 
   public ReelDto toReelDto(Reel reel, User reqUser) {
-    ReelDto.User user = new ReelDto.User();
-    user.setId(reqUser.getId());
-    user.setFullName(reqUser.getFullName());
+    if (reel == null || reqUser == null) {
+      return null;
+    }
 
-    boolean isLiked = reelUtil.isLikedByReqUser(reqUser, reel);
+    ReelDto reelDto = modelMapper.map(reel, ReelDto.class);
 
-    ReelDto reelDto = new ReelDto();
-    reelDto.setId(reel.getId());
-    reelDto.setContent(reel.getContent());
-    reelDto.setCreatedAt(reel.getCreatedDate().toInstant()
-        .atZone(ZoneId.systemDefault())
-        .toLocalDateTime());
-    reelDto.setImage(reel.getImage());
-    reelDto.setTotalLikes(reel.getLikes().size());
-    reelDto.setUser(user);
-    reelDto.setLiked(isLiked);
+    ReelDto.User userDto = new ReelDto.User();
+    userDto.setId(reel.getUser().getId());
+    userDto.setFullName(reel.getUser().getFullName());
+    reelDto.setUser(userDto);
+
+    reelDto.setTotalLikes(reel.getLikes() != null ? reel.getLikes().size() : 0);
+    reelDto.setLiked(reelUtil.isLikedByReqUser(reqUser, reel));
 
     return reelDto;
   }

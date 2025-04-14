@@ -1,49 +1,45 @@
 package com.project.social_network.converter;
 
 import com.project.social_network.dto.response.StoryDto;
-import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Story;
 import com.project.social_network.entity.User;
 import com.project.social_network.util.StoryUtil;
-import java.time.ZoneId;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StoryConverter {
 
+  private final UserConverter userConverter;
+  private final StoryUtil storyUtil;
+  private final ModelMapper modelMapper;
 
-  @Autowired
-  private UserConverter userConverter;
-  @Autowired
-  private StoryUtil storyUtil;
+  public StoryConverter(UserConverter userConverter, StoryUtil storyUtil, ModelMapper modelMapper) {
+    this.userConverter = userConverter;
+    this.storyUtil = storyUtil;
+    this.modelMapper = modelMapper;
+  }
 
   public Story storyConverter(Story story, User user) {
-    ModelMapper modelMapper = new ModelMapper();
+    if (story == null || user == null) {
+      return null;
+    }
+
     Story newStory = modelMapper.map(story, Story.class);
     newStory.setUser(user);
     return newStory;
   }
 
   public StoryDto toStoryDto(Story story, User reqUser) {
-    UserDto user = userConverter.toUserDto(story.getUser());
+    if (story == null || reqUser == null) {
+      return null;
+    }
 
-    boolean isLiked = storyUtil.isLikedByReqUser(reqUser, story);
-
-    StoryDto storyDto = new StoryDto();
-    storyDto.setId(story.getId());
-    storyDto.setContent(story.getContent());
-    storyDto.setCreatedAt(story.getCreatedDate().toInstant()
-        .atZone(ZoneId.systemDefault())
-        .toLocalDateTime());
-    storyDto.setImage(story.getImage());
-    storyDto.setTotalLikes(story.getLikes().size());
-    storyDto.setUser(user);
-    storyDto.setLiked(isLiked);
+    StoryDto storyDto = modelMapper.map(story, StoryDto.class);
+    storyDto.setUser(userConverter.toUserDto(story.getUser()));
+    storyDto.setTotalLikes(story.getLikes() != null ? story.getLikes().size() : 0);
+    storyDto.setLiked(storyUtil.isLikedByReqUser(reqUser, story));
 
     return storyDto;
   }
-
-
 }

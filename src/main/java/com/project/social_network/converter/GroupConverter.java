@@ -2,73 +2,80 @@ package com.project.social_network.converter;
 
 import com.project.social_network.dto.response.GroupDto;
 import com.project.social_network.dto.response.PostDto;
-import com.project.social_network.dto.response.UserDto;
 import com.project.social_network.entity.Group;
-import com.project.social_network.entity.Post;
 import com.project.social_network.entity.User;
-import java.util.ArrayList;
-import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class GroupConverter {
 
+  private final ModelMapper modelMapper;
+  private final PostConverter postConverter;
 
   @Autowired
-  private PostConverter postConverter;
-
+  public GroupConverter(ModelMapper modelMapper, PostConverter postConverter) {
+    this.modelMapper = modelMapper;
+    this.postConverter = postConverter;
+  }
 
   public GroupDto toGroupDto(Group group) {
-
-    GroupDto groupDto = new GroupDto();
-
-    GroupDto.User user = new GroupDto.User();
-
-    user.setId(group.getAdmin().getId());
-    user.setFullName(group.getAdmin().getFullName());
-
-    List<PostDto> postDtos = new ArrayList<>();
-
-    for(Post post:group.getPosts()) {
-      PostDto postDto = postConverter.toPostDto(post, post.getUser());
-      postDtos.add(postDto);
+    if (group == null) {
+      return null;
     }
 
-    List<GroupDto.User> members = new ArrayList<>();
+    GroupDto groupDto = modelMapper.map(group, GroupDto.class);
 
-
-    for(User user1 : group.getUsers()) {
-      GroupDto.User userDto = new GroupDto.User();
-
-      userDto.setId(user1.getId());
-      userDto.setFullName(user1.getFullName());
-
-      members.add(userDto);
-    }
-
-
-
-    groupDto.setId(group.getId());
-    groupDto.setName(group.getName());
-    groupDto.setAdmin(user);
-    groupDto.setPosts(postDtos);
-    groupDto.setMembers(members);
-    groupDto.setCreatedDate(group.getCreatedDate());
+    groupDto.setAdmin(toGroupUserDto(group.getAdmin()));
+    groupDto.setMembers(toGroupUserDtos(group.getUsers()));
+    groupDto.setPosts(toPostDtos(group.getPosts()));
 
     return groupDto;
-
   }
 
   public List<GroupDto> toGroupDtos(List<Group> groups) {
-    List<GroupDto> groupDtos = new ArrayList<>();
-
-    for(Group group:groups) {
-      GroupDto groupDto = toGroupDto(group);
-      groupDtos.add(groupDto);
+    if (groups == null || groups.isEmpty()) {
+      return Collections.emptyList();
     }
 
-    return groupDtos;
+    return groups.stream()
+        .map(this::toGroupDto)
+        .collect(Collectors.toList());
+  }
+
+  private GroupDto.User toGroupUserDto(User user) {
+    if (user == null) {
+      return null;
+    }
+
+    GroupDto.User userDto = new GroupDto.User();
+    userDto.setId(user.getId());
+    userDto.setFullName(user.getFullName());
+    return userDto;
+  }
+
+  private List<GroupDto.User> toGroupUserDtos(List<User> users) {
+    if (users == null || users.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    return users.stream()
+        .map(this::toGroupUserDto)
+        .collect(Collectors.toList());
+  }
+
+  private List<PostDto> toPostDtos(List<com.project.social_network.entity.Post> posts) {
+    if (posts == null || posts.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    return posts.stream()
+        .map(post -> postConverter.toPostDto(post, post.getUser()))
+        .collect(Collectors.toList());
   }
 }
