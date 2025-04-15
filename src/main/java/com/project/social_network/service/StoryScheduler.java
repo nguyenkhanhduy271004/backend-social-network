@@ -1,6 +1,6 @@
 package com.project.social_network.service;
 
-import com.project.social_network.entity.Story;
+import com.project.social_network.model.entity.Story;
 import com.project.social_network.repository.StoryRepository;
 import java.time.LocalDateTime;
 import java.util.List;

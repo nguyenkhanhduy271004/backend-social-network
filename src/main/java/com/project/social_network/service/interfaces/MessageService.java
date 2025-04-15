@@ -1,7 +1,7 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.dto.response.UserDto;
-import com.project.social_network.entity.Message;
+import com.project.social_network.model.dto.UserDto;
+import com.project.social_network.model.entity.Message;
 import java.util.List;
 
 public interface MessageService {

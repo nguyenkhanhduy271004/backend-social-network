@@ -1,6 +1,6 @@
 package com.project.social_network.repository;
 
-import com.project.social_network.entity.Like;
+import com.project.social_network.model.entity.Like;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

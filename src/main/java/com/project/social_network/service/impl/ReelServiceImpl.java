@@ -1,12 +1,12 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.ReelConverter;
-import com.project.social_network.dto.response.ReelDto;
+import com.project.social_network.model.dto.ReelDto;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.ReelException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.entity.Reel;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.entity.Reel;
+import com.project.social_network.model.entity.User;
 import com.project.social_network.repository.ReelRepository;
 import com.project.social_network.service.interfaces.ReelService;
 import com.project.social_network.service.interfaces.UploadImageFile;

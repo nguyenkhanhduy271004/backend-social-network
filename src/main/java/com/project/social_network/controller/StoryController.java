@@ -1,14 +1,12 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.config.Translator;
 import com.project.social_network.converter.StoryConverter;
-import com.project.social_network.exception.PostException;
+import com.project.social_network.model.dto.response.ResponseData;
+import com.project.social_network.model.dto.StoryDto;
+import com.project.social_network.model.entity.User;
 import com.project.social_network.exception.StoryException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.dto.response.StoryDto;
-import com.project.social_network.entity.Story;
-import com.project.social_network.entity.User;
-import com.project.social_network.dto.response.ResponseData;
-import com.project.social_network.dto.response.ResponseError;
 import com.project.social_network.service.interfaces.StoryService;
 import com.project.social_network.service.interfaces.UploadImageFile;
 import com.project.social_network.service.interfaces.UserService;
@@ -18,121 +16,113 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/story")
 @Tag(name = "Story Controller")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 public class StoryController {
 
-  @Autowired
-  private StoryService storyService;
+  private final StoryService storyService;
+  private final UserService userService;
+  private final StoryConverter storyConverter;
+  private final UploadImageFile uploadImageFile;
+  private final Translator translator;
 
-  @Autowired
-  private UserService userService;
-
-  @Autowired
-  private StoryConverter storyConverter;
-
-  @Autowired
-  private UploadImageFile uploadImageFile;
+  public StoryController(StoryService storyService, UserService userService,
+      StoryConverter storyConverter, UploadImageFile uploadImageFile,
+      Translator translator) {
+    this.storyService = storyService;
+    this.userService = userService;
+    this.storyConverter = storyConverter;
+    this.uploadImageFile = uploadImageFile;
+    this.translator = translator;
+  }
 
   @PostMapping("/create")
-  @Operation(summary = "Create a new story", description = "Create a new story with content and an optional image file.")
-  @ApiResponses(value = {
+  @Operation(summary = "Create a new story", description = "Create a new story with content and an optional image file")
+  @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Story created successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid input or creation failed")
   })
-  public ResponseEntity<?> createStory(
-      @Parameter(description = "Image file to upload", required = false)
-      @RequestParam(value = "file", required = false) MultipartFile file,
-      @Parameter(description = "Content of the story", required = true)
-      @RequestParam("content") String content,
-      @Parameter(description = "JWT token for authentication", required = true)
-      @RequestHeader("Authorization") String jwt) throws UserException, StoryException, IOException {
-
+  public ResponseEntity<ResponseData<StoryDto>> createStory(
+      @Parameter(description = "Image file to upload") @RequestParam(value = "file", required = false) MultipartFile file,
+      @Parameter(description = "Content of the story") @RequestParam("content") @NotBlank String content,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, StoryException, IOException {
+    validateFile(file);
     User user = userService.findUserProfileByJwt(jwt);
-
-    try {
-      StoryDto storyDto = storyService.createStory(file, content);
-
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.CREATED.value(), "Create story successfully", storyDto), HttpStatus.CREATED);
-    } catch (StoryException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Create story failed"), HttpStatus.BAD_REQUEST);
-    }
+    StoryDto storyDto = storyService.createStory(file, content, user);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new ResponseData<>(HttpStatus.CREATED.value(), translator.toLocale("story.create.success"), storyDto));
   }
 
   @GetMapping("/{storyId}")
-  @Operation(summary = "Get a story by ID", description = "Retrieve a story by its ID.")
-  @ApiResponses(value = {
+  @Operation(summary = "Get a story by ID", description = "Retrieve a story by its ID")
+  @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Story retrieved successfully"),
       @ApiResponse(responseCode = "404", description = "Story not found")
   })
-  public ResponseEntity<?> findStoryById(
-      @Parameter(description = "ID of the story to retrieve", required = true)
-      @PathVariable Long storyId,
-      @Parameter(description = "JWT token for authentication", required = true)
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
-
+  public ResponseEntity<ResponseData<StoryDto>> findStoryById(
+      @Parameter(description = "ID of the story to retrieve") @PathVariable @Min(1) Long storyId,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, StoryException {
     User user = userService.findUserProfileByJwt(jwt);
-
-    try {
-      StoryDto storyDto = storyService.findStoryById(storyId);
-
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get story by id " + storyId + " successfully", storyDto), HttpStatus.OK);
-    } catch (StoryException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.NOT_FOUND.value(), "Get story by id " + storyId + " failed"), HttpStatus.NOT_FOUND);
-    }
+    StoryDto storyDto = storyService.findStoryById(storyId);
+    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
+        translator.toLocale("story.find.success", storyId), storyDto));
   }
 
   @DeleteMapping("/{storyId}")
-  @Operation(summary = "Delete a story by ID", description = "Delete a story by its ID.")
-  @ApiResponses(value = {
+  @Operation(summary = "Delete a story by ID", description = "Delete a story by its ID")
+  @ApiResponses({
       @ApiResponse(responseCode = "204", description = "Story deleted successfully"),
       @ApiResponse(responseCode = "400", description = "Deletion failed")
   })
-  public ResponseEntity<?> deleteStory(
-      @Parameter(description = "ID of the story to delete", required = true)
-      @PathVariable Long storyId,
-      @Parameter(description = "JWT token for authentication", required = true)
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
-
+  public ResponseEntity<Void> deleteStory(
+      @Parameter(description = "ID of the story to delete") @PathVariable @Min(1) Long storyId,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, StoryException {
     User user = userService.findUserProfileByJwt(jwt);
-
-    try {
-      storyService.deleteStoryById(storyId, user.getId());
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete story by id " + storyId + " successfully"), HttpStatus.NO_CONTENT);
-    } catch (StoryException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Delete story by id " + storyId + " failed"), HttpStatus.BAD_REQUEST);
-    }
+    storyService.deleteStoryById(storyId, user.getId());
+    return ResponseEntity.noContent().build();
   }
 
-  @GetMapping("/")
-  @Operation(summary = "Get all stories", description = "Retrieve all stories.")
-  @ApiResponses(value = {
+  @GetMapping
+  @Operation(summary = "Get all stories", description = "Retrieve all stories")
+  @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Stories retrieved successfully"),
       @ApiResponse(responseCode = "400", description = "Retrieval failed")
   })
-  public ResponseEntity<?> getAllStories(
-      @Parameter(description = "JWT token for authentication", required = true)
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
-
+  public ResponseEntity<ResponseData<List<StoryDto>>> getAllStories(
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, StoryException {
     User user = userService.findUserProfileByJwt(jwt);
+    List<StoryDto> storyDtos = storyService.findAllStory();
+    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
+        translator.toLocale("story.get.all.success"), storyDtos));
+  }
 
-    try {
-      List<StoryDto> storyDtos = storyService.findAllStory();
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get all stories successfully", storyDtos), HttpStatus.OK);
-    } catch (StoryException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all stories failed"), HttpStatus.BAD_REQUEST);
+  private void validateFile(MultipartFile file) {
+    if (file != null) {
+      if (file.getSize() > 5 * 1024 * 1024) {
+        throw new IllegalArgumentException("File size exceeds limit");
+      }
+      String contentType = file.getContentType();
+      if (contentType == null || !contentType.startsWith("image/")) {
+        throw new IllegalArgumentException("Only image files are allowed");
+      }
     }
   }
 }

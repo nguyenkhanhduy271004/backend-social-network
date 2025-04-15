@@ -2,9 +2,9 @@ package com.project.social_network.service.impl;
 
 import com.project.social_network.config.JwtProvider;
 import com.project.social_network.converter.UserConverter;
-import com.project.social_network.dto.response.UserDto;
+import com.project.social_network.model.dto.UserDto;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.entity.User;
 import com.project.social_network.repository.UserRepository;
 import com.project.social_network.service.interfaces.UserService;
 import java.util.List;

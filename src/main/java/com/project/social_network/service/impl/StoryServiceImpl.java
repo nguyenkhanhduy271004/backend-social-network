@@ -1,9 +1,9 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.StoryConverter;
-import com.project.social_network.dto.response.StoryDto;
-import com.project.social_network.entity.Story;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.dto.StoryDto;
+import com.project.social_network.model.entity.Story;
+import com.project.social_network.model.entity.User;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.StoryException;
 import com.project.social_network.exception.UserException;
@@ -28,7 +28,7 @@ public class StoryServiceImpl implements StoryService {
   private UploadImageFile uploadImageFile;
 
   @Override
-  public StoryDto createStory(MultipartFile file, String content) throws UserException, IOException {
+  public StoryDto createStory(MultipartFile file, String content, User user) throws UserException, IOException {
     String imageFileUrl = null;
     if (file != null && !file.isEmpty()) {
       imageFileUrl = uploadImageFile.uploadImage(file);
@@ -37,6 +37,7 @@ public class StoryServiceImpl implements StoryService {
     Story req = new Story();
     req.setContent(content);
     req.setImage(imageFileUrl);
+    req.setUser(user);
 
     Story story = storyRepository.save(req);
 

@@ -1,9 +1,10 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.response.GroupDto;
-import com.project.social_network.dto.response.PostDto;
-import com.project.social_network.entity.Group;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.dto.GroupDto;
+import com.project.social_network.model.dto.PostDto;
+import com.project.social_network.model.entity.Group;
+import com.project.social_network.model.entity.User;
+import com.project.social_network.model.entity.Post;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -69,7 +70,7 @@ public class GroupConverter {
         .collect(Collectors.toList());
   }
 
-  private List<PostDto> toPostDtos(List<com.project.social_network.entity.Post> posts) {
+  private List<PostDto> toPostDtos(List<Post> posts) {
     if (posts == null || posts.isEmpty()) {
       return Collections.emptyList();
     }

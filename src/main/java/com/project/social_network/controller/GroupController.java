@@ -1,12 +1,12 @@
 package com.project.social_network.controller;
 
 import com.project.social_network.converter.GroupConverter;
-import com.project.social_network.dto.response.GroupDto;
-import com.project.social_network.dto.response.PostDto;
-import com.project.social_network.dto.response.ResponseData;
-import com.project.social_network.dto.response.ResponseError;
-import com.project.social_network.entity.Group;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.dto.GroupDto;
+import com.project.social_network.model.dto.PostDto;
+import com.project.social_network.model.dto.response.ResponseData;
+import com.project.social_network.model.dto.response.ResponseError;
+import com.project.social_network.model.entity.Group;
+import com.project.social_network.model.entity.User;
 import com.project.social_network.exception.GroupException;
 import com.project.social_network.service.interfaces.GroupService;
 import com.project.social_network.service.interfaces.UserService;

@@ -1,10 +1,10 @@
 package com.project.social_network.service.impl;
 
+import com.project.social_network.model.entity.Like;
+import com.project.social_network.model.entity.Post;
+import com.project.social_network.model.entity.User;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.entity.Like;
-import com.project.social_network.entity.Post;
-import com.project.social_network.entity.User;
 import com.project.social_network.repository.LikeRepository;
 import com.project.social_network.repository.PostRepository;
 import com.project.social_network.service.interfaces.LikeService;

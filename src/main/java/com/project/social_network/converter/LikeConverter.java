@@ -1,10 +1,8 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.response.LikeDto;
-import com.project.social_network.dto.response.PostDto;
-import com.project.social_network.dto.response.UserDto;
-import com.project.social_network.entity.Like;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.dto.LikeDto;
+import com.project.social_network.model.entity.Like;
+import com.project.social_network.model.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,10 +1,10 @@
 package com.project.social_network.controller;
 
 import com.project.social_network.exception.UserException;
-import com.project.social_network.dto.response.UserDto;
-import com.project.social_network.entity.Message;
-import com.project.social_network.entity.User;
-import com.project.social_network.dto.request.MessageRequest;
+import com.project.social_network.model.dto.UserDto;
+import com.project.social_network.model.entity.Message;
+import com.project.social_network.model.entity.User;
+import com.project.social_network.model.dto.request.MessageRequest;
 import com.project.social_network.service.interfaces.MessageService;
 import com.project.social_network.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;

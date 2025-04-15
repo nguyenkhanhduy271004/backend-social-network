@@ -1,7 +1,7 @@
 package com.project.social_network.repository;
 
-import com.project.social_network.entity.Post;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.entity.Post;
+import com.project.social_network.model.entity.User;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

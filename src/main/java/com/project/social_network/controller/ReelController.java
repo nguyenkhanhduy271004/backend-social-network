@@ -1,25 +1,27 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.config.Translator;
 import com.project.social_network.converter.ReelConverter;
-import com.project.social_network.dto.response.ReelDto;
-import com.project.social_network.dto.response.ResponseData;
-import com.project.social_network.dto.response.ResponseError;
-import com.project.social_network.entity.User;
+import com.project.social_network.model.dto.ReelDto;
+import com.project.social_network.model.dto.response.ResponseData;
+import com.project.social_network.model.entity.User;
 import com.project.social_network.exception.ReelException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.service.interfaces.ReelService;
 import com.project.social_network.service.interfaces.UploadImageFile;
 import com.project.social_network.service.interfaces.UserService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,101 +34,100 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/reel")
-@Tag(name = "Reel Controller", description = "APIs for controller reels")
+@Tag(name = "Reel Controller", description = "APIs for controlling reels")
+@SecurityRequirement(name = "bearerAuth")
+@Validated
 public class ReelController {
 
-  @Autowired
-  private ReelService reelService;
+  private final ReelService reelService;
+  private final UserService userService;
+  private final ReelConverter reelConverter;
+  private final UploadImageFile uploadImageFile;
+  private final Translator translator;
 
-  @Autowired
-  private UserService userService;
-
-  @Autowired
-  private ReelConverter reelConverter;
-
-  @Autowired
-  private UploadImageFile uploadImageFile;
+  public ReelController(ReelService reelService, UserService userService,
+      ReelConverter reelConverter, UploadImageFile uploadImageFile,
+      Translator translator) {
+    this.reelService = reelService;
+    this.userService = userService;
+    this.reelConverter = reelConverter;
+    this.uploadImageFile = uploadImageFile;
+    this.translator = translator;
+  }
 
   @PostMapping("/create")
-  @ApiOperation(value = "Create a new reel", notes = "Create a new reel with content and an optional image file.")
-  @ApiResponses(value = {
-      @ApiResponse(code = 201, message = "Reel created successfully"),
-      @ApiResponse(code = 400, message = "Invalid input or creation failed")
+  @Operation(summary = "Create a new reel", description = "Create a new reel with content and an optional image file")
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Reel created successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid input or creation failed")
   })
-  public ResponseEntity<?> createReel(
-      @ApiParam(value = "Image file to upload", required = true) @RequestParam(value = "file") MultipartFile file,
-      @ApiParam(value = "Content of the reel", required = true) @RequestParam("content") String content,
-      @ApiParam(value = "JWT token for authentication", required = true) @RequestHeader("Authorization") String jwt) throws UserException, ReelException, IOException {
-
+  public ResponseEntity<ResponseData<ReelDto>> createReel(
+      @Parameter(description = "Image file to upload") @RequestParam(value = "file") MultipartFile file,
+      @Parameter(description = "Content of the reel") @RequestParam("content") @NotBlank String content,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, ReelException, IOException {
+    validateFile(file);
     User user = userService.findUserProfileByJwt(jwt);
-
-    try {
-      ReelDto reelDto = reelService.createReel(file, content, user);
-
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.CREATED.value(), "Create reel successfully", reelDto), HttpStatus.CREATED);
-    } catch (ReelException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Create reel failed"), HttpStatus.BAD_REQUEST);
-    }
+    ReelDto reelDto = reelService.createReel(file, content, user);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new ResponseData<>(HttpStatus.CREATED.value(), translator.toLocale("reel.create.success"), reelDto));
   }
 
   @GetMapping("/{reelId}")
-  @ApiOperation(value = "Get a reel by ID", notes = "Retrieve a reel by its ID.")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Reel retrieved successfully"),
-      @ApiResponse(code = 404, message = "Reel not found")
+  @Operation(summary = "Get a reel by ID", description = "Retrieve a reel by its ID")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Reel retrieved successfully"),
+      @ApiResponse(responseCode = "404", description = "Reel not found")
   })
-  public ResponseEntity<?> findReelById(
-      @ApiParam(value = "ID of the reel to retrieve", required = true) @PathVariable Long reelId,
-      @ApiParam(value = "JWT token for authentication", required = true) @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
-
+  public ResponseEntity<ResponseData<ReelDto>> findReelById(
+      @Parameter(description = "ID of the reel to retrieve") @PathVariable Long reelId,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, ReelException {
     User user = userService.findUserProfileByJwt(jwt);
-
-    try {
-      ReelDto reelDto = reelService.findReelById(reelId);
-
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get reel by id " + reelId + " successfully", reelDto), HttpStatus.OK);
-    } catch (ReelException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.NOT_FOUND.value(), "Get reel by id " + reelId + " failed"), HttpStatus.NOT_FOUND);
-    }
+    ReelDto reelDto = reelService.findReelById(reelId);
+    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
+        translator.toLocale("reel.find.success", reelId), reelDto));
   }
 
   @DeleteMapping("/{reelId}")
-  @ApiOperation(value = "Delete a reel by ID", notes = "Delete a reel by its ID.")
-  @ApiResponses(value = {
-      @ApiResponse(code = 204, message = "Reel deleted successfully"),
-      @ApiResponse(code = 400, message = "Deletion failed")
+  @Operation(summary = "Delete a reel by ID", description = "Delete a reel by its ID")
+  @ApiResponses({
+      @ApiResponse(responseCode = "204", description = "Reel deleted successfully"),
+      @ApiResponse(responseCode = "400", description = "Deletion failed")
   })
-  public ResponseEntity<?> deleteReel(
-      @ApiParam(value = "ID of the reel to delete", required = true) @PathVariable Long reelId,
-      @ApiParam(value = "JWT token for authentication", required = true) @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
-
+  public ResponseEntity<Void> deleteReel(
+      @Parameter(description = "ID of the reel to delete") @PathVariable Long reelId,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, ReelException {
     User user = userService.findUserProfileByJwt(jwt);
-
-    try {
-      reelService.deleteReelById(reelId, user.getId());
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete reel by id " + reelId + " successfully"), HttpStatus.NO_CONTENT);
-    } catch (ReelException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Delete reel by id " + reelId + " failed"), HttpStatus.BAD_REQUEST);
-    }
+    reelService.deleteReelById(reelId, user.getId());
+    return ResponseEntity.noContent().build();
   }
 
-  @GetMapping("/")
-  @ApiOperation(value = "Get all reels", notes = "Retrieve all reels.")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Reels retrieved successfully"),
-      @ApiResponse(code = 400, message = "Retrieval failed")
+  @GetMapping
+  @Operation(summary = "Get all reels", description = "Retrieve all reels")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Reels retrieved successfully"),
+      @ApiResponse(responseCode = "400", description = "Retrieval failed")
   })
-  public ResponseEntity<?> getAllReels(
-      @ApiParam(value = "JWT token for authentication", required = true) @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
-
+  public ResponseEntity<ResponseData<List<ReelDto>>> getAllReels(
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, ReelException {
     User user = userService.findUserProfileByJwt(jwt);
+    List<ReelDto> reelDtos = reelService.findAllReel();
+    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
+        translator.toLocale("reel.get.all.success"), reelDtos));
+  }
 
-    try {
-      List<ReelDto> reelDtos = reelService.findAllReel();
-
-      return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get all reels successfully", reelDtos), HttpStatus.OK);
-    } catch (ReelException e) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.BAD_REQUEST.value(), "Get all reels failed"), HttpStatus.BAD_REQUEST);
+  private void validateFile(MultipartFile file) {
+    if (file != null) {
+      if (file.getSize() > 5 * 1024 * 1024) { // Giới hạn 5MB
+        throw new IllegalArgumentException("File size exceeds limit");
+      }
+      String contentType = file.getContentType();
+      if (contentType == null || !contentType.startsWith("image/")) {
+        throw new IllegalArgumentException("Only image files are allowed");
+      }
     }
   }
 }
