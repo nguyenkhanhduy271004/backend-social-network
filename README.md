@@ -97,7 +97,7 @@ spring:
 - Report bugs via the **Issues** section.
 
 ## Contact
-- **Email:** your.email@example.com
+- **Email:** bogiaoffline@gmail.com
 - **GitHub:** https://github.com/nguyenkhanhduy271004
 
 ## License
