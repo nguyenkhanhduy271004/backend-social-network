@@ -6,7 +6,6 @@ import com.project.social_network.model.Group;
 import com.project.social_network.model.User;
 import com.project.social_network.model.Post;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -19,7 +18,6 @@ public class GroupConverter {
   private final ModelMapper modelMapper;
   private final PostConverter postConverter;
 
-  @Autowired
   public GroupConverter(ModelMapper modelMapper, PostConverter postConverter) {
     this.modelMapper = modelMapper;
     this.postConverter = postConverter;
