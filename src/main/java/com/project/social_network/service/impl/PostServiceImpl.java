@@ -1,13 +1,13 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.PostConverter;
-import com.project.social_network.model.dto.request.CommentRequest;
-import com.project.social_network.model.dto.request.PostReplyRequest;
-import com.project.social_network.model.dto.PostDto;
-import com.project.social_network.model.entity.Comment;
-import com.project.social_network.model.entity.Group;
-import com.project.social_network.model.entity.Post;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.request.CommentRequest;
+import com.project.social_network.request.PostReplyRequest;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Comment;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.Post;
+import com.project.social_network.model.User;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.CommentRepository;

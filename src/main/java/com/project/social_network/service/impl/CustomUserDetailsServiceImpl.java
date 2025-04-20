@@ -1,6 +1,6 @@
 package com.project.social_network.service.impl;
 
-import com.project.social_network.model.entity.User;
+import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;

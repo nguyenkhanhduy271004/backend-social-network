@@ -2,12 +2,12 @@ package com.project.social_network.controller;
 
 import com.project.social_network.config.JwtProvider;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.model.entity.User;
-import com.project.social_network.model.entity.Verification;
-import com.project.social_network.model.dto.request.LoginRequest;
-import com.project.social_network.model.dto.request.RegisterRequest;
+import com.project.social_network.model.User;
+import com.project.social_network.model.Verification;
+import com.project.social_network.request.LoginRequest;
+import com.project.social_network.request.RegisterRequest;
 import com.project.social_network.repository.UserRepository;
-import com.project.social_network.model.dto.response.AuthResponse;
+import com.project.social_network.response.AuthResponse;
 import com.project.social_network.service.MailService;
 import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;

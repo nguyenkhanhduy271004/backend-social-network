@@ -48,6 +48,19 @@ public class UploadImageFileImpl implements UploadImageFile {
     return cloudinary.url().resourceType(resourceType).generate(publicValue + "." + extension);
   }
 
+  @Override
+  public void validateImage(MultipartFile file) {
+    if (file != null) {
+      if (file.getSize() > 5 * 1024 * 1024) { // 5MB limit
+        throw new IllegalArgumentException("File size exceeds 5MB limit");
+      }
+      String contentType = file.getContentType();
+      if (contentType == null || !contentType.startsWith("image/")) {
+        throw new IllegalArgumentException("Only image files are allowed");
+      }
+    }
+  }
+
   private File convert(MultipartFile file) throws IOException {
     File convFile = new File(UUID.randomUUID() + "_" + file.getOriginalFilename());
     try (InputStream is = file.getInputStream()) {

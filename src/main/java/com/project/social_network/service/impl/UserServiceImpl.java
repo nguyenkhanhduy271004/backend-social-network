@@ -2,12 +2,13 @@ package com.project.social_network.service.impl;
 
 import com.project.social_network.config.JwtProvider;
 import com.project.social_network.converter.UserConverter;
-import com.project.social_network.model.dto.UserDto;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;
 import com.project.social_network.service.interfaces.UserService;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,49 +31,18 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new UserException("User not found with id: " + userId));
   }
 
-
   @Override
   public User findUserProfileByJwt(String jwt) throws UserException {
     String email = jwtProvider.getEmailFromToken(jwt);
-    User user = userRepository.findByEmail(email);
-
-    if (user == null) {
-      throw new UserException("User not found with email: " + email);
-    }
-    return user;
+    return Optional.ofNullable(userRepository.findByEmail(email))
+        .orElseThrow(() -> new UserException("User not found with email: " + email));
   }
 
   @Override
   public UserDto updateUser(Long userId, User user) throws UserException {
-    User existUser = userRepository.findById(userId).orElseThrow(() -> new UserException("User not found with id: " + userId));
+    User existUser = findUserById(userId);
 
-    if (user.getFullName() != null) {
-      existUser.setFullName(user.getFullName());
-    }
-
-    if(user.getImage() != null) {
-      existUser.setImage(user.getImage());
-    }
-
-    if(user.getBackgroundImage() != null) {
-      existUser.setBackgroundImage(user.getBackgroundImage());
-    }
-
-    if(user.getBirthDate() != null) {
-      existUser.setBirthDate(user.getBirthDate());
-    }
-
-    if(user.getLocation() != null) {
-      existUser.setLocation(user.getLocation());
-    }
-
-    if(user.getBio() != null) {
-      existUser.setBio(user.getBio());
-    }
-
-    if(user.getWebsite() != null) {
-      existUser.setWebsite(user.getWebsite());
-    }
+    updateUserDetails(existUser, user);
 
     return userConverter.toUserDto(userRepository.save(existUser));
   }
@@ -81,7 +51,7 @@ public class UserServiceImpl implements UserService {
   public UserDto followUser(Long userId, User user) throws UserException {
     User followToUser = findUserById(userId);
 
-    if(user.getFollowings().contains(followToUser) && followToUser.getFollowers().contains(user)) {
+    if (user.getFollowings().contains(followToUser) && followToUser.getFollowers().contains(user)) {
       user.getFollowings().remove(followToUser);
       followToUser.getFollowers().remove(user);
     } else {
@@ -89,8 +59,7 @@ public class UserServiceImpl implements UserService {
       followToUser.getFollowers().add(user);
     }
 
-    userRepository.save(followToUser);
-    userRepository.save(user);
+    userRepository.saveAll(List.of(user, followToUser)); // Optimize by saving both users in one call
     return userConverter.toUserDto(followToUser);
   }
 
@@ -99,7 +68,7 @@ public class UserServiceImpl implements UserService {
     return userRepository.searchUser(query)
         .stream()
         .filter(user -> !user.getId().equals(userId))
-        .map((user) -> userConverter.toUserDto(user))
+        .map(userConverter::toUserDto)
         .collect(Collectors.toList());
   }
 
@@ -107,7 +76,17 @@ public class UserServiceImpl implements UserService {
   public List<UserDto> findAllUsers() {
     return userRepository.findAll()
         .stream()
-        .map((user) -> userConverter.toUserDto(user))
+        .map(userConverter::toUserDto)
         .collect(Collectors.toList());
+  }
+
+  private void updateUserDetails(User existUser, User user) {
+    Optional.ofNullable(user.getFullName()).ifPresent(existUser::setFullName);
+    Optional.ofNullable(user.getImage()).ifPresent(existUser::setImage);
+    Optional.ofNullable(user.getBackgroundImage()).ifPresent(existUser::setBackgroundImage);
+    Optional.ofNullable(user.getBirthDate()).ifPresent(existUser::setBirthDate);
+    Optional.ofNullable(user.getLocation()).ifPresent(existUser::setLocation);
+    Optional.ofNullable(user.getBio()).ifPresent(existUser::setBio);
+    Optional.ofNullable(user.getWebsite()).ifPresent(existUser::setWebsite);
   }
 }

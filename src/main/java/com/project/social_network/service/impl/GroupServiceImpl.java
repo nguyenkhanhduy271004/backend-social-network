@@ -1,10 +1,10 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.PostConverter;
-import com.project.social_network.model.dto.GroupUserDto;
-import com.project.social_network.model.dto.PostDto;
-import com.project.social_network.model.entity.Group;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.dto.GroupUserDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.User;
 import com.project.social_network.exception.GroupException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.GroupRepository;

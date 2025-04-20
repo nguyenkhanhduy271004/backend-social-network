@@ -1,9 +1,9 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.model.dto.StoryDto;
+import com.project.social_network.dto.StoryDto;
 import com.project.social_network.exception.StoryException;
 import com.project.social_network.exception.UserException;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.model.User;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;

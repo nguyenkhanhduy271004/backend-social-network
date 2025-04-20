@@ -1,6 +1,6 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.model.entity.Message;
+import com.project.social_network.model.Message;
 import com.project.social_network.service.interfaces.MessageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

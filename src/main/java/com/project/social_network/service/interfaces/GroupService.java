@@ -1,9 +1,9 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.model.dto.GroupUserDto;
-import com.project.social_network.model.dto.PostDto;
-import com.project.social_network.model.entity.Group;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.dto.GroupUserDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.User;
 import com.project.social_network.exception.GroupException;
 import java.util.List;
 

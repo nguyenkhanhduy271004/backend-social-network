@@ -1,8 +1,8 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.model.dto.ReelDto;
-import com.project.social_network.model.entity.Reel;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.dto.ReelDto;
+import com.project.social_network.model.Reel;
+import com.project.social_network.model.User;
 import com.project.social_network.util.ReelUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;

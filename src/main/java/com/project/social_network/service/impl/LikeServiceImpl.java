@@ -1,8 +1,8 @@
 package com.project.social_network.service.impl;
 
-import com.project.social_network.model.entity.Like;
-import com.project.social_network.model.entity.Post;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.model.Like;
+import com.project.social_network.model.Post;
+import com.project.social_network.model.User;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.LikeRepository;

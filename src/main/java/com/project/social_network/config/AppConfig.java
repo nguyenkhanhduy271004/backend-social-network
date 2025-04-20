@@ -1,6 +1,6 @@
 package com.project.social_network.config;
 
-import com.project.social_network.exception.CustomAuthenticationEntryPoint;
+import com.project.social_network.handler.CustomAuthenticationEntryPoint;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;

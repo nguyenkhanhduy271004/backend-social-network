@@ -1,12 +1,12 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.model.dto.request.PostReplyRequest;
-import com.project.social_network.model.dto.CommentDto;
-import com.project.social_network.model.dto.PostDto;
-import com.project.social_network.model.dto.response.UserCommentResponse;
-import com.project.social_network.model.entity.Comment;
-import com.project.social_network.model.entity.Post;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.request.PostReplyRequest;
+import com.project.social_network.dto.CommentDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.response.UserCommentResponse;
+import com.project.social_network.model.Comment;
+import com.project.social_network.model.Post;
+import com.project.social_network.model.User;
 import com.project.social_network.util.PostUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;

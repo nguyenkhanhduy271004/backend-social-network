@@ -1,8 +1,8 @@
 package com.project.social_network.service.impl;
 
-import com.project.social_network.model.dto.request.CommentRequest;
-import com.project.social_network.model.entity.Comment;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.request.CommentRequest;
+import com.project.social_network.model.Comment;
+import com.project.social_network.model.User;
 import com.project.social_network.exception.CommentException;
 import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.CommentRepository;

@@ -1,11 +1,11 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.model.dto.request.CommentRequest;
-import com.project.social_network.model.dto.request.PostReplyRequest;
-import com.project.social_network.model.dto.PostDto;
-import com.project.social_network.model.entity.Comment;
-import com.project.social_network.model.entity.Post;
-import com.project.social_network.model.entity.User;
+import com.project.social_network.request.CommentRequest;
+import com.project.social_network.request.PostReplyRequest;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Comment;
+import com.project.social_network.model.Post;
+import com.project.social_network.model.User;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
 import java.util.List;
