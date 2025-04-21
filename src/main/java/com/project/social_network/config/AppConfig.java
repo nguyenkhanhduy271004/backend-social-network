@@ -30,8 +30,7 @@ public class AppConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/**");
-    registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/auth/**");
+    registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/auth/login");
   }
 
   @Bean

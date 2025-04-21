@@ -39,19 +39,24 @@ public class GroupController {
 
   @Operation(summary = "Create a new group", description = "Create a new group")
   @PostMapping
-  public ResponseEntity<?> createGroup(@Valid @RequestBody CreateGroupRequest createGroupRequest, @RequestHeader("Authorization") String jwt) {
+  public ResponseEntity<?> createGroup(@Valid @RequestBody CreateGroupRequest createGroupRequest,
+      @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     Group group = groupService.createGroup(createGroupRequest.getName(), user);
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.CREATED.value(), "Create group successfully", groupConverter.toGroupDto(group)), HttpStatus.CREATED);
+    return new ResponseEntity<>(
+        new ResponseData<>(HttpStatus.CREATED.value(), "Create group successfully", groupConverter.toGroupDto(group)),
+        HttpStatus.CREATED);
   }
 
   @Operation(summary = "Update group", description = "Update the group's name")
   @PutMapping("/{groupId}")
-  public ResponseEntity<?> updateGroup(@PathVariable Long groupId, @Valid @RequestBody
-      UpdateGroupRequest updateGroupRequest, @RequestHeader("Authorization") String jwt) {
+  public ResponseEntity<?> updateGroup(@PathVariable Long groupId,
+      @Valid @RequestBody UpdateGroupRequest updateGroupRequest, @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
     Group updatedGroup = groupService.updateGroup(groupId, updateGroupRequest.getName(), admin);
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Update group successfully", groupConverter.toGroupDto(updatedGroup)), HttpStatus.OK);
+    return new ResponseEntity<>(
+        new ResponseData<>(HttpStatus.OK.value(), "Update group successfully", groupConverter.toGroupDto(updatedGroup)),
+        HttpStatus.OK);
   }
 
   @Operation(summary = "Delete a group", description = "Delete a group by ID")
@@ -59,15 +64,17 @@ public class GroupController {
   public ResponseEntity<?> deleteGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
     groupService.deleteGroup(groupId, admin);
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Group deleted successfully", null), HttpStatus.OK);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Group deleted successfully", null),
+        HttpStatus.OK);
   }
 
-  @Operation(summary = "Join a group", description = "User joins a group")
+  @Operation(summary = "Join a group", description = "User joins a group or sends a join request if the group is private")
   @PostMapping("/{groupId}/join")
   public ResponseEntity<?> joinGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     groupService.joinGroup(groupId, user);
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Joined group successfully", null), HttpStatus.OK);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Join request processed successfully", null),
+        HttpStatus.OK);
   }
 
   @Operation(summary = "Leave a group", description = "User leaves a group")
@@ -75,20 +82,67 @@ public class GroupController {
   public ResponseEntity<?> leaveGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     groupService.leaveGroup(groupId, user);
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Left group successfully", null), HttpStatus.OK);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Left group successfully", null),
+        HttpStatus.OK);
+  }
+
+  @Operation(summary = "Accept join request", description = "Admin accepts a user's request to join the group")
+  @PostMapping("/{groupId}/accept-request/{userId}")
+  public ResponseEntity<?> acceptJoinRequest(
+      @PathVariable Long groupId,
+      @PathVariable Long userId,
+      @RequestHeader("Authorization") String jwt) {
+    User admin = userService.findUserProfileByJwt(jwt);
+    groupService.acceptJoinRequest(groupId, userId, admin);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Join request accepted", null),
+        HttpStatus.OK);
+  }
+
+  @Operation(summary = "Reject join request", description = "Admin rejects a user's request to join the group")
+  @PostMapping("/{groupId}/reject-request/{userId}")
+  public ResponseEntity<?> rejectJoinRequest(
+      @PathVariable Long groupId,
+      @PathVariable Long userId,
+      @RequestHeader("Authorization") String jwt) {
+    User admin = userService.findUserProfileByJwt(jwt);
+    groupService.rejectJoinRequest(groupId, userId, admin);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Join request rejected", null),
+        HttpStatus.OK);
+  }
+
+  @Operation(summary = "Get pending join requests", description = "Admin gets list of pending join requests")
+  @GetMapping("/{groupId}/pending-requests")
+  public ResponseEntity<?> getPendingRequests(
+      @PathVariable Long groupId,
+      @RequestHeader("Authorization") String jwt) {
+    User admin = userService.findUserProfileByJwt(jwt);
+    List<User> pendingRequests = groupService.getPendingRequests(groupId, admin);
+    return new ResponseEntity<>(
+        new ResponseData<>(HttpStatus.OK.value(), "Pending requests retrieved successfully", pendingRequests),
+        HttpStatus.OK);
   }
 
   @Operation(summary = "Get all groups", description = "Retrieve a list of all groups")
   @GetMapping
   public ResponseEntity<?> getAllGroups() {
     List<GroupDto> groupDtos = groupConverter.toGroupDtos(groupService.getAllGroups());
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get groups successfully", groupDtos), HttpStatus.OK);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get groups successfully", groupDtos),
+        HttpStatus.OK);
   }
 
-  @Operation(summary = "Get group by ID", description = "Retrieve a specific group by ID")
   @GetMapping("/{groupId}")
   public ResponseEntity<?> getGroupById(@PathVariable Long groupId) {
-    return ResponseEntity.ok(groupConverter.toGroupDto(groupService.getGroupById(groupId)));
+    try {
+      Group group = groupService.getGroupById(groupId);
+      if (group == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
+      }
+      GroupDto groupDto = groupConverter.toGroupDto(group);
+      return ResponseEntity.ok(groupDto);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error: " + e.getMessage());
+    }
   }
 
   @Operation(summary = "Get posts from a group", description = "Retrieve all posts of a specific group")
@@ -96,9 +150,11 @@ public class GroupController {
   public ResponseEntity<?> getPostsByGroupId(@PathVariable Long groupId) {
     List<PostDto> posts = groupService.getPostsByGroupId(groupId);
     if (posts.isEmpty()) {
-      return new ResponseEntity<>(new ResponseError(HttpStatus.NOT_FOUND.value(), "No posts found"), HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(new ResponseError(HttpStatus.NOT_FOUND.value(), "No posts found"),
+          HttpStatus.NOT_FOUND);
     }
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get posts for group successfully", posts), HttpStatus.OK);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get posts for group successfully", posts),
+        HttpStatus.OK);
   }
 
   @Operation(summary = "Get joined groups of the user", description = "Retrieve all groups the authenticated user is part of")
@@ -107,12 +163,14 @@ public class GroupController {
     User user = userService.findUserProfileByJwt(jwt);
     List<Group> joinedGroups = groupService.getGroupsByUser(user);
     List<GroupDto> groupDtos = groupConverter.toGroupDtos(joinedGroups);
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get my groups successfully", groupDtos), HttpStatus.OK);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get my groups successfully", groupDtos),
+        HttpStatus.OK);
   }
 
   @Operation(summary = "Get posts from all groups", description = "Retrieve all posts from every group")
   @GetMapping("/posts")
   public ResponseEntity<?> getPostsFromAllGroups() {
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get posts from all groups successfully", groupService.getPostsFromAllGroups()), HttpStatus.OK);
+    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get posts from all groups successfully",
+        groupService.getPostsFromAllGroups()), HttpStatus.OK);
   }
 }

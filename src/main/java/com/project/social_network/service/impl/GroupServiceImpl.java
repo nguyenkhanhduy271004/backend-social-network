@@ -1,6 +1,7 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.PostConverter;
+import com.project.social_network.dto.GroupDto;
 import com.project.social_network.dto.GroupUserDto;
 import com.project.social_network.dto.PostDto;
 import com.project.social_network.model.Group;
@@ -66,10 +67,24 @@ public class GroupServiceImpl implements GroupService {
     boolean isMember = group.getUsers().stream()
         .anyMatch(u -> u.getId().equals(user.getId()));
 
-    if (!isMember) {
-      group.getUsers().add(user);
-      groupRepository.save(group);
+    if (isMember) {
+      throw new GroupException("User is already a member of this group");
     }
+
+    boolean hasPendingRequest = group.getPendingRequests().stream()
+        .anyMatch(u -> u.getId().equals(user.getId()));
+
+    if (hasPendingRequest) {
+      throw new GroupException("User already has a pending join request");
+    }
+
+    if (group.isPublic()) {
+      group.getUsers().add(user);
+    } else {
+      group.getPendingRequests().add(user);
+    }
+
+    groupRepository.save(group);
   }
 
   @Override
@@ -78,6 +93,7 @@ public class GroupServiceImpl implements GroupService {
         .orElseThrow(() -> new GroupException("Group not found"));
 
     group.getUsers().remove(user);
+    group.getPendingRequests().remove(user);
 
     if (group.getAdmin().equals(user)) {
       if (!group.getUsers().isEmpty()) {
@@ -89,6 +105,52 @@ public class GroupServiceImpl implements GroupService {
     }
 
     groupRepository.save(group);
+  }
+
+  @Override
+  public void acceptJoinRequest(Long groupId, Long userId, User admin) {
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new GroupException("Group not found"));
+
+    checkIfAdmin(group, admin);
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new UserException("User not found"));
+
+    if (!group.getPendingRequests().contains(user)) {
+      throw new GroupException("No pending request found for this user");
+    }
+
+    group.getPendingRequests().remove(user);
+    group.getUsers().add(user);
+    groupRepository.save(group);
+  }
+
+  @Override
+  public void rejectJoinRequest(Long groupId, Long userId, User admin) {
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new GroupException("Group not found"));
+
+    checkIfAdmin(group, admin);
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new UserException("User not found"));
+
+    if (!group.getPendingRequests().remove(user)) {
+      throw new GroupException("No pending request found for this user");
+    }
+
+    groupRepository.save(group);
+  }
+
+  @Override
+  public List<User> getPendingRequests(Long groupId, User admin) {
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new GroupException("Group not found"));
+
+    checkIfAdmin(group, admin);
+
+    return group.getPendingRequests();
   }
 
   @Override
@@ -153,7 +215,8 @@ public class GroupServiceImpl implements GroupService {
     List<Group> groups = groupRepository.findAll();
     return groups.stream()
         .flatMap(group -> group.getPosts().stream())
-        .map(post -> postConverter.toPostDtoForGroup(post, post.getUser(), post.getGroup().getName(), post.getGroup().getId()))
+        .map(post -> postConverter.toPostDtoForGroup(post, post.getUser(), post.getGroup().getName(),
+            post.getGroup().getId()))
         .collect(Collectors.toList());
   }
 
@@ -168,8 +231,8 @@ public class GroupServiceImpl implements GroupService {
   }
 
   private void checkIfAdmin(Group group, User user) {
-    if (user == null || group.getAdmin() == null || !group.getAdmin().getId().equals(user.getId())) {
-      throw new GroupException("User is not the admin of this group");
+    if (!group.getAdmin().getId().equals(user.getId())) {
+      throw new GroupException("Only the group admin can perform this action");
     }
   }
 }

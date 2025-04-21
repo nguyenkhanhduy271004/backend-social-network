@@ -1,5 +1,6 @@
 package com.project.social_network.repository;
 
+import com.project.social_network.dto.GroupDto;
 import com.project.social_network.dto.GroupUserDto;
 import com.project.social_network.model.Group;
 import com.project.social_network.model.User;

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
+
 @Entity
 @Getter
 @Setter
@@ -16,21 +17,22 @@ public class Group extends BaseEntity {
 
   private String name;
 
-  @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+  private boolean isPublic = true; // Default to public
+
+  @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
   @ManyToOne
   @JoinColumn(name = "admin_id", nullable = false)
   private User admin;
 
-
   @ManyToMany
-  @JoinTable(
-      name = "user_groups",
-      joinColumns = @JoinColumn(name = "group_id"),
-      inverseJoinColumns = @JoinColumn(name = "user_id")
-  )
+  @JoinTable(name = "user_groups", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
   @JsonIgnore
   private List<User> users = new ArrayList<>();
 
+  @ManyToMany
+  @JoinTable(name = "group_join_requests", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+  @JsonIgnore
+  private List<User> pendingRequests = new ArrayList<>();
 
   @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
   private List<Post> posts = new ArrayList<>();

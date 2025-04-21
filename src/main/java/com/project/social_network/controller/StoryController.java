@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,21 +33,13 @@ import java.util.List;
 @RequestMapping("/api/story")
 @Tag(name = "Story Controller")
 @SecurityRequirement(name = "bearerAuth")
+@RequiredArgsConstructor
 public class StoryController {
 
   private final StoryService storyService;
   private final UserService userService;
   private final Translator translator;
   private final UploadImageFile uploadImageFile;
-
-  public StoryController(StoryService storyService, UserService userService,
-      StoryConverter storyConverter, UploadImageFile uploadImageFile,
-      Translator translator) {
-    this.storyService = storyService;
-    this.userService = userService;
-    this.uploadImageFile = uploadImageFile;
-    this.translator = translator;
-  }
 
   @PostMapping("/create")
   @Operation(summary = "Create a new story")

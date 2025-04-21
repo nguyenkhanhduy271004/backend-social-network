@@ -9,12 +9,15 @@ import com.project.social_network.model.User;
 import com.project.social_network.exception.PostException;
 import com.project.social_network.exception.UserException;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface PostService {
   PostDto createPost(String content, MultipartFile file, String jwt) throws UserException;
   PostDto createPostForGroup(String content, MultipartFile file, String jwt, Long groupId) throws UserException;
   List<PostDto> findAllPost();
+  Page<PostDto> findAllPost(Pageable pageable) throws PostException;
   PostDto rePost(Long postId, User user) throws UserException, PostException;
   PostDto findById(Long postId) throws PostException;
   Post findByPostId(Long postId) throws PostException;

@@ -34,7 +34,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     Bucket bucket = resolveBucket(clientId);
 
     if (bucket.tryConsume(1)) {
-      return true; // Cho phép request
+      return true;
     } else {
       response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
       response.getWriter().write("Too many requests");

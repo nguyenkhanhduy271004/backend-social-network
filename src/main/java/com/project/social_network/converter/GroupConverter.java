@@ -28,8 +28,10 @@ public class GroupConverter {
       return null;
     }
 
-    GroupDto groupDto = modelMapper.map(group, GroupDto.class);
+    GroupDto groupDto = new GroupDto();
 
+    groupDto.setId(group.getId());
+    groupDto.setName(group.getName());
     groupDto.setAdmin(toGroupUserDto(group.getAdmin()));
     groupDto.setMembers(toGroupUserDtos(group.getUsers()));
     groupDto.setPosts(toPostDtos(group.getPosts()));

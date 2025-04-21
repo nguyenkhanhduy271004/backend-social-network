@@ -13,4 +13,3 @@ public class GroupUserDto {
   private Long id;
   private String fullName;
 }
-
