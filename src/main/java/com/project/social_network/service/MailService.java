@@ -1,19 +1,19 @@
 package com.project.social_network.service;
 
-import com.project.social_network.service.interfaces.BaseRedisService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.project.social_network.service.interfaces.BaseRedisService;
 
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class MailService {
@@ -61,4 +61,3 @@ public class MailService {
     baseRedisService.delete("OTP_" + email);
   }
 }
-

@@ -117,16 +117,16 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public PostDto findById(Long postId) throws PostException {
-    Post post = postRepository.findById(postId).orElseThrow(() -> new PostException("Post not found with id: " + postId));
+    Post post = postRepository.findById(postId)
+        .orElseThrow(() -> new PostException("Post not found with id: " + postId));
     return postConverter.toPostDto(post, post.getUser());
   }
-
 
   @Override
   public void deletePostById(Long postId, Long userId) throws UserException, PostException {
     Post post = findByPostId(postId);
 
-    if(!userId.equals(post.getUser().getId())) {
+    if (!userId.equals(post.getUser().getId())) {
       throw new UserException("You can't delete another user's post");
     }
 
@@ -152,7 +152,6 @@ public class PostServiceImpl implements PostService {
 
     return postConverter.toPostDto(savedPost, user);
   }
-
 
   @Override
   public List<PostDto> getUserPost(User user) {
@@ -207,7 +206,6 @@ public class PostServiceImpl implements PostService {
     return postConverter.toPostDto(postRepository.save(post), user);
   }
 
-
   @Override
   public List<Comment> getAllCommentsByPostId(Long postId) throws UserException, PostException {
     List<Comment> comments = commentRepository.findByPost_Id(postId);
@@ -224,8 +222,22 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public Post findByPostId(Long postId) throws PostException {
-    Post post = postRepository.findById(postId).orElseThrow(() -> new PostException("Post not found with id: " + postId));
-    return post;
+    return postRepository.findById(postId)
+        .orElseThrow(() -> new PostException("Post not found with id: " + postId));
   }
 
+  @Override
+  public List<Post> findAllPosts() {
+    return postRepository.findAll();
+  }
+
+  @Override
+  public void deletePost(Long postId, User admin) throws PostException, UserException {
+    if (!admin.isAdmin()) {
+      throw new UserException("Unauthorized: Admin access required");
+    }
+
+    Post post = findByPostId(postId);
+    postRepository.delete(post);
+  }
 }

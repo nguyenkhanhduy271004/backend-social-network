@@ -1,15 +1,16 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.dto.GroupDto;
-import com.project.social_network.dto.GroupUserDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.model.Group;
-import com.project.social_network.model.User;
-import com.project.social_network.exception.GroupException;
 import java.util.List;
 
+import com.project.social_network.dto.GroupUserDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.exception.GroupException;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.User;
+import com.project.social_network.request.CreateGroupRequest;
+
 public interface GroupService {
-  Group createGroup(String name, User owner);
+  Group createGroup(CreateGroupRequest createGroupRequest, User owner);
 
   Group updateGroup(Long groupId, String name, User admin) throws GroupException;
 

@@ -17,6 +17,7 @@ public class GroupDto {
   private Long id;
   private String name;
   private User admin;
+  private boolean isPublic;
   private List<PostDto> posts = new ArrayList<>();
   private List<User> members = new ArrayList<>();
   private Date createdDate;

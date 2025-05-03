@@ -1,22 +1,37 @@
 package com.project.social_network.controller;
 
+import static com.project.social_network.dto.AccountDto.convertToDto;
+
+import com.project.social_network.model.Account;
+import com.project.social_network.service.AccountService;
+import java.security.Principal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project.social_network.converter.UserConverter;
-import com.project.social_network.exception.UserException;
 import com.project.social_network.dto.UserDto;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.response.ResponseData;
 import com.project.social_network.service.interfaces.UserService;
 import com.project.social_network.util.UserUtil;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -31,6 +46,9 @@ public class UserController {
 
   @Autowired
   private UserUtil userUtil;
+
+  @Autowired
+  private AccountService accountService;
 
   @Operation(summary = "Get all users", description = "Retrieves a list of all users")
   @ApiResponses(value = {
@@ -53,7 +71,7 @@ public class UserController {
   @GetMapping("/random")
   public Object getUserRandom(@RequestHeader("Authorization") String jwt) throws UserException {
     User user = userService.findUserProfileByJwt(jwt);
-    List<UserDto> userDtos = userService.findAllUsers();
+    List<UserDto> userDtos = userService.getRandomUsers(user);
 
     return new ResponseData<>(HttpStatus.OK.value(), "Get random user successfully", userDtos);
   }
@@ -79,7 +97,8 @@ public class UserController {
   })
   @GetMapping("/{userId}")
   @Cacheable(value = "users", key = "#id")
-  public Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
+  public Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt)
+      throws UserException {
     User reqUser = userService.findUserProfileByJwt(jwt);
     User user = userService.findUserById(userId);
     UserDto userDto = userConverter.toUserDto(user);
@@ -95,7 +114,8 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "Get user by query failed")
   })
   @GetMapping("/search")
-  public Object getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt) throws UserException {
+  public Object getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt)
+      throws UserException {
     User reqUser = userService.findUserProfileByJwt(jwt);
     List<UserDto> userDtos = userService.searchUser(query, reqUser.getId());
 
@@ -126,5 +146,11 @@ public class UserController {
     UserDto userDto = userService.followUser(userId, reqUser);
 
     return new ResponseData<>(HttpStatus.OK.value(), "Follow user successfully", userDto);
+  }
+
+  @GetMapping("/info")
+  public ResponseEntity getUserInfo(Principal principal) {
+    Account account = accountService.getAccount(Long.valueOf(principal.getName()));
+    return ResponseEntity.ok().body(convertToDto(account));
   }
 }

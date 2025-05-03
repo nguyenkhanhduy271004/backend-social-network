@@ -122,6 +122,7 @@ public class PostConverter {
     }
 
     CommentDto commentDto = new CommentDto();
+    commentDto.setId(comment.getId());
     commentDto.setPostId(comment.getPost() != null ? comment.getPost().getId() : null);
 
     UserCommentResponse user = new UserCommentResponse();

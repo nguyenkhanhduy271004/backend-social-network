@@ -19,7 +19,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = userRepository.findByEmail(username);
+    User user = userRepository.findByEmail(username).get();
 
     if (user == null || user.isLoginWithGoogle()) {
       throw new UsernameNotFoundException("Username not found with email: " + username);

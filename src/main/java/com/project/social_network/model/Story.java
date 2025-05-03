@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class Story extends BaseEntity{
+public class Story extends BaseEntity {
 
   @ManyToOne
   @JsonBackReference

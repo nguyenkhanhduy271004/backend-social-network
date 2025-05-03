@@ -1,17 +1,21 @@
 package com.project.social_network.service.impl;
 
-import com.project.social_network.config.JwtProvider;
-import com.project.social_network.converter.UserConverter;
-import com.project.social_network.exception.UserException;
-import com.project.social_network.dto.UserDto;
-import com.project.social_network.model.User;
-import com.project.social_network.repository.UserRepository;
-import com.project.social_network.service.interfaces.UserService;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.project.social_network.config.JwtProvider;
+import com.project.social_network.converter.UserConverter;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.exception.UserException;
+import com.project.social_network.model.User;
+import com.project.social_network.repository.UserRepository;
+import com.project.social_network.service.interfaces.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -34,7 +38,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public User findUserProfileByJwt(String jwt) throws UserException {
     String email = jwtProvider.getEmailFromToken(jwt);
-    return Optional.ofNullable(userRepository.findByEmail(email))
+    return userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException("User not found with email: " + email));
   }
 
@@ -78,6 +82,44 @@ public class UserServiceImpl implements UserService {
         .stream()
         .map(userConverter::toUserDto)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public UserDto updateUserAdminStatus(Long userId, boolean isAdmin) throws UserException {
+    User user = findUserById(userId);
+    user.setAdmin(isAdmin);
+    return userConverter.toUserDto(userRepository.save(user));
+  }
+
+  @Override
+  public void deleteUser(Long userId) throws UserException {
+    User user = findUserById(userId);
+    userRepository.delete(user);
+  }
+
+  @Override
+  public List<UserDto> getRandomUsers(User user) {
+
+    List<User> users = userRepository.findAll();
+
+    List<User> followings = user.getFollowings();
+
+    List<UserDto> randomUsers = new ArrayList<>();
+
+    for (User user1 : users) {
+      if (!followings.contains(user1) && !user1.getId().equals(user.getId())) {
+        UserDto userDto = userConverter.toUserDto(user1);
+        randomUsers.add(userDto);
+      }
+    }
+
+    Collections.shuffle(randomUsers);
+
+    if (randomUsers.size() > 10) {
+      randomUsers = randomUsers.subList(0, 5);
+    }
+
+    return randomUsers;
   }
 
   private void updateUserDetails(User existUser, User user) {

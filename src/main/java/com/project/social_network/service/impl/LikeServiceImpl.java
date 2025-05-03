@@ -1,17 +1,19 @@
 package com.project.social_network.service.impl;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.Like;
 import com.project.social_network.model.Post;
 import com.project.social_network.model.User;
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.LikeRepository;
 import com.project.social_network.repository.PostRepository;
 import com.project.social_network.service.interfaces.LikeService;
 import com.project.social_network.service.interfaces.PostService;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class LikeServiceImpl implements LikeService {
@@ -27,7 +29,7 @@ public class LikeServiceImpl implements LikeService {
   public Like likePost(Long postId, User user) throws UserException, PostException {
     Like isLikeExist = likeRepository.isLikeExist(user.getId(), postId);
 
-    if(isLikeExist != null) {
+    if (isLikeExist != null) {
       likeRepository.deleteById(isLikeExist.getId());
       return isLikeExist;
     }

@@ -1,21 +1,23 @@
 package com.project.social_network.service.impl;
 
-import com.project.social_network.converter.PostConverter;
-import com.project.social_network.dto.GroupDto;
-import com.project.social_network.dto.GroupUserDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.model.Group;
-import com.project.social_network.model.User;
-import com.project.social_network.exception.GroupException;
-import com.project.social_network.exception.UserException;
-import com.project.social_network.repository.GroupRepository;
-import com.project.social_network.repository.UserRepository;
-import com.project.social_network.service.interfaces.GroupService;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.project.social_network.converter.PostConverter;
+import com.project.social_network.dto.GroupUserDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.exception.GroupException;
+import com.project.social_network.exception.UserException;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.User;
+import com.project.social_network.repository.GroupRepository;
+import com.project.social_network.repository.UserRepository;
+import com.project.social_network.request.CreateGroupRequest;
+import com.project.social_network.service.interfaces.GroupService;
 
 @Service
 public class GroupServiceImpl implements GroupService {
@@ -30,9 +32,10 @@ public class GroupServiceImpl implements GroupService {
   private PostConverter postConverter;
 
   @Override
-  public Group createGroup(String name, User owner) {
+  public Group createGroup(CreateGroupRequest createGroupRequest, User owner) {
     Group group = new Group();
-    group.setName(name);
+    group.setName(createGroupRequest.getName());
+    group.setPublic(createGroupRequest.isPublic());
     group.getUsers().add(owner);
     group.setAdmin(owner);
     return groupRepository.save(group);

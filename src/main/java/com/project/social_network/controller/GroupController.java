@@ -1,26 +1,37 @@
 package com.project.social_network.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project.social_network.converter.GroupConverter;
 import com.project.social_network.dto.GroupDto;
 import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.User;
 import com.project.social_network.request.CreateGroupRequest;
 import com.project.social_network.request.UpdateGroupRequest;
 import com.project.social_network.response.ResponseData;
 import com.project.social_network.response.ResponseError;
-import com.project.social_network.model.Group;
-import com.project.social_network.model.User;
 import com.project.social_network.service.interfaces.GroupService;
 import com.project.social_network.service.interfaces.UserService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -42,7 +53,7 @@ public class GroupController {
   public ResponseEntity<?> createGroup(@Valid @RequestBody CreateGroupRequest createGroupRequest,
       @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
-    Group group = groupService.createGroup(createGroupRequest.getName(), user);
+    Group group = groupService.createGroup(createGroupRequest, user);
     return new ResponseEntity<>(
         new ResponseData<>(HttpStatus.CREATED.value(), "Create group successfully", groupConverter.toGroupDto(group)),
         HttpStatus.CREATED);
@@ -51,7 +62,8 @@ public class GroupController {
   @Operation(summary = "Update group", description = "Update the group's name")
   @PutMapping("/{groupId}")
   public ResponseEntity<?> updateGroup(@PathVariable Long groupId,
-      @Valid @RequestBody UpdateGroupRequest updateGroupRequest, @RequestHeader("Authorization") String jwt) {
+      @Valid @RequestBody UpdateGroupRequest updateGroupRequest,
+      @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
     Group updatedGroup = groupService.updateGroup(groupId, updateGroupRequest.getName(), admin);
     return new ResponseEntity<>(
@@ -88,8 +100,7 @@ public class GroupController {
 
   @Operation(summary = "Accept join request", description = "Admin accepts a user's request to join the group")
   @PostMapping("/{groupId}/accept-request/{userId}")
-  public ResponseEntity<?> acceptJoinRequest(
-      @PathVariable Long groupId,
+  public ResponseEntity<?> acceptJoinRequest(@PathVariable Long groupId,
       @PathVariable Long userId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
@@ -100,8 +111,7 @@ public class GroupController {
 
   @Operation(summary = "Reject join request", description = "Admin rejects a user's request to join the group")
   @PostMapping("/{groupId}/reject-request/{userId}")
-  public ResponseEntity<?> rejectJoinRequest(
-      @PathVariable Long groupId,
+  public ResponseEntity<?> rejectJoinRequest(@PathVariable Long groupId,
       @PathVariable Long userId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
@@ -112,11 +122,19 @@ public class GroupController {
 
   @Operation(summary = "Get pending join requests", description = "Admin gets list of pending join requests")
   @GetMapping("/{groupId}/pending-requests")
-  public ResponseEntity<?> getPendingRequests(
-      @PathVariable Long groupId,
+  public ResponseEntity<?> getPendingRequests(@PathVariable Long groupId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
-    List<User> pendingRequests = groupService.getPendingRequests(groupId, admin);
+    List<User> users = groupService.getPendingRequests(groupId, admin);
+    List<GroupDto.User> pendingRequests = new ArrayList<>();
+
+    for (User user : users) {
+      GroupDto.User user1 = new GroupDto.User();
+      user1.setId(user.getId());
+      user1.setFullName(user.getFullName());
+      pendingRequests.add(user1);
+    }
+
     return new ResponseEntity<>(
         new ResponseData<>(HttpStatus.OK.value(), "Pending requests retrieved successfully", pendingRequests),
         HttpStatus.OK);
@@ -170,7 +188,20 @@ public class GroupController {
   @Operation(summary = "Get posts from all groups", description = "Retrieve all posts from every group")
   @GetMapping("/posts")
   public ResponseEntity<?> getPostsFromAllGroups() {
-    return new ResponseEntity<>(new ResponseData<>(HttpStatus.OK.value(), "Get posts from all groups successfully",
-        groupService.getPostsFromAllGroups()), HttpStatus.OK);
+    List<PostDto> posts = groupService.getPostsFromAllGroups();
+    return new ResponseEntity<>(
+        new ResponseData<>(HttpStatus.OK.value(), "Get posts from all groups successfully", posts),
+        HttpStatus.OK);
   }
+
+  @DeleteMapping("/{groupId}/user/{userId}")
+  public ResponseEntity<?> removeUserFromGroup(@PathVariable Long groupId, @PathVariable Long userId,
+      @RequestHeader("Authorization") String jwt) {
+    User user = userService.findUserProfileByJwt(jwt);
+    groupService.removeMember(groupId, userId, user);
+    return new ResponseEntity<>(
+        new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete user from group successfully"),
+        HttpStatus.NO_CONTENT);
+  }
+
 }

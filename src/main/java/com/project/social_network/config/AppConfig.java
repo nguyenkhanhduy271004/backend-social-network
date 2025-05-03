@@ -1,9 +1,8 @@
 package com.project.social_network.config;
 
-import com.project.social_network.handler.CustomAuthenticationEntryPoint;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,18 +14,29 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.project.social_network.handler.CustomAuthenticationEntryPoint;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 @Configuration
 @EnableWebSecurity
 public class AppConfig implements WebMvcConfigurer {
 
-  @Autowired
-  private RateLimitInterceptor rateLimitInterceptor;
+  private final RateLimitInterceptor rateLimitInterceptor;
+
+  private final JWTRequestFilter jwtRequestFilter;
+
+  public AppConfig(RateLimitInterceptor rateLimitInterceptor, JWTRequestFilter jwtRequestFilter) {
+    this.rateLimitInterceptor = rateLimitInterceptor;
+    this.jwtRequestFilter = jwtRequestFilter;
+  }
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
@@ -42,11 +52,11 @@ public class AppConfig implements WebMvcConfigurer {
 
   private static CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
     CorsConfiguration cfg = new CorsConfiguration();
-    cfg.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+    cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
     cfg.setAllowedMethods(Collections.singletonList("*"));
     cfg.setAllowCredentials(true);
     cfg.setAllowedHeaders(Collections.singletonList("*"));
-    cfg.setExposedHeaders(Arrays.asList("Authorization"));
+    cfg.setExposedHeaders(Arrays.asList("Authorization", "Cross-Origin-Opener-Policy"));
     cfg.setMaxAge(3600L);
     return cfg;
   }
@@ -59,16 +69,13 @@ public class AppConfig implements WebMvcConfigurer {
             .requestMatchers(
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
-                "/auth/**"
-            ).permitAll()
-
-            .requestMatchers("/api/**").authenticated()
-            .anyRequest().permitAll()
-        )
+                "/auth/**",
+                "/oauth2/**")
+            .permitAll()
+            .anyRequest().authenticated())
         .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
         .exceptionHandling(exception -> exception
-            .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-        )
+            .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
         .csrf(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 

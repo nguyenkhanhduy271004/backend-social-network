@@ -1,7 +1,7 @@
 package com.project.social_network.config;
 
 import java.util.Locale;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -14,7 +14,6 @@ public class Translator {
 
   private static ResourceBundleMessageSource messageSource;
 
-  @Autowired
   public Translator(ResourceBundleMessageSource messageSource) {
     Translator.messageSource = messageSource;
   }

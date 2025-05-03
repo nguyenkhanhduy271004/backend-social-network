@@ -3,7 +3,6 @@ package com.project.social_network.converter;
 import com.project.social_network.dto.UserDto;
 import com.project.social_network.model.User;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -15,7 +14,6 @@ public class UserConverter {
 
   private final ModelMapper modelMapper;
 
-  @Autowired
   public UserConverter(ModelMapper modelMapper) {
     this.modelMapper = modelMapper;
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
@@ -27,6 +25,7 @@ public class UserConverter {
     }
 
     UserDto userDto = modelMapper.map(user, UserDto.class);
+    userDto.setAdmin(user.isAdmin());
     userDto.setFollowers(toShallowUserDtos(user.getFollowers()));
     userDto.setFollowing(toShallowUserDtos(user.getFollowings()));
 
@@ -42,6 +41,7 @@ public class UserConverter {
         .map(user -> {
           UserDto userDto = new UserDto();
           userDto.setId(user.getId());
+          userDto.setAdmin(user.isAdmin());
           userDto.setEmail(user.getEmail());
           userDto.setFullName(user.getFullName());
           userDto.setImage(user.getImage());

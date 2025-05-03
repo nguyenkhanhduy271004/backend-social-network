@@ -18,7 +18,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class User extends BaseEntity{
+public class User extends BaseEntity {
 
   private String fullName;
   private String location;
@@ -32,6 +32,7 @@ public class User extends BaseEntity{
   private String bio;
   private boolean req_user;
   private boolean loginWithGoogle;
+  private boolean isAdmin;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   @JsonManagedReference
@@ -69,6 +70,5 @@ public class User extends BaseEntity{
 
   @Enumerated(EnumType.STRING)
   private AuthProvider authProvider;
-
 
 }
