@@ -1,4 +1,4 @@
-package com.project.social_network.service;
+package com.project.social_network.service.impl;
 
 import java.util.Arrays;
 import java.util.Map;

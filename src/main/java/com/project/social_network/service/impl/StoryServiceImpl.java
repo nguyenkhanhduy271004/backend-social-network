@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,6 +56,7 @@ public class StoryServiceImpl implements StoryService {
   }
 
   @Override
+  @Cacheable(value = "stories", key = "#storyId")
   public StoryDto findStoryById(Long storyId) {
     Story story = storyRepository.findById(storyId).orElseThrow(() -> new PostException("Story not found with id: " + storyId));
     return storyConverter.toStoryDto(story, story.getUser());
@@ -64,6 +67,7 @@ public class StoryServiceImpl implements StoryService {
   }
 
   @Override
+  @CacheEvict(value = "stories", key = "#storyId")
   public void deleteStoryById(Long storyId, Long userId) throws UserException, StoryException {
     Story story = findStoryById2(storyId);
 

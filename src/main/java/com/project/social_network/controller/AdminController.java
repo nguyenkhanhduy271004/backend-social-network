@@ -78,7 +78,6 @@ public class AdminController {
   public Object getDashboardMetrics(@RequestHeader("Authorization") String jwt)
       throws UserException {
     validateAdminAccess(jwt);
-
     List<UserDto> allUsers = userService.findAllUsers();
     List<Post> allPosts = postService.findAllPosts();
 
@@ -91,7 +90,6 @@ public class AdminController {
       }
     }
 
-    // Count approximate totals from repository calls
     List<StoryDto> stories = storyService.findAllStory();
     List<ReelDto> reels = reelService.findAllReel();
     List<Group> groups = groupService.getAllGroups();

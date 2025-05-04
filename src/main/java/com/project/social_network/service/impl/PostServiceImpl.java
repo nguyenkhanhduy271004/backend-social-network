@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -116,6 +119,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
+  @Cacheable(value = "posts", key = "#postId")
   public PostDto findById(Long postId) throws PostException {
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new PostException("Post not found with id: " + postId));
@@ -123,6 +127,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
+  @CacheEvict(value = "posts", key = "#postId")
   public void deletePostById(Long postId, Long userId) throws UserException, PostException {
     Post post = findByPostId(postId);
 
@@ -170,6 +175,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
+  @CachePut(value = "posts", key = "#postId")
   public PostDto updatePost(Long postId, MultipartFile file, String content, String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     Post post = findByPostId(postId);

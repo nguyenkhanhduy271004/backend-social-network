@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,6 +54,7 @@ public class ReelServiceImpl implements ReelService {
   }
 
   @Override
+  @Cacheable(value = "reels", key = "#reelId")
   public ReelDto findReelById(Long reelId) {
     Reel reel = reelRepository.findById(reelId).orElseThrow(() -> new PostException("Reel not found with id: " + reelId));
     return reelConverter.toReelDto(reel, reel.getUser());
@@ -62,6 +65,7 @@ public class ReelServiceImpl implements ReelService {
   }
 
   @Override
+  @CacheEvict(value = "reels", key = "#reelId")
   public void deleteReelById(Long reelId, Long userId) throws UserException, ReelException {
     Reel reel = findReelById2(reelId);
 

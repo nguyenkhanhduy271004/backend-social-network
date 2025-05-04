@@ -2,11 +2,14 @@ package com.project.social_network.config;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -43,6 +46,15 @@ public class AppConfig implements WebMvcConfigurer {
     registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/auth/login");
   }
 
+  @Override
+  public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+    MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+    converter.setSupportedMediaTypes(Arrays.asList(
+        org.springframework.http.MediaType.APPLICATION_JSON,
+        org.springframework.http.MediaType.TEXT_EVENT_STREAM));
+    converters.add(converter);
+  }
+
   @Bean
   public ModelMapper modelMapper() {
     ModelMapper modelMapper = new ModelMapper();
@@ -70,7 +82,9 @@ public class AppConfig implements WebMvcConfigurer {
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
                 "/auth/**",
-                "/oauth2/**")
+                "/oauth2/**",
+                "/push-notifications/**",
+                "/notification/**")
             .permitAll()
             .anyRequest().authenticated())
         .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)

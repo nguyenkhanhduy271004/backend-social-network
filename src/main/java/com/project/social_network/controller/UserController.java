@@ -3,12 +3,15 @@ package com.project.social_network.controller;
 import static com.project.social_network.dto.AccountDto.convertToDto;
 
 import com.project.social_network.model.Account;
+import com.project.social_network.request.PaginationRequest;
+import com.project.social_network.response.PagingResult;
 import com.project.social_network.service.AccountService;
 import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,12 +59,24 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "Get user failed")
   })
   @GetMapping("/")
-  public Object getUser(@RequestHeader("Authorization") String jwt) throws UserException {
-    User user = userService.findUserProfileByJwt(jwt);
-    List<UserDto> userDtos = userService.findAllUsers();
+  public ResponseEntity<ResponseData<PagingResult<UserDto>>> getUser(
+      @RequestHeader("Authorization") String jwt,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "ASC") String direction,
+      @RequestParam(defaultValue = "id") String sortBy
+  ) throws UserException {
 
-    return new ResponseData<>(HttpStatus.OK.value(), "Get user successfully", userDtos);
+    User user = userService.findUserProfileByJwt(jwt);
+
+    PaginationRequest request = new PaginationRequest(page, size, sortBy, Sort.Direction.fromString(direction));
+
+    PagingResult<UserDto> result = userService.findAllUsers(request);
+
+    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Get user successfully", result));
   }
+
+
 
   @Operation(summary = "Get random users", description = "Retrieves a list of random users who are not followed by the current user")
   @ApiResponses(value = {

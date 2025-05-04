@@ -1,5 +1,8 @@
 package com.project.social_network.service.impl;
 
+import com.project.social_network.request.PaginationRequest;
+import com.project.social_network.response.PagingResult;
+import com.project.social_network.util.PaginationUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +10,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.project.social_network.config.JwtProvider;
@@ -30,6 +38,7 @@ public class UserServiceImpl implements UserService {
   private UserConverter userConverter;
 
   @Override
+  @Cacheable(value = "users", key = "#userId")
   public User findUserById(Long userId) throws UserException {
     return userRepository.findById(userId)
         .orElseThrow(() -> new UserException("User not found with id: " + userId));
@@ -43,6 +52,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @CachePut(value = "users", key = "#userId")
   public UserDto updateUser(Long userId, User user) throws UserException {
     User existUser = findUserById(userId);
 
@@ -63,7 +73,7 @@ public class UserServiceImpl implements UserService {
       followToUser.getFollowers().add(user);
     }
 
-    userRepository.saveAll(List.of(user, followToUser)); // Optimize by saving both users in one call
+    userRepository.saveAll(List.of(user, followToUser));
     return userConverter.toUserDto(followToUser);
   }
 
@@ -78,10 +88,25 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public List<UserDto> findAllUsers() {
-    return userRepository.findAll()
-        .stream()
-        .map(userConverter::toUserDto)
-        .collect(Collectors.toList());
+
+    List<UserDto> users = userRepository.findAll().stream().map(userConverter::toUserDto).collect(Collectors.toList());
+    return users;
+  }
+
+  @Override
+  public PagingResult<UserDto> findAllUsers(PaginationRequest request) {
+    final Pageable pageable = PaginationUtils.getPageable(request);
+    final Page<User> entities = userRepository.findAll(pageable);
+
+    final List<UserDto> entitiesDto = entities.stream().map(userConverter::toUserDto).toList();
+    return new PagingResult<>(
+        entitiesDto,
+        entities.getTotalPages(),
+        entities.getTotalElements(),
+        entities.getSize(),
+        entities.getNumber(),
+        entities.isEmpty()
+    );
   }
 
   @Override
@@ -92,6 +117,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @CacheEvict(value = "users", key = "#userId")
   public void deleteUser(Long userId) throws UserException {
     User user = findUserById(userId);
     userRepository.delete(user);

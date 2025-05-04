@@ -1,5 +1,8 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.enums.NotificationType;
+import com.project.social_network.model.Notification;
+import com.project.social_network.service.interfaces.NotificationStorageService;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -40,47 +43,54 @@ import lombok.RequiredArgsConstructor;
 @Validated
 public class LikeController {
 
-        private final UserService userService;
-        private final LikeService likeService;
-        private final LikeConverter likeConverter;
-        private final Translator translator;
+  private final UserService userService;
+  private final LikeService likeService;
+  private final LikeConverter likeConverter;
+  private final Translator translator;
+  private final NotificationStorageService notificationStorageService;
 
-        @PostMapping("/{postId}/likes")
-        @Operation(summary = "Like a post", description = "Allows a user to like a post using their JWT token")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "201", description = "Post liked successfully"),
-                        @ApiResponse(responseCode = "400", description = "Like post failed"),
-                        @ApiResponse(responseCode = "401", description = "Unauthorized")
-        })
-        public ResponseEntity<ResponseData<LikeDto>> likePost(
-                        @Parameter(description = "ID of the post to like") @PathVariable @Min(1) Long postId,
-                        @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
-                        throws UserException, PostException {
-                User user = userService.findUserProfileByJwt(jwt);
-                Like like = likeService.likePost(postId, user);
-                LikeDto likeDto = likeConverter.toLikeDto(like, user);
+  @PostMapping("/{postId}/likes")
+  @Operation(summary = "Like a post", description = "Allows a user to like a post using their JWT token")
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Post liked successfully"),
+      @ApiResponse(responseCode = "400", description = "Like post failed"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  public ResponseEntity<ResponseData<LikeDto>> likePost(
+      @Parameter(description = "ID of the post to like") @PathVariable @Min(1) Long postId,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, PostException {
+    User user = userService.findUserProfileByJwt(jwt);
+    Like like = likeService.likePost(postId, user);
+    LikeDto likeDto = likeConverter.toLikeDto(like, user);
+    notificationStorageService.createNotificationStorage(Notification.builder()
+        .delivered(false)
+        .content("New like from " + like.getUser().getFullName())
+        .notificationType(NotificationType.LIKE)
+        .userFrom(user)
+        .userTo(like.getPost().getUser())
+        .build());
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new ResponseData<>(HttpStatus.CREATED.value(),
+            translator.toLocale("like.create.success"), likeDto));
+  }
 
-                return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(new ResponseData<>(HttpStatus.CREATED.value(),
-                                                translator.toLocale("like.create.success"), likeDto));
-        }
+  @GetMapping("/{postId}/likes")
+  @Operation(summary = "Get all likes for a post", description = "Retrieve all users who liked a specific post")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Likes retrieved successfully"),
+      @ApiResponse(responseCode = "400", description = "Failed to retrieve likes"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  public ResponseEntity<ResponseData<List<LikeDto>>> getAllLikesForPost(
+      @Parameter(description = "ID of the post to retrieve likes") @PathVariable @Min(1) Long postId,
+      @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
+      throws UserException, PostException {
+    User user = userService.findUserProfileByJwt(jwt);
+    List<Like> likes = likeService.getAllLikes(postId);
+    List<LikeDto> likeDtos = likeConverter.toLikeDtos(likes, user);
 
-        @GetMapping("/{postId}/likes")
-        @Operation(summary = "Get all likes for a post", description = "Retrieve all users who liked a specific post")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Likes retrieved successfully"),
-                        @ApiResponse(responseCode = "400", description = "Failed to retrieve likes"),
-                        @ApiResponse(responseCode = "401", description = "Unauthorized")
-        })
-        public ResponseEntity<ResponseData<List<LikeDto>>> getAllLikesForPost(
-                        @Parameter(description = "ID of the post to retrieve likes") @PathVariable @Min(1) Long postId,
-                        @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
-                        throws UserException, PostException {
-                User user = userService.findUserProfileByJwt(jwt);
-                List<Like> likes = likeService.getAllLikes(postId);
-                List<LikeDto> likeDtos = likeConverter.toLikeDtos(likes, user);
-
-                return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
-                                translator.toLocale("like.get.all.success"), likeDtos));
-        }
+    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
+        translator.toLocale("like.get.all.success"), likeDtos));
+  }
 }

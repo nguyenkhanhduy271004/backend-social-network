@@ -1,5 +1,7 @@
 package com.project.social_network.service.interfaces;
 
+import com.project.social_network.request.PaginationRequest;
+import com.project.social_network.response.PagingResult;
 import java.util.List;
 
 import com.project.social_network.dto.UserDto;
@@ -19,6 +21,8 @@ public interface UserService {
   List<UserDto> searchUser(String query, Long userId);
 
   List<UserDto> findAllUsers();
+
+  PagingResult<UserDto> findAllUsers(PaginationRequest request);
 
   List<UserDto> getRandomUsers(User user);
 
