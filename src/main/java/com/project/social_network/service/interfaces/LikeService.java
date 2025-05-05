@@ -1,7 +1,7 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Like;
 import com.project.social_network.model.User;
 import java.util.List;

@@ -4,9 +4,9 @@ import com.project.social_network.config.Translator;
 import com.project.social_network.converter.PostConverter;
 import com.project.social_network.dto.CommentDto;
 import com.project.social_network.dto.PostDto;
-import com.project.social_network.exception.CommentException;
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.CommentException;
+import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Comment;
 import com.project.social_network.model.Group;
 import com.project.social_network.model.JoinRequest;
@@ -43,11 +43,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("${api.prefix}/posts")
 @Tag(name = "Post Controller")
 @SecurityRequirement(name = "bearerAuth")
-@RequiredArgsConstructor
 @Validated
 public class PostController {
 
@@ -121,8 +121,7 @@ public class PostController {
 
   @GetMapping
   @Operation(summary = "Get all posts", description = "Retrieve all public posts")
-  public ResponseEntity<ResponseData<List<PostDto>>> getAllPosts(
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+  public ResponseEntity<ResponseData<List<PostDto>>> getAllPosts() throws UserException, PostException {
 
     List<PostDto> postDtos = postService.findAllPost();
     return okResponse("post.get.all.success", postDtos);
@@ -131,8 +130,7 @@ public class PostController {
   @GetMapping("/user/{userId}")
   @Operation(summary = "Get user's posts", description = "Retrieve all posts of a specific user")
   public ResponseEntity<ResponseData<List<PostDto>>> getUsersAllPosts(
-      @PathVariable @Min(1) Long userId,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @PathVariable @Min(1) Long userId) throws UserException, PostException {
 
     User user = userService.findUserById(userId);
     List<PostDto> postDtos = postService.getUserPost(user);
@@ -189,8 +187,7 @@ public class PostController {
   @GetMapping("/{postId}/comment")
   @Operation(summary = "Get comments", description = "Retrieve all comments of a post")
   public ResponseEntity<ResponseData<List<CommentDto>>> getAllCommentsByPostId(
-      @PathVariable @Min(1) Long postId,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @PathVariable @Min(1) Long postId) throws UserException, PostException {
 
     List<Comment> comments = postService.getAllCommentsByPostId(postId);
     List<CommentDto> commentDtos = comments.stream()

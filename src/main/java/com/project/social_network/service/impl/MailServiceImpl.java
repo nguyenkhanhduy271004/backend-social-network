@@ -1,8 +1,10 @@
-package com.project.social_network.service;
+package com.project.social_network.service.impl;
 
+import com.project.social_network.service.interfaces.MailService;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,23 +18,23 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
-public class MailService {
+@RequiredArgsConstructor
+public class MailServiceImpl implements MailService {
 
-  @Autowired
-  private JavaMailSender mailSender;
+  private final JavaMailSender mailSender;
 
-  @Autowired
-  private TemplateEngine templateEngine;
+  private final TemplateEngine templateEngine;
 
-  @Autowired
-  private BaseRedisService baseRedisService; // ✅ Đúng dependency
+  private final BaseRedisService baseRedisService;
 
+  @Override
   public String generateOTP() {
     Random random = new Random();
     int otp = 100000 + random.nextInt(900000);
     return String.valueOf(otp);
   }
 
+  @Override
   public void sendOTP(String email) throws MessagingException {
     String otp = generateOTP();
 
@@ -53,10 +55,12 @@ public class MailService {
     mailSender.send(message);
   }
 
+  @Override
   public String getOTP(String email) {
     return (String) baseRedisService.get("OTP_" + email);
   }
 
+  @Override
   public void deleteOTP(String email) {
     baseRedisService.delete("OTP_" + email);
   }

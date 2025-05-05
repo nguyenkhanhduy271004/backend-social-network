@@ -2,6 +2,7 @@ package com.project.social_network.controller;
 
 import com.project.social_network.model.Notification;
 import com.project.social_network.service.impl.PushNotificationServiceImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Flux;
 @RestController
 @RequestMapping("/push-notifications")
 @Slf4j
+@Tag(name = "Push Notification Controller")
 public class PushNotificationController {
 
   private final PushNotificationServiceImpl service;

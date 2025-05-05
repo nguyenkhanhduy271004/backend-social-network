@@ -1,16 +1,57 @@
 server:
   port: 8080
-app:
-  jwtSecret: Aslkdjalwidjaslmdnmcnvxleflisdjflskejflidsjflskjefasdsadsadasdqweqewqe123asdsadzxczcadw
-  googleClientId: 615612093999-3ommfatdj5qm627gs6um9dneft4civdv.apps.googleusercontent.com
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 spring:
   application:
-    name: nguyen-duy-dev
+    name: social-network
     frontend-url: http://localhost:3000
   profiles:
     active: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/social_network?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: bogiaoffline@gmail.com
+    password: hzso pjbx equx hxcr
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  messages:
+    basename: messages
+    encoding: UTF-8
   data:
     redis:
       host: localhost
       port: 6379
-
+api:
+  prefix: /api/v1
+app:
+  jwtSecret: Aslkdjalwidjaslmdnmcnvxleflisdjflskejflidsjflskjefasdsadsadasdqweqewqe123asdsadzxczcadw
+  googleClientId: 615612093999-3ommfatdj5qm627gs6um9dneft4civdv.apps.googleusercontent.com

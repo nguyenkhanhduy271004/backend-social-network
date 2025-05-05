@@ -2,33 +2,25 @@ package com.project.social_network.controller;
 
 import com.project.social_network.config.JwtProvider;
 import com.project.social_network.dto.IdTokenRequestDto;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.model.Verification;
 import com.project.social_network.repository.UserRepository;
 import com.project.social_network.request.LoginRequest;
 import com.project.social_network.request.RegisterRequest;
 import com.project.social_network.response.AuthResponse;
-import com.project.social_network.service.AccountService;
-import com.project.social_network.service.MailService;
+import com.project.social_network.service.impl.AccountServiceImpl;
+import com.project.social_network.service.impl.MailServiceImpl;
 import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
-import com.project.social_network.util.UserUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,31 +31,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Auth Controller")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Auth Controller")
 @Validated
 public class AuthController {
 
-  @Autowired
-  private UserRepository userRepository;
+  private final JwtProvider jwtProvider;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  private final MailServiceImpl mailServiceImpl;
 
-  @Autowired
-  private JwtProvider jwtProvider;
+  private final UserRepository userRepository;
 
-  @Autowired
-  private MailService mailService;
+  private final AccountServiceImpl accountServiceImpl;
 
-  @Autowired
-  private UserUtil userUtil;
+  private final PasswordEncoder passwordEncoder;
 
-  @Autowired
-  private CustomUserDetailsServiceImpl customUserDetailsService;
-  @Autowired
-  private AccountService accountService;
+  private final CustomUserDetailsServiceImpl customUserDetailsService;
+
 
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> createUserHandler(@Valid @RequestBody RegisterRequest user)
@@ -72,10 +58,7 @@ public class AuthController {
     String fullName = user.getFullName();
     String birthDate = user.getBirthDate();
 
-    User isEmailExist = userRepository.findByEmail(user.getEmail()).get();
-    if (isEmailExist != null) {
-      throw new UserException("Email already exists!");
-    }
+    User isEmailExist = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserException("Email already exists!"));
 
     User newUser = new User();
     newUser.setEmail(user.getEmail());
@@ -96,9 +79,7 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user,
-      HttpServletRequest request)
-      throws UserException {
+  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user) throws UserException {
     String username = user.getEmail();
     String password = user.getPassword();
 
@@ -112,7 +93,7 @@ public class AuthController {
 
   @PostMapping("/login-oauth2")
   public ResponseEntity<AuthResponse> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody) throws UserException {
-    String token = accountService.loginOAuthGoogle(requestBody);
+    String token = accountServiceImpl.loginOAuthGoogle(requestBody);
     return ResponseEntity.ok(new AuthResponse(token, true));
   }
 
@@ -136,20 +117,20 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found!");
     }
 
-    mailService.sendOTP(email);
+    mailServiceImpl.sendOTP(email);
     return ResponseEntity.ok("OTP has been sent to your email!");
   }
 
   @PostMapping("/reset-password")
   public ResponseEntity<?> resetPassword(@RequestParam String email, @RequestParam String otp,
       @RequestParam String newPassword) {
-    String storedOTP = mailService.getOTP(email);
+    String storedOTP = mailServiceImpl.getOTP(email);
 
     if (storedOTP == null || !storedOTP.equals(otp)) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP!");
     }
 
-    mailService.deleteOTP(email);
+    mailServiceImpl.deleteOTP(email);
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException("User not found with email: " + email));
     user.setPassword(passwordEncoder.encode(newPassword));

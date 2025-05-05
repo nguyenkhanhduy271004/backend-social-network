@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.project.social_network.dto.PostDto;
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Comment;
 import com.project.social_network.model.Post;
 import com.project.social_network.model.User;

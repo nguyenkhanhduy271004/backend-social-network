@@ -1,25 +1,25 @@
 package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.PostConverter;
-import com.project.social_network.request.CommentRequest;
-import com.project.social_network.request.PostReplyRequest;
 import com.project.social_network.dto.PostDto;
+import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Comment;
 import com.project.social_network.model.Group;
 import com.project.social_network.model.Post;
 import com.project.social_network.model.User;
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
 import com.project.social_network.repository.CommentRepository;
 import com.project.social_network.repository.GroupRepository;
 import com.project.social_network.repository.PostRepository;
+import com.project.social_network.request.CommentRequest;
+import com.project.social_network.request.PostReplyRequest;
 import com.project.social_network.service.interfaces.PostService;
 import com.project.social_network.service.interfaces.UploadImageFile;
 import com.project.social_network.service.interfaces.UserService;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,20 +31,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
-  @Autowired
-  private PostConverter postConverter;
-  @Autowired
-  private PostRepository postRepository;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private GroupRepository groupRepository;
-  @Autowired
-  private CommentRepository commentRepository;
-  @Autowired
-  private UploadImageFile uploadImageFile;
+  private final UserService userService;
+
+  private final PostConverter postConverter;
+
+  private final PostRepository postRepository;
+
+  private final UploadImageFile uploadImageFile;
+
+  private final GroupRepository groupRepository;
+
+  private final CommentRepository commentRepository;
 
   @Override
   public PostDto createPost(String content, MultipartFile file, String jwt) throws UserException {
@@ -214,7 +214,6 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<Comment> getAllCommentsByPostId(Long postId) throws UserException, PostException {
-    List<Comment> comments = commentRepository.findByPost_Id(postId);
     return commentRepository.findByPost_Id(postId);
   }
 

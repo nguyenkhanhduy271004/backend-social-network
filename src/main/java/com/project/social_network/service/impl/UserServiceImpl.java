@@ -1,44 +1,39 @@
 package com.project.social_network.service.impl;
 
+import com.project.social_network.config.JwtProvider;
+import com.project.social_network.converter.UserConverter;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.exceptions.UserException;
+import com.project.social_network.model.User;
+import com.project.social_network.repository.UserRepository;
 import com.project.social_network.request.PaginationRequest;
 import com.project.social_network.response.PagingResult;
+import com.project.social_network.service.interfaces.UserService;
 import com.project.social_network.util.PaginationUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.project.social_network.config.JwtProvider;
-import com.project.social_network.converter.UserConverter;
-import com.project.social_network.dto.UserDto;
-import com.project.social_network.exception.UserException;
-import com.project.social_network.model.User;
-import com.project.social_network.repository.UserRepository;
-import com.project.social_network.service.interfaces.UserService;
-
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-  @Autowired
-  private UserRepository userRepository;
+  private final JwtProvider jwtProvider;
 
-  @Autowired
-  private JwtProvider jwtProvider;
+  private final UserConverter userConverter;
 
-  @Autowired
-  private UserConverter userConverter;
+  private final UserRepository userRepository;
 
   @Override
-  @Cacheable(value = "users", key = "#userId")
+//  @Cacheable(value = "users", key = "#userId")
   public User findUserById(Long userId) throws UserException {
     return userRepository.findById(userId)
         .orElseThrow(() -> new UserException("User not found with id: " + userId));

@@ -2,15 +2,24 @@ package com.project.social_network.controller;
 
 import static com.project.social_network.dto.AccountDto.convertToDto;
 
+import com.project.social_network.converter.UserConverter;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Account;
+import com.project.social_network.model.User;
 import com.project.social_network.request.PaginationRequest;
 import com.project.social_network.response.PagingResult;
-import com.project.social_network.service.AccountService;
+import com.project.social_network.response.ResponseData;
+import com.project.social_network.service.impl.AccountServiceImpl;
+import com.project.social_network.service.interfaces.UserService;
+import com.project.social_network.util.UserUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,35 +32,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.social_network.converter.UserConverter;
-import com.project.social_network.dto.UserDto;
-import com.project.social_network.exception.UserException;
-import com.project.social_network.model.User;
-import com.project.social_network.response.ResponseData;
-import com.project.social_network.service.interfaces.UserService;
-import com.project.social_network.util.UserUtil;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("${api.prefix}/user")
 @Tag(name = "User Controller")
 public class UserController {
 
-  @Autowired
-  private UserService userService;
+  private final UserUtil userUtil;
 
-  @Autowired
-  private UserConverter userConverter;
+  private final UserService userService;
 
-  @Autowired
-  private UserUtil userUtil;
+  private final UserConverter userConverter;
 
-  @Autowired
-  private AccountService accountService;
+  private final AccountServiceImpl accountServiceImpl;
 
   @Operation(summary = "Get all users", description = "Retrieves a list of all users")
   @ApiResponses(value = {
@@ -69,13 +62,14 @@ public class UserController {
 
     User user = userService.findUserProfileByJwt(jwt);
 
-    PaginationRequest request = new PaginationRequest(page, size, sortBy, Sort.Direction.fromString(direction));
+    PaginationRequest request = new PaginationRequest(page, size, sortBy,
+        Sort.Direction.fromString(direction));
 
     PagingResult<UserDto> result = userService.findAllUsers(request);
 
-    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Get user successfully", result));
+    return ResponseEntity.ok(
+        new ResponseData<>(HttpStatus.OK.value(), "Get user successfully", result));
   }
-
 
 
   @Operation(summary = "Get random users", description = "Retrieves a list of random users who are not followed by the current user")
@@ -111,11 +105,14 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "Get user by ID failed")
   })
   @GetMapping("/{userId}")
-  @Cacheable(value = "users", key = "#id")
+//  @Cacheable(value = "users", key = "#userId")
   public Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt)
       throws UserException {
+
+    System.out.println(userId);
     User reqUser = userService.findUserProfileByJwt(jwt);
     User user = userService.findUserById(userId);
+
     UserDto userDto = userConverter.toUserDto(user);
     userDto.setReq_user(userUtil.isReqUser(reqUser, user));
     userDto.setFollowed(userUtil.isFollowedByReqUser(reqUser, user));
@@ -123,13 +120,15 @@ public class UserController {
     return new ResponseData<>(HttpStatus.OK.value(), "Get user by ID successfully", userDto);
   }
 
+
   @Operation(summary = "Search users", description = "Search users by query")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Get user by query successfully"),
       @ApiResponse(responseCode = "400", description = "Get user by query failed")
   })
   @GetMapping("/search")
-  public Object getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt)
+  public Object getUserByQuery(@RequestParam String query,
+      @RequestHeader("Authorization") String jwt)
       throws UserException {
     User reqUser = userService.findUserProfileByJwt(jwt);
     List<UserDto> userDtos = userService.searchUser(query, reqUser.getId());
@@ -143,7 +142,8 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "Update user failed")
   })
   @PutMapping("/update")
-  public Object updateUser(@RequestBody User req, @RequestHeader("Authorization") String jwt) throws UserException {
+  public Object updateUser(@RequestBody User req, @RequestHeader("Authorization") String jwt)
+      throws UserException {
     User reqUser = userService.findUserProfileByJwt(jwt);
     UserDto userDto = userService.updateUser(reqUser.getId(), req);
 
@@ -156,7 +156,8 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "Follow user failed")
   })
   @PutMapping("/{userId}/follow")
-  public Object followUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
+  public Object followUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt)
+      throws UserException {
     User reqUser = userService.findUserProfileByJwt(jwt);
     UserDto userDto = userService.followUser(userId, reqUser);
 
@@ -165,7 +166,7 @@ public class UserController {
 
   @GetMapping("/info")
   public ResponseEntity getUserInfo(Principal principal) {
-    Account account = accountService.getAccount(Long.valueOf(principal.getName()));
+    Account account = accountServiceImpl.getAccount(Long.valueOf(principal.getName()));
     return ResponseEntity.ok().body(convertToDto(account));
   }
 }

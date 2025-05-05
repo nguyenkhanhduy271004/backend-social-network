@@ -7,12 +7,11 @@ import com.project.social_network.dto.PostDto;
 import com.project.social_network.dto.ReelDto;
 import com.project.social_network.dto.StoryDto;
 import com.project.social_network.dto.UserDto;
-import com.project.social_network.exception.GroupException;
-import com.project.social_network.exception.ReelException;
-import com.project.social_network.exception.StoryException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.GroupException;
+import com.project.social_network.exceptions.ReelException;
+import com.project.social_network.exceptions.StoryException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Group;
-import com.project.social_network.model.Post;
 import com.project.social_network.model.User;
 import com.project.social_network.response.ResponseData;
 import com.project.social_network.service.interfaces.GroupService;
@@ -28,7 +27,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,28 +38,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("${api.prefix}/admin")
 @Tag(name = "Admin Controller")
 public class AdminController {
 
-  @Autowired
-  private UserService userService;
+  private final UserService userService;
 
-  @Autowired
-  private PostService postService;
+  private final PostService postService;
 
-  @Autowired
-  private StoryService storyService;
+  private final ReelService reelService;
 
-  @Autowired
-  private ReelService reelService;
+  private final GroupService groupService;
 
-  @Autowired
-  private GroupService groupService;
+  private final StoryService storyService;
 
-  @Autowired
-  private GroupConverter groupConverter;
+  private final GroupConverter groupConverter;
 
   private void validateAdminAccess(String jwt) throws UserException {
     User requestingUser = userService.findUserProfileByJwt(jwt);
@@ -79,10 +73,10 @@ public class AdminController {
       throws UserException {
     validateAdminAccess(jwt);
     List<UserDto> allUsers = userService.findAllUsers();
-    List<Post> allPosts = postService.findAllPosts();
+    List<PostDto> allPosts = postService.findAllPost();
 
     Map<String, Integer> postsByMonth = new HashMap<>();
-    for (Post post : allPosts) {
+    for (PostDto post : allPosts) {
       LocalDateTime createdAt = post.getCreatedAt();
       if (createdAt != null) {
         String monthKey = createdAt.getMonth().toString() + " " + createdAt.getYear();
@@ -273,7 +267,6 @@ public class AdminController {
   @GetMapping("/reels")
   public Object getAllReels(@RequestHeader("Authorization") String jwt) throws UserException {
     validateAdminAccess(jwt);
-
     List<ReelDto> reels = reelService.findAllReel();
     return new ResponseData<>(HttpStatus.OK.value(), "Reels retrieved successfully", reels);
   }

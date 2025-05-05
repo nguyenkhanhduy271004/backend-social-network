@@ -1,4 +1,4 @@
-package com.project.social_network.exception;
+package com.project.social_network.exceptions;
 
 public class StoryException extends RuntimeException {
 

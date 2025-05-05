@@ -1,4 +1,4 @@
-package com.project.social_network.service;
+package com.project.social_network.service.impl;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -6,10 +6,11 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.project.social_network.dto.IdTokenRequestDto;
 import com.project.social_network.enums.AuthProvider;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Account;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;
+import com.project.social_network.service.interfaces.AccountService;
 import com.project.social_network.util.JWTUtils;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -26,13 +27,15 @@ import java.util.Collections;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AccountService {
+public class AccountServiceImpl implements AccountService {
+
+  private final JWTUtils jwtUtils;
 
   private final UserRepository userRepository;
-  private final JWTUtils jwtUtils;
+
   private final GoogleIdTokenVerifier verifier;
 
-  public AccountService(@Value("${app.googleClientId}") String clientId, UserRepository userRepository,
+  public AccountServiceImpl(@Value("${app.googleClientId}") String clientId, UserRepository userRepository,
       JWTUtils jwtUtils) {
     this.userRepository = userRepository;
     this.jwtUtils = jwtUtils;
@@ -43,6 +46,7 @@ public class AccountService {
         .build();
   }
 
+  @Override
   public Account getAccount(Long id) {
     User user = userRepository.findById(id).orElseThrow(() -> new UserException("User not found!"));
     Account account = new Account();
@@ -54,6 +58,7 @@ public class AccountService {
     return account;
   }
 
+  @Override
   public String loginOAuthGoogle(IdTokenRequestDto requestBody) {
     Account account = verifyIDToken(requestBody.getIdToken());
     if (account == null) {
@@ -66,29 +71,19 @@ public class AccountService {
     return jwtUtils.createToken(account, false);
   }
 
+  @Override
   @Transactional
   public Account createOrUpdateUser(Account account) {
-    User existingAccount = userRepository.findByEmail(account.getEmail()).orElse(null);
-    if (existingAccount == null) {
-      User user = new User();
+    User user = userRepository.findByEmail(account.getEmail()).orElse(new User());
+    if (user.getId() == null) {
       user.setEmail(account.getEmail());
-      user.setFullName(account.getFullName());
-      user.setImage(account.getPictureUrl());
       user.setAuthProvider(AuthProvider.GOOGLE);
-      userRepository.save(user);
-      return account;
     }
-    existingAccount.setFullName(account.getFullName());
-    existingAccount.setImage(account.getPictureUrl());
-    userRepository.save(existingAccount);
+    user.setFullName(account.getFullName());
+    user.setImage(account.getPictureUrl());
+    user = userRepository.save(user);
 
-    Account accountRes = new Account();
-    accountRes.setId(existingAccount.getId());
-    accountRes.setEmail(existingAccount.getEmail());
-    accountRes.setRoles("ROLE_USER");
-    accountRes.setPictureUrl(existingAccount.getImage());
-    accountRes.setFullName(existingAccount.getFullName());
-    return accountRes;
+    return new Account(user.getId(), user.getFullName(), user.getEmail(), user.getImage(), "ROLE_USER");
   }
 
   private Account verifyIDToken(String idToken) {

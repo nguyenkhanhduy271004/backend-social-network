@@ -1,8 +1,8 @@
 package com.project.social_network.service.interfaces;
 
 import com.project.social_network.dto.ReelDto;
-import com.project.social_network.exception.ReelException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.ReelException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
 import java.io.IOException;
 import java.util.List;

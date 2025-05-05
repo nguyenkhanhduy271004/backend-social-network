@@ -1,9 +1,23 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.converter.GroupConverter;
+import com.project.social_network.dto.GroupDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.User;
+import com.project.social_network.request.CreateGroupRequest;
+import com.project.social_network.request.UpdateGroupRequest;
+import com.project.social_network.response.ResponseData;
+import com.project.social_network.response.ResponseError;
+import com.project.social_network.service.interfaces.GroupService;
+import com.project.social_network.service.interfaces.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,37 +30,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.social_network.converter.GroupConverter;
-import com.project.social_network.dto.GroupDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.model.Group;
-import com.project.social_network.model.User;
-import com.project.social_network.request.CreateGroupRequest;
-import com.project.social_network.request.UpdateGroupRequest;
-import com.project.social_network.response.ResponseData;
-import com.project.social_network.response.ResponseError;
-import com.project.social_network.service.interfaces.GroupService;
-import com.project.social_network.service.interfaces.UserService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/groups")
+@RequestMapping("${api.prefix}/groups")
 @Tag(name = "Group Controller", description = "APIs for managing groups")
 @SecurityRequirement(name = "bearerAuth")
 public class GroupController {
 
-  @Autowired
-  private GroupService groupService;
+  private final UserService userService;
 
-  @Autowired
-  private UserService userService;
+  private final GroupService groupService;
 
-  @Autowired
-  private GroupConverter groupConverter;
+  private final GroupConverter groupConverter;
+
 
   @Operation(summary = "Create a new group", description = "Create a new group")
   @PostMapping

@@ -2,9 +2,9 @@ package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.ReelConverter;
 import com.project.social_network.dto.ReelDto;
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.ReelException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exceptions.ReelException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Reel;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.ReelRepository;
@@ -13,21 +13,21 @@ import com.project.social_network.service.interfaces.UploadImageFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@RequiredArgsConstructor
 public class ReelServiceImpl implements ReelService {
 
-  @Autowired
-  private ReelRepository reelRepository;
-  @Autowired
-  private ReelConverter reelConverter;
-  @Autowired
-  private UploadImageFile uploadImageFile;
+  private final ReelConverter reelConverter;
+
+  private final ReelRepository reelRepository;
+
+  private final UploadImageFile uploadImageFile;
 
   @Override
   public ReelDto createReel(MultipartFile file, String content, User user) throws UserException, IOException {

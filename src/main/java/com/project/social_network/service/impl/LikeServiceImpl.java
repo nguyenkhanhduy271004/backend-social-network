@@ -1,12 +1,7 @@
 package com.project.social_network.service.impl;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Like;
 import com.project.social_network.model.Post;
 import com.project.social_network.model.User;
@@ -14,16 +9,19 @@ import com.project.social_network.repository.LikeRepository;
 import com.project.social_network.repository.PostRepository;
 import com.project.social_network.service.interfaces.LikeService;
 import com.project.social_network.service.interfaces.PostService;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LikeServiceImpl implements LikeService {
 
-  @Autowired
-  private LikeRepository likeRepository;
-  @Autowired
-  private PostService postService;
-  @Autowired
-  private PostRepository postRepository;
+  private final PostService postService;
+
+  private final LikeRepository likeRepository;
+
+  private final PostRepository postRepository;
 
   @Override
   public Like likePost(Long postId, User user) throws UserException, PostException {
@@ -52,8 +50,10 @@ public class LikeServiceImpl implements LikeService {
 
     Post post = postService.findByPostId(postId);
 
-    List<Like> likes = likeRepository.findByPostId(postId);
+    if(post == null) {
+      throw new PostException("Post not found!");
+    }
 
-    return likes;
+    return likeRepository.findByPostId(postId);
   }
 }

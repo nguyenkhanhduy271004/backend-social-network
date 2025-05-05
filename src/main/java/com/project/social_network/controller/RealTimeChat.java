@@ -2,6 +2,7 @@ package com.project.social_network.controller;
 
 import com.project.social_network.request.MessageRequest;
 import com.project.social_network.response.Message;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -10,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
+@Tag(name = "Realtime Chat Controller")
 public class RealTimeChat {
 
   @Autowired

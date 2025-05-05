@@ -1,10 +1,27 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.config.Translator;
+import com.project.social_network.converter.LikeConverter;
+import com.project.social_network.dto.LikeDto;
 import com.project.social_network.enums.NotificationType;
+import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exceptions.UserException;
+import com.project.social_network.model.Like;
 import com.project.social_network.model.Notification;
+import com.project.social_network.model.User;
+import com.project.social_network.response.ResponseData;
+import com.project.social_network.service.interfaces.LikeService;
 import com.project.social_network.service.interfaces.NotificationStorageService;
+import com.project.social_network.service.interfaces.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,38 +32,22 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.social_network.config.Translator;
-import com.project.social_network.converter.LikeConverter;
-import com.project.social_network.dto.LikeDto;
-import com.project.social_network.exception.PostException;
-import com.project.social_network.exception.UserException;
-import com.project.social_network.model.Like;
-import com.project.social_network.model.User;
-import com.project.social_network.response.ResponseData;
-import com.project.social_network.service.interfaces.LikeService;
-import com.project.social_network.service.interfaces.UserService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Min;
-import lombok.RequiredArgsConstructor;
-
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("${api.prefix}/posts")
 @Tag(name = "Like Controller", description = "APIs for liking and retrieving likes on posts")
 @SecurityRequirement(name = "bearerAuth")
-@RequiredArgsConstructor
 @Validated
 public class LikeController {
 
-  private final UserService userService;
-  private final LikeService likeService;
-  private final LikeConverter likeConverter;
   private final Translator translator;
+
+  private final UserService userService;
+
+  private final LikeService likeService;
+
+  private final LikeConverter likeConverter;
+
   private final NotificationStorageService notificationStorageService;
 
   @PostMapping("/{postId}/likes")

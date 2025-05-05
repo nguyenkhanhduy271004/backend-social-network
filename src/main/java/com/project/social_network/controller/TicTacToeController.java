@@ -1,5 +1,6 @@
 package com.project.social_network.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller
 @RequestMapping("/")
+@Tag(name = "Game Controller")
 public class TicTacToeController {
 
     /**

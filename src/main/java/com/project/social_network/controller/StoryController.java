@@ -17,8 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.project.social_network.config.Translator;
 import com.project.social_network.dto.StoryDto;
-import com.project.social_network.exception.StoryException;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.StoryException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.response.ResponseData;
 import com.project.social_network.service.interfaces.StoryService;
@@ -34,16 +34,19 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/story")
+@RequestMapping("${api.prefix}/story")
 @Tag(name = "Story Controller")
 @SecurityRequirement(name = "bearerAuth")
-@RequiredArgsConstructor
 public class StoryController {
 
-  private final StoryService storyService;
-  private final UserService userService;
   private final Translator translator;
+
+  private final UserService userService;
+
+  private final StoryService storyService;
+
   private final UploadImageFile uploadImageFile;
 
   @PostMapping("/create")

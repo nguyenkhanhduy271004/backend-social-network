@@ -2,6 +2,7 @@ package com.project.social_network.controller;
 
 import com.project.social_network.model.Notification;
 import com.project.social_network.service.impl.NotificationStorageServiceImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/notification")
 @RestController
+@Tag(name = "Notification Storage Controller")
 public class NotificationStorageController {
 
   private final NotificationStorageServiceImpl notifService;

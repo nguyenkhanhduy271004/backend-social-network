@@ -1,8 +1,23 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.config.Translator;
+import com.project.social_network.dto.ReelDto;
+import com.project.social_network.exceptions.ReelException;
+import com.project.social_network.exceptions.UserException;
+import com.project.social_network.model.User;
+import com.project.social_network.response.ResponseData;
+import com.project.social_network.service.interfaces.ReelService;
+import com.project.social_network.service.interfaces.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,39 +31,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.project.social_network.config.Translator;
-import com.project.social_network.converter.ReelConverter;
-import com.project.social_network.dto.ReelDto;
-import com.project.social_network.exception.ReelException;
-import com.project.social_network.exception.UserException;
-import com.project.social_network.model.User;
-import com.project.social_network.response.ResponseData;
-import com.project.social_network.service.interfaces.ReelService;
-import com.project.social_network.service.interfaces.UploadImageFile;
-import com.project.social_network.service.interfaces.UserService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
-import lombok.RequiredArgsConstructor;
-
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/reel")
+@RequestMapping("${api.prefix}/reel")
 @Tag(name = "Reel Controller", description = "APIs for controlling reels")
 @SecurityRequirement(name = "bearerAuth")
 @Validated
-@RequiredArgsConstructor
 public class ReelController {
 
-  private final ReelService reelService;
-  private final UserService userService;
-  private final ReelConverter reelConverter;
-  private final UploadImageFile uploadImageFile;
   private final Translator translator;
+
+  private final ReelService reelService;
+
+  private final UserService userService;
 
   @PostMapping("/create")
   @Operation(summary = "Create a new reel", description = "Create a new reel with content and an optional image file")
@@ -68,7 +63,7 @@ public class ReelController {
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(new ResponseData<>(HttpStatus.CREATED.value(),
-            translator.toLocale("reel.create.success"), reelDto));
+            Translator.toLocale("reel.create.success"), reelDto));
   }
 
   @GetMapping("/{reelId}")
@@ -102,7 +97,7 @@ public class ReelController {
     getUserFromJwt(jwt); // Kiểm tra JWT
     List<ReelDto> reelDtos = reelService.findAllReel();
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
-        translator.toLocale("reel.get.all.success"), reelDtos));
+        Translator.toLocale("reel.get.all.success"), reelDtos));
   }
 
   private static void validateFile(MultipartFile file) {

@@ -1,5 +1,6 @@
 package com.project.social_network.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -11,6 +12,7 @@ import com.project.social_network.model.Message;
 import com.project.social_network.service.interfaces.MessageService;
 
 @Controller
+@Tag(name = "Chat Controller")
 public class ChatController {
   @Autowired
   private SimpMessagingTemplate messagingTemplate;

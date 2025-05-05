@@ -10,18 +10,17 @@ import com.project.social_network.service.interfaces.MessageService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
-  @Autowired
-  private MessageRepository messageRepository;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private UserConverter userConverter;
+  private final UserConverter userConverter;
+  private final UserRepository userRepository;
+  private final MessageRepository messageRepository;
 
   public Message sendMessage(Long senderId, Long receiverId, String content) {
     Message message = new Message();

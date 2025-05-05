@@ -5,7 +5,7 @@ import com.project.social_network.response.PagingResult;
 import java.util.List;
 
 import com.project.social_network.dto.UserDto;
-import com.project.social_network.exception.UserException;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
 
 public interface UserService {

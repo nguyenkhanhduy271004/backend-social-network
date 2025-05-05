@@ -34,11 +34,9 @@ public class AppConfig implements WebMvcConfigurer {
 
   private final RateLimitInterceptor rateLimitInterceptor;
 
-  private final JWTRequestFilter jwtRequestFilter;
 
-  public AppConfig(RateLimitInterceptor rateLimitInterceptor, JWTRequestFilter jwtRequestFilter) {
+  public AppConfig(RateLimitInterceptor rateLimitInterceptor) {
     this.rateLimitInterceptor = rateLimitInterceptor;
-    this.jwtRequestFilter = jwtRequestFilter;
   }
 
   @Override
@@ -84,7 +82,8 @@ public class AppConfig implements WebMvcConfigurer {
                 "/auth/**",
                 "/oauth2/**",
                 "/push-notifications/**",
-                "/notification/**")
+                "/notification/**",
+                "/ws/**")
             .permitAll()
             .anyRequest().authenticated())
         .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)

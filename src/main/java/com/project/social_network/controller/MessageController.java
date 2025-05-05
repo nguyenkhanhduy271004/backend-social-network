@@ -1,31 +1,37 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.exception.UserException;
 import com.project.social_network.dto.UserDto;
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Message;
 import com.project.social_network.model.User;
 import com.project.social_network.request.MessageRequest;
 import com.project.social_network.service.interfaces.MessageService;
 import com.project.social_network.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/messages")
+@RequestMapping("${api.prefix}/messages")
 @Tag(name = "Message Controller", description = "APIs for sending and retrieving messages between users.")
 @SecurityRequirement(name = "bearerAuth")
-@RequiredArgsConstructor
 public class MessageController {
 
-  private final MessageService messageService;
   private final UserService userService;
+
+  private final MessageService messageService;
 
   private User getCurrentUser(String jwt) throws UserException {
     return userService.findUserProfileByJwt(jwt);
