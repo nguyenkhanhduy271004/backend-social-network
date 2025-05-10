@@ -1,13 +1,14 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.UserDto;
-import com.project.social_network.model.User;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
+
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.model.User;
 
 @Component
 public class UserConverter {

@@ -1,16 +1,17 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.GroupDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.model.Group;
-import com.project.social_network.model.User;
-import com.project.social_network.model.Post;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
+
+import com.project.social_network.dto.GroupDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.Post;
+import com.project.social_network.model.User;
 
 @Component
 public class GroupConverter {
@@ -26,6 +27,9 @@ public class GroupConverter {
   public GroupDto toGroupDto(Group group) {
     if (group == null) {
       return null;
+    }
+    if (group.getName() == null || group.getName().trim().isEmpty()) {
+      throw new IllegalArgumentException("Group name cannot be empty");
     }
 
     GroupDto groupDto = new GroupDto();

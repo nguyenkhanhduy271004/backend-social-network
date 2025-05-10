@@ -1,14 +1,14 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.dto.LikeDto;
-import com.project.social_network.model.Like;
-import com.project.social_network.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.project.social_network.dto.LikeDto;
+import com.project.social_network.model.Like;
+import com.project.social_network.model.User;
 
 @Component
 public class LikeConverter {
@@ -16,7 +16,6 @@ public class LikeConverter {
   private final UserConverter userConverter;
   private final PostConverter postConverter;
 
-  @Autowired
   public LikeConverter(UserConverter userConverter, PostConverter postConverter) {
     this.userConverter = userConverter;
     this.postConverter = postConverter;

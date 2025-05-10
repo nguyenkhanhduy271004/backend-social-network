@@ -1,18 +1,19 @@
 package com.project.social_network.converter;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
+
 import com.project.social_network.dto.StoryDto;
 import com.project.social_network.model.Story;
 import com.project.social_network.model.User;
 import com.project.social_network.util.StoryUtil;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
 
 @Component
 public class StoryConverter {
 
-  private final UserConverter userConverter;
   private final StoryUtil storyUtil;
   private final ModelMapper modelMapper;
+  private final UserConverter userConverter;
 
   public StoryConverter(UserConverter userConverter, StoryUtil storyUtil, ModelMapper modelMapper) {
     this.userConverter = userConverter;

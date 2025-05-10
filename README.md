@@ -1,104 +1,173 @@
-# Social Network - Spring Boot RESTful API
+# Social Network Backend
 
-## Introduction
-This is a Social Network project built with **Spring Boot**, providing RESTful APIs for social networking functionalities such as user management, posts, comments, likes, and friend system.
+A robust social network backend built with Spring Boot, featuring modern social media functionalities and best practices in software development.
 
-## Key Features
-- **User Management:**
-    - Registration, login, and JWT authentication.
-    - Forgot password and profile update.
-    - Follow and friend list.
+## 🚀 Features
 
-- **Post Management:**
-    - Create, update, delete, and view posts.
-    - Support images for posts.
+- **User Management**
+  - User registration and authentication
+  - Profile management
+  - Admin privileges and user roles
+  - Email verification
 
-- **Comment Management:**
-    - Add, edit, and delete comments.
+- **Content Management**
+  - Posts with text, images, and videos
+  - Stories (24-hour content)
+  - Reels (short-form videos)
+  - Comments and likes
+  - Group posts and discussions
 
-- **Likes:**
-    - Like and unlike posts.
+- **Social Features**
+  - Follow/Unfollow users
+  - Like and comment on posts
+  - Share and repost content
+  - Group creation and management
+  - Real-time notifications
 
-- **Notifications:**
-    - Notifications for new likes and comments.
+- **Security**
+  - JWT-based authentication
+  - OAuth2 integration
+  - Role-based access control
+  - Rate limiting
+  - Input validation
 
-## Technologies Used
-- **Java 17**
-- **Spring Boot 3.x**
-- **Spring Security** (JWT Authentication)
-- **Hibernate & JPA**
-- **MySQL** 
-- **Maven**
-- **Swagger UI** (API Documentation)
+## 🛠️ Technology Stack
 
-## Project Structure
+- **Backend Framework**: Spring Boot 3.4.5
+- **Database**: MySQL 8.0
+- **Caching**: Redis
+- **Authentication**: Spring Security + JWT
+- **API Documentation**: Swagger/OpenAPI
+- **File Storage**: Cloudinary
+- **Email Service**: Spring Mail
+- **Real-time Communication**: WebSocket
+- **Rate Limiting**: Bucket4j
+- **Object Mapping**: ModelMapper
+- **Containerization**: Docker
+
+## 📋 Prerequisites
+
+- Java 17 or higher
+- Maven
+- Docker and Docker Compose
+- MySQL 8.0
+- Redis
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone [repository-url]
+   cd social-network
+   ```
+
+2. **Environment Setup**
+   - Configure your database settings in `application.properties`
+   - Set up your Cloudinary credentials
+   - Configure email service settings
+
+3. **Run with Docker**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Run Locally**
+   ```bash
+   mvn spring-boot:run
+   ```
+
+## 🔧 Configuration
+
+### Database Configuration
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/social_network
+spring.datasource.username=user
+spring.datasource.password=password
 ```
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── com.example.socialnetwork
-│   │   │       ├── controller
-│   │   │       ├── service
-│   │   │       ├── repository
-│   │   │       ├── model
-│   │   │       ├── config
-│   │   │       └── dto
-│   │   └── resources
-│       ├── application.yml
-│       └── static
-│           └── images
+
+### Redis Configuration
+```properties
+spring.redis.host=localhost
+spring.redis.port=6379
 ```
 
-## Installation
-1. **Clone the project:**
+### JWT Configuration
+```properties
+jwt.secret=your-secret-key
+jwt.expiration=86400000
+```
+
+## 📚 API Documentation
+
+Once the application is running, you can access the API documentation at:
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI: `http://localhost:8080/v3/api-docs`
+
+## 🏗️ Project Structure
+
+```
+src/main/java/com/project/social_network/
+├── config/          # Configuration classes
+├── controller/      # REST controllers
+├── converter/       # DTO converters
+├── dto/            # Data Transfer Objects
+├── exceptions/     # Custom exceptions
+├── model/          # Entity classes
+├── repository/     # Data access layer
+├── security/       # Security configurations
+├── service/        # Business logic
+└── util/           # Utility classes
+```
+
+## 🔐 Security Features
+
+- JWT-based authentication
+- Role-based access control
+- Password encryption
+- Rate limiting
+- Input validation
+- CORS configuration
+- XSS protection
+
+## 🧪 Testing
+
+Run tests using Maven:
 ```bash
-git clone https://github.com/nguyenkhanhduy271004/backend-social-network
+mvn test
 ```
 
-2. **Configure the database:**
-   Edit the `application.yml` file:
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/socialnetwork
-    username: root
-    password: yourpassword
-  jpa:
-    hibernate:
-      ddl-auto: update
-```
+## 📦 Deployment
 
-3. **Run the project:**
-```bash
-./mvnw spring-boot:run
-```
+1. Build the application:
+   ```bash
+   mvn clean package
+   ```
 
-## Usage
-- **Access Swagger UI:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+2. Run with Docker:
+   ```bash
+   docker-compose up -d
+   ```
 
-## API Endpoints
-### Users
-- `POST /api/auth/register` - Register a new account
-- `POST /api/auth/login` - Login
-- `GET /api/users/{id}` - Get user information
+## 🔄 CI/CD
 
-### Posts
-- `POST /api/posts` - Create a post
-- `GET /api/posts` - Get all posts
-- `PUT /api/posts/{id}` - Update a post
-- `DELETE /api/posts/{id}` - Delete a post
+The project includes GitHub Actions workflows for:
+- Automated testing
+- Code quality checks
+- Docker image building
+- Deployment
 
-### Comments
-- `POST /api/posts/{id}/comments` - Add a comment
-- `DELETE /api/comments/{id}` - Delete a comment
+## 📝 License
 
-## Contribution
-- Fork the project and create a pull request.
-- Report bugs via the **Issues** section.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contact
-- **Email:** your.email@example.com
-- **GitHub:** https://github.com/nguyenkhanhduy271004
+## 👥 Contributing
 
-## License
-This project is released under the **MIT** license.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📞: 0903525012 for Support
+
+For support, email kuy271004@gmail.com or create an issue in the repository.

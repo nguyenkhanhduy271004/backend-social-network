@@ -1,21 +1,20 @@
 package com.project.social_network.converter;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
+
 import com.project.social_network.dto.ReelDto;
 import com.project.social_network.model.Reel;
 import com.project.social_network.model.User;
 import com.project.social_network.util.ReelUtil;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ReelConverter {
 
-  private final UserConverter userConverter;
   private final ReelUtil reelUtil;
   private final ModelMapper modelMapper;
 
-  public ReelConverter(UserConverter userConverter, ReelUtil reelUtil, ModelMapper modelMapper) {
-    this.userConverter = userConverter;
+  public ReelConverter(ReelUtil reelUtil, ModelMapper modelMapper) {
     this.reelUtil = reelUtil;
     this.modelMapper = modelMapper;
   }

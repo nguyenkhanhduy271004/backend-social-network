@@ -1,30 +1,29 @@
 package com.project.social_network.converter;
 
-import com.project.social_network.request.PostReplyRequest;
-import com.project.social_network.dto.CommentDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.response.UserCommentResponse;
-import com.project.social_network.model.Comment;
-import com.project.social_network.model.Post;
-import com.project.social_network.model.User;
-import com.project.social_network.util.PostUtil;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
+
+import com.project.social_network.dto.CommentDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Comment;
+import com.project.social_network.model.Post;
+import com.project.social_network.model.User;
+import com.project.social_network.request.PostReplyRequest;
+import com.project.social_network.response.UserCommentResponse;
+import com.project.social_network.util.PostUtil;
+
 @Component
 public class PostConverter {
 
-  private final UserConverter userConverter;
   private final PostUtil postUtil;
   private final ModelMapper modelMapper;
 
-  public PostConverter(UserConverter userConverter, PostUtil postUtil, ModelMapper modelMapper) {
-    this.userConverter = userConverter;
+  public PostConverter(PostUtil postUtil, ModelMapper modelMapper) {
     this.postUtil = postUtil;
     this.modelMapper = modelMapper;
   }
