@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.project.social_network.dto.GroupUserDto;
 import com.project.social_network.dto.PostDto;
-import com.project.social_network.exceptions.GroupException;
 import com.project.social_network.model.Group;
 import com.project.social_network.model.User;
 import com.project.social_network.request.CreateGroupRequest;
@@ -12,7 +11,7 @@ import com.project.social_network.request.CreateGroupRequest;
 public interface GroupService {
   Group createGroup(CreateGroupRequest createGroupRequest, User owner);
 
-  Group updateGroup(Long groupId, String name, User admin) throws GroupException;
+  Group updateGroup(Long groupId, String name, User admin);
 
   void deleteGroup(Long groupId, User admin);
 

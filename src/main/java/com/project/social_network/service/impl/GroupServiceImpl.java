@@ -1,5 +1,11 @@
 package com.project.social_network.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.project.social_network.converter.PostConverter;
 import com.project.social_network.dto.GroupUserDto;
 import com.project.social_network.dto.PostDto;
@@ -11,11 +17,8 @@ import com.project.social_network.repository.GroupRepository;
 import com.project.social_network.repository.UserRepository;
 import com.project.social_network.request.CreateGroupRequest;
 import com.project.social_network.service.interfaces.GroupService;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

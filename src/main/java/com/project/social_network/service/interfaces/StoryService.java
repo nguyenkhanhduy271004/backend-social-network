@@ -1,17 +1,21 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.dto.StoryDto;
-import com.project.social_network.exceptions.StoryException;
-import com.project.social_network.exceptions.UserException;
-import com.project.social_network.model.User;
 import java.io.IOException;
 import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
+import com.project.social_network.dto.StoryDto;
+import com.project.social_network.model.User;
+
 public interface StoryService {
-  StoryDto createStory(MultipartFile file, String content, User user) throws UserException, IOException;
+  StoryDto createStory(MultipartFile file, String content, User user) throws IOException;
+
   List<StoryDto> findAllStory();
+
   StoryDto findStoryById(Long storyId);
-  void deleteStoryById(Long storyId, Long userId) throws UserException, StoryException;
+
+  void deleteStoryById(Long storyId, Long userId);
+
   List<StoryDto> getUserStory(User user);
 }

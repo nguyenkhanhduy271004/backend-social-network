@@ -1,7 +1,10 @@
 package com.project.social_network.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.project.social_network.exceptions.PostException;
-import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.Like;
 import com.project.social_network.model.Post;
 import com.project.social_network.model.User;
@@ -9,9 +12,8 @@ import com.project.social_network.repository.LikeRepository;
 import com.project.social_network.repository.PostRepository;
 import com.project.social_network.service.interfaces.LikeService;
 import com.project.social_network.service.interfaces.PostService;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class LikeServiceImpl implements LikeService {
   private final PostRepository postRepository;
 
   @Override
-  public Like likePost(Long postId, User user) throws UserException, PostException {
+  public Like likePost(Long postId, User user) {
     Like isLikeExist = likeRepository.isLikeExist(user.getId(), postId);
 
     if (isLikeExist != null) {
@@ -46,11 +48,11 @@ public class LikeServiceImpl implements LikeService {
   }
 
   @Override
-  public List<Like> getAllLikes(Long postId) throws PostException {
+  public List<Like> getAllLikes(Long postId) {
 
     Post post = postService.findByPostId(postId);
 
-    if(post == null) {
+    if (post == null) {
       throw new PostException("Post not found!");
     }
 

@@ -1,5 +1,18 @@
 package com.project.social_network.service.impl;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.project.social_network.converter.PostConverter;
 import com.project.social_network.dto.PostDto;
 import com.project.social_network.exceptions.PostException;
@@ -16,18 +29,8 @@ import com.project.social_network.request.PostReplyRequest;
 import com.project.social_network.service.interfaces.PostService;
 import com.project.social_network.service.interfaces.UploadImageFile;
 import com.project.social_network.service.interfaces.UserService;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional
@@ -47,7 +50,7 @@ public class PostServiceImpl implements PostService {
   private final CommentRepository commentRepository;
 
   @Override
-  public PostDto createPost(String content, MultipartFile file, String jwt) throws UserException {
+  public PostDto createPost(String content, MultipartFile file, String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     String imageFileUrl = null;
     if (file != null && !file.isEmpty()) {
@@ -65,7 +68,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PostDto createPostForGroup(String content, MultipartFile file, String jwt, Long groupId) throws UserException {
+  public PostDto createPostForGroup(String content, MultipartFile file, String jwt, Long groupId) {
     User user = userService.findUserProfileByJwt(jwt);
     String imageFileUrl = null;
     if (file != null && !file.isEmpty()) {
@@ -97,7 +100,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Page<PostDto> findAllPost(Pageable pageable) throws PostException {
+  public Page<PostDto> findAllPost(Pageable pageable) {
     try {
       Page<Post> posts = postRepository.findAllByIsPostTrue(pageable);
       return posts.map(post -> postConverter.toPostDto(post, post.getUser()));
@@ -107,7 +110,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PostDto rePost(Long postId, User user) throws UserException, PostException {
+  public PostDto rePost(Long postId, User user) {
     Post post = findByPostId(postId);
     if (post.getRePostUsers().contains(user)) {
       post.getRePostUsers().remove(user);
@@ -128,7 +131,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @CacheEvict(value = "posts", key = "#postId")
-  public void deletePostById(Long postId, Long userId) throws UserException, PostException {
+  public void deletePostById(Long postId, Long userId) {
     Post post = findByPostId(postId);
 
     if (!userId.equals(post.getUser().getId())) {
@@ -139,12 +142,12 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PostDto removeFromRePost(Long postId, User user) throws UserException, PostException {
+  public PostDto removeFromRePost(Long postId, User user) {
     return null;
   }
 
   @Override
-  public PostDto createdReply(PostReplyRequest req, User user) throws UserException, PostException {
+  public PostDto createdReply(PostReplyRequest req, User user) {
     Post replyFor = findByPostId(req.getPostId());
 
     Post post = postConverter.postReplyConverter(req, user);
@@ -199,7 +202,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PostDto createComment(CommentRequest commentRequest, User user) throws UserException, PostException {
+  public PostDto createComment(CommentRequest commentRequest, User user) {
     Post post = findByPostId(commentRequest.getPostId());
 
     Comment comment = new Comment();
@@ -213,7 +216,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<Comment> getAllCommentsByPostId(Long postId) throws UserException, PostException {
+  public List<Comment> getAllCommentsByPostId(Long postId) {
     return commentRepository.findByPost_Id(postId);
   }
 
@@ -237,7 +240,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public void deletePost(Long postId, User admin) throws PostException, UserException {
+  public void deletePost(Long postId, User admin) {
     if (!admin.isAdmin()) {
       throw new UserException("Unauthorized: Admin access required");
     }

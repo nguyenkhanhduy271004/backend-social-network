@@ -30,7 +30,7 @@ public class StoryServiceImpl implements StoryService {
   private final StoryRepository storyRepository;
 
   @Override
-  public StoryDto createStory(MultipartFile file, String content, User user) throws UserException, IOException {
+  public StoryDto createStory(MultipartFile file, String content, User user) throws IOException {
     String imageFileUrl = null;
     if (file != null && !file.isEmpty()) {
       imageFileUrl = uploadImageFile.uploadImage(file);
@@ -58,20 +58,22 @@ public class StoryServiceImpl implements StoryService {
   @Override
   @Cacheable(value = "stories", key = "#storyId")
   public StoryDto findStoryById(Long storyId) {
-    Story story = storyRepository.findById(storyId).orElseThrow(() -> new PostException("Story not found with id: " + storyId));
+    Story story = storyRepository.findById(storyId)
+        .orElseThrow(() -> new PostException("Story not found with id: " + storyId));
     return storyConverter.toStoryDto(story, story.getUser());
   }
 
   public Story findStoryById2(Long storyId) {
-    return storyRepository.findById(storyId).orElseThrow(() -> new PostException("Story not found with id: " + storyId));
+    return storyRepository.findById(storyId)
+        .orElseThrow(() -> new PostException("Story not found with id: " + storyId));
   }
 
   @Override
   @CacheEvict(value = "stories", key = "#storyId")
-  public void deleteStoryById(Long storyId, Long userId) throws UserException, StoryException {
+  public void deleteStoryById(Long storyId, Long userId) {
     Story story = findStoryById2(storyId);
 
-    if(!userId.equals(story.getUser().getId())) {
+    if (!userId.equals(story.getUser().getId())) {
       throw new UserException("You can't delete another user's story");
     }
 
