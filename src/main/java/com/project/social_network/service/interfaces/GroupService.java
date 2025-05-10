@@ -5,8 +5,10 @@ import java.util.List;
 import com.project.social_network.dto.GroupUserDto;
 import com.project.social_network.dto.PostDto;
 import com.project.social_network.model.Group;
+import com.project.social_network.model.JoinRequest;
 import com.project.social_network.model.User;
 import com.project.social_network.request.CreateGroupRequest;
+import com.project.social_network.dto.GroupDto;
 
 public interface GroupService {
   Group createGroup(CreateGroupRequest createGroupRequest, User owner);
@@ -40,4 +42,12 @@ public interface GroupService {
   void rejectJoinRequest(Long groupId, Long userId, User admin);
 
   List<User> getPendingRequests(Long groupId, User admin);
+
+  void approveJoinRequest(Group group, JoinRequest request, boolean approve);
+
+  String requestToJoinGroup(Long groupId, String jwt);
+
+  String approveJoinRequest(Long groupId, Long requestId, boolean approve, User admin);
+
+  List<GroupDto.User> getPendingRequestsWithUserInfo(Long groupId, User admin);
 }

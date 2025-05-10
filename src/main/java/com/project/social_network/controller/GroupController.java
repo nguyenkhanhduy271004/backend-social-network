@@ -1,5 +1,20 @@
 package com.project.social_network.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project.social_network.converter.GroupConverter;
 import com.project.social_network.dto.GroupDto;
 import com.project.social_network.dto.PostDto;
@@ -11,24 +26,12 @@ import com.project.social_network.response.ResponseData;
 import com.project.social_network.response.ResponseError;
 import com.project.social_network.service.interfaces.GroupService;
 import com.project.social_network.service.interfaces.UserService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
@@ -42,7 +45,6 @@ public class GroupController {
   private final GroupService groupService;
 
   private final GroupConverter groupConverter;
-
 
   @Operation(summary = "Create a new group", description = "Create a new group")
   @PostMapping
@@ -121,16 +123,7 @@ public class GroupController {
   public ResponseEntity<?> getPendingRequests(@PathVariable Long groupId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
-    List<User> users = groupService.getPendingRequests(groupId, admin);
-    List<GroupDto.User> pendingRequests = new ArrayList<>();
-
-    for (User user : users) {
-      GroupDto.User user1 = new GroupDto.User();
-      user1.setId(user.getId());
-      user1.setFullName(user.getFullName());
-      pendingRequests.add(user1);
-    }
-
+    List<GroupDto.User> pendingRequests = groupService.getPendingRequestsWithUserInfo(groupId, admin);
     return new ResponseEntity<>(
         new ResponseData<>(HttpStatus.OK.value(), "Pending requests retrieved successfully", pendingRequests),
         HttpStatus.OK);
@@ -146,17 +139,9 @@ public class GroupController {
 
   @GetMapping("/{groupId}")
   public ResponseEntity<?> getGroupById(@PathVariable Long groupId) {
-    try {
-      Group group = groupService.getGroupById(groupId);
-      if (group == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
-      }
-      GroupDto groupDto = groupConverter.toGroupDto(group);
-      return ResponseEntity.ok(groupDto);
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error: " + e.getMessage());
-    }
+    Group group = groupService.getGroupById(groupId);
+    GroupDto groupDto = groupConverter.toGroupDto(group);
+    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Group retrieved successfully", groupDto));
   }
 
   @Operation(summary = "Get posts from a group", description = "Retrieve all posts of a specific group")
@@ -198,6 +183,23 @@ public class GroupController {
     return new ResponseEntity<>(
         new ResponseData<>(HttpStatus.NO_CONTENT.value(), "Delete user from group successfully"),
         HttpStatus.NO_CONTENT);
+  }
+
+  @PostMapping("/{groupId}/request-join")
+  public ResponseEntity<?> requestToJoinGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
+    String result = groupService.requestToJoinGroup(groupId, jwt);
+    return ResponseEntity.ok(result);
+  }
+
+  @PostMapping("/{groupId}/approve-request/{requestId}")
+  public ResponseEntity<?> approveJoinRequest(
+      @PathVariable Long groupId,
+      @PathVariable Long requestId,
+      @RequestParam boolean approve,
+      @RequestHeader("Authorization") String jwt) {
+    User admin = userService.findUserProfileByJwt(jwt);
+    String result = groupService.approveJoinRequest(groupId, requestId, approve, admin);
+    return ResponseEntity.ok(result);
   }
 
 }

@@ -17,8 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.project.social_network.config.Translator;
 import com.project.social_network.dto.StoryDto;
-import com.project.social_network.exceptions.StoryException;
-import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.response.ResponseData;
 import com.project.social_network.service.interfaces.StoryService;

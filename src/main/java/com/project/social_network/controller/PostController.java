@@ -23,11 +23,7 @@ import com.project.social_network.converter.PostConverter;
 import com.project.social_network.dto.CommentDto;
 import com.project.social_network.dto.PostDto;
 import com.project.social_network.model.Comment;
-import com.project.social_network.model.Group;
-import com.project.social_network.model.JoinRequest;
 import com.project.social_network.model.User;
-import com.project.social_network.repository.GroupRepository;
-import com.project.social_network.repository.JoinRequestRepository;
 import com.project.social_network.request.CommentRequest;
 import com.project.social_network.request.PostReplyRequest;
 import com.project.social_network.response.ResponseData;
@@ -54,8 +50,6 @@ public class PostController {
   private final UserService userService;
   private final CommentService commentService;
   private final PostConverter postConverter;
-  private final GroupRepository groupRepository;
-  private final JoinRequestRepository joinRequestRepository;
 
   // POST CRUD
 
@@ -229,67 +223,6 @@ public class PostController {
     User user = userService.findUserProfileByJwt(jwt);
     commentService.deleteCommentById(commentId, user);
     return ResponseEntity.noContent().build();
-  }
-
-  @PostMapping("/{groupId}/request-join")
-  public ResponseEntity<?> requestToJoinGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
-    User user = userService.findUserProfileByJwt(jwt);
-    Group group = groupRepository.findById(groupId).orElseThrow();
-    if (group.isPublic()) {
-      group.getUsers().add(user);
-      groupRepository.save(group);
-      return ResponseEntity.ok("Joined group directly.");
-    }
-
-    if (joinRequestRepository.findByGroupAndUser(group, user).isPresent()) {
-      return ResponseEntity.badRequest().body("You already sent a join request.");
-    }
-
-    JoinRequest joinRequest = new JoinRequest();
-    joinRequest.setGroup(group);
-    joinRequest.setUser(user);
-    joinRequest.setPending(true);
-    joinRequestRepository.save(joinRequest);
-
-    return ResponseEntity.ok("Join request sent. Wait for approval.");
-  }
-
-  @PostMapping("/{groupId}/approve-request/{requestId}")
-  public ResponseEntity<?> approveJoinRequest(
-      @PathVariable Long groupId,
-      @PathVariable Long requestId,
-      @RequestParam boolean approve,
-      @RequestHeader("Authorization") String jwt) {
-    User admin = userService.findUserProfileByJwt(jwt);
-    Group group = groupRepository.findById(groupId).orElseThrow();
-
-    if (!group.getAdmin().equals(admin)) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized.");
-    }
-
-    JoinRequest request = joinRequestRepository.findById(requestId)
-        .orElseThrow(() -> new RuntimeException("Request not found"));
-
-    if (!request.getGroup().getId().equals(groupId)) {
-      return ResponseEntity.badRequest().body("Request not for this group.");
-    }
-
-    if (!request.isPending()) {
-      return ResponseEntity.badRequest().body("Request already handled.");
-    }
-
-    if (approve) {
-      group.getUsers().add(request.getUser());
-      groupRepository.save(group);
-      request.setApproved(true);
-    } else {
-      request.setApproved(false);
-    }
-
-    request.setPending(false);
-    joinRequestRepository.save(request);
-
-    return ResponseEntity.ok("Request has been " + (approve ? "approved." : "rejected."));
   }
 
   private void validateFile(MultipartFile file) {
