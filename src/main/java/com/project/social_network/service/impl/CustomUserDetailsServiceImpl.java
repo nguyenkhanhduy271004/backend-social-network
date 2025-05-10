@@ -1,10 +1,14 @@
 package com.project.social_network.service.impl;
 
+import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,8 +22,8 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
   private final UserRepository userRepository;
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
+  public UserDetails loadUserByUsername(String username) {
+    User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Username not found with email: " + username));
 
     if (user.isLoginWithGoogle()) {
       throw new UsernameNotFoundException("Username not found with email: " + username);

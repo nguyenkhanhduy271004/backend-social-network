@@ -6,10 +6,13 @@ import com.project.social_network.exceptions.ReelException;
 import com.project.social_network.exceptions.UserException;
 import com.project.social_network.response.ErrorResponse;
 import com.project.social_network.response.ResponseError;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,6 +29,12 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(UserException.class)
   public ResponseEntity<ResponseError> handleUserException(UserException e) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(new ResponseError(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
+  }
+
+  @ExceptionHandler(UsernameNotFoundException.class)
+  public ResponseEntity<ResponseError> handleUsernameNotFoundException(UsernameNotFoundException e) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(new ResponseError(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
   }
@@ -53,6 +62,19 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ResponseError> handleIOException(IOException e) {
     return ResponseEntity.badRequest()
         .body(new ResponseError(HttpStatus.BAD_REQUEST.value(), "File upload failed: " + e.getMessage()));
+  }
+
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<ResponseError> handleBadCredentialsException(BadCredentialsException e) {
+    return ResponseEntity.badRequest()
+        .body(new ResponseError(HttpStatus.BAD_REQUEST.value(),e.getMessage()));
+  }
+
+  @ExceptionHandler(MessagingException.class)
+  public ResponseEntity<ResponseError> handleMessagingException(MessagingException e) {
+    HttpStatus status = e.getMessage().contains("not found") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+    return ResponseEntity.status(status)
+        .body(new ResponseError(status.value(), e.getMessage()));
   }
 
   @ExceptionHandler(Exception.class)

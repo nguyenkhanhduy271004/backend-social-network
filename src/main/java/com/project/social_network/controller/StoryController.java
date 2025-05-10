@@ -58,12 +58,11 @@ public class StoryController {
   public ResponseEntity<ResponseData<StoryDto>> createStory(
       @RequestParam(value = "file", required = false) MultipartFile file,
       @RequestParam("content") @NotBlank String content,
-      @RequestHeader("Authorization") String jwt)
-      throws UserException, StoryException, IOException {
+      @RequestHeader("Authorization") String jwt) throws IOException {
 
     if (file != null)
       uploadImageFile.validateImage(file);
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     StoryDto storyDto = storyService.createStory(file, content, user);
 
     return buildResponse(HttpStatus.CREATED, "story.create.success", storyDto);
@@ -77,10 +76,9 @@ public class StoryController {
   })
   public ResponseEntity<ResponseData<StoryDto>> findStoryById(
       @PathVariable @Min(1) Long storyId,
-      @RequestHeader("Authorization") String jwt)
-      throws UserException, StoryException {
+      @RequestHeader("Authorization") String jwt) {
 
-    getUserFromJwt(jwt); // ensure valid user
+    userService.findUserProfileByJwt(jwt);
     StoryDto storyDto = storyService.findStoryById(storyId);
 
     return buildResponse(HttpStatus.OK, "story.find.success", storyDto, storyId);
@@ -94,10 +92,9 @@ public class StoryController {
   })
   public ResponseEntity<Void> deleteStory(
       @PathVariable @Min(1) Long storyId,
-      @RequestHeader("Authorization") String jwt)
-      throws UserException, StoryException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     storyService.deleteStoryById(storyId, user.getId());
 
     return ResponseEntity.noContent().build();
@@ -110,17 +107,12 @@ public class StoryController {
       @ApiResponse(responseCode = "400", description = "Retrieval failed")
   })
   public ResponseEntity<ResponseData<List<StoryDto>>> getAllStories(
-      @RequestHeader("Authorization") String jwt)
-      throws UserException, StoryException {
+      @RequestHeader("Authorization") String jwt) {
 
-    getUserFromJwt(jwt);
+    userService.findUserProfileByJwt(jwt);
     List<StoryDto> storyDtos = storyService.findAllStory();
 
     return buildResponse(HttpStatus.OK, "story.get.all.success", storyDtos);
-  }
-
-  private User getUserFromJwt(String jwt) throws UserException {
-    return userService.findUserProfileByJwt(jwt);
   }
 
   private <T> ResponseEntity<ResponseData<T>> buildResponse(HttpStatus status, String messageKey, T data,

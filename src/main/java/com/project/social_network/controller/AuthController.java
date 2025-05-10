@@ -1,21 +1,5 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.config.JwtProvider;
-import com.project.social_network.dto.IdTokenRequestDto;
-import com.project.social_network.exceptions.UserException;
-import com.project.social_network.model.User;
-import com.project.social_network.model.Verification;
-import com.project.social_network.repository.UserRepository;
-import com.project.social_network.request.LoginRequest;
-import com.project.social_network.request.RegisterRequest;
-import com.project.social_network.response.AuthResponse;
-import com.project.social_network.service.impl.AccountServiceImpl;
-import com.project.social_network.service.impl.MailServiceImpl;
-import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.mail.MessagingException;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,6 +15,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.social_network.config.JwtProvider;
+import com.project.social_network.dto.IdTokenRequestDto;
+import com.project.social_network.exceptions.UserException;
+import com.project.social_network.model.User;
+import com.project.social_network.model.Verification;
+import com.project.social_network.repository.UserRepository;
+import com.project.social_network.request.LoginRequest;
+import com.project.social_network.request.RegisterRequest;
+import com.project.social_network.response.AuthResponse;
+import com.project.social_network.service.impl.AccountServiceImpl;
+import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
+import com.project.social_network.service.impl.MailServiceImpl;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
@@ -40,25 +42,24 @@ public class AuthController {
 
   private final JwtProvider jwtProvider;
 
-  private final MailServiceImpl mailServiceImpl;
-
   private final UserRepository userRepository;
-
-  private final AccountServiceImpl accountServiceImpl;
 
   private final PasswordEncoder passwordEncoder;
 
+  private final MailServiceImpl mailServiceImpl;
+
+  private final AccountServiceImpl accountServiceImpl;
+
   private final CustomUserDetailsServiceImpl customUserDetailsService;
 
-
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> createUserHandler(@Valid @RequestBody RegisterRequest user)
-      throws UserException {
+  public ResponseEntity<AuthResponse> createUserHandler(@Valid @RequestBody RegisterRequest user) {
     String password = user.getPassword();
     String fullName = user.getFullName();
     String birthDate = user.getBirthDate();
 
-    User isEmailExist = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserException("Email already exists!"));
+    userRepository.findByEmail(user.getEmail())
+        .orElseThrow(() -> new UserException("Email already exists!"));
 
     User newUser = new User();
     newUser.setEmail(user.getEmail());
@@ -79,7 +80,7 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user) throws UserException {
+  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user) {
     String username = user.getEmail();
     String password = user.getPassword();
 
@@ -92,11 +93,10 @@ public class AuthController {
   }
 
   @PostMapping("/login-oauth2")
-  public ResponseEntity<AuthResponse> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody) throws UserException {
+  public ResponseEntity<AuthResponse> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody) {
     String token = accountServiceImpl.loginOAuthGoogle(requestBody);
     return ResponseEntity.ok(new AuthResponse(token, true));
   }
-
 
   private Authentication authenticate(String username, String password) {
     UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);

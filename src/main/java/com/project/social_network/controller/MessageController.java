@@ -1,19 +1,7 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.dto.UserDto;
-import com.project.social_network.exceptions.UserException;
-import com.project.social_network.model.Message;
-import com.project.social_network.model.User;
-import com.project.social_network.request.MessageRequest;
-import com.project.social_network.service.interfaces.MessageService;
-import com.project.social_network.service.interfaces.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +9,20 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.model.Message;
+import com.project.social_network.model.User;
+import com.project.social_network.request.MessageRequest;
+import com.project.social_network.service.interfaces.MessageService;
+import com.project.social_network.service.interfaces.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
@@ -33,10 +35,6 @@ public class MessageController {
 
   private final MessageService messageService;
 
-  private User getCurrentUser(String jwt) throws UserException {
-    return userService.findUserProfileByJwt(jwt);
-  }
-
   @PostMapping("/send")
   @Operation(summary = "Send a message", description = "Send a new message to a specific user.")
   @ApiResponses({
@@ -46,8 +44,8 @@ public class MessageController {
   })
   public Message sendMessage(
       @RequestBody MessageRequest messageRequest,
-      @RequestHeader("Authorization") String jwt) throws UserException {
-    User sender = getCurrentUser(jwt);
+      @RequestHeader("Authorization") String jwt) {
+    User sender = userService.findUserProfileByJwt(jwt);
     return messageService.sendMessage(sender.getId(), messageRequest.getReceiverId(), messageRequest.getContent());
   }
 
@@ -60,8 +58,8 @@ public class MessageController {
   })
   public List<Message> getChatHistory(
       @RequestParam Long receiverId,
-      @RequestHeader("Authorization") String jwt) throws UserException {
-    User user = getCurrentUser(jwt);
+      @RequestHeader("Authorization") String jwt) {
+    User user = userService.findUserProfileByJwt(jwt);
     return messageService.getChatHistory(user.getId(), receiverId);
   }
 
@@ -72,8 +70,8 @@ public class MessageController {
       @ApiResponse(responseCode = "400", description = "Failed to retrieve users"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
-  public List<UserDto> getUserForMessage(@RequestHeader("Authorization") String jwt) throws UserException {
-    User user = getCurrentUser(jwt);
+  public List<UserDto> getUserForMessage(@RequestHeader("Authorization") String jwt) {
+    User user = userService.findUserProfileByJwt(jwt);
     return messageService.findDistinctReceiverIdsBySenderId(user.getId());
   }
 }

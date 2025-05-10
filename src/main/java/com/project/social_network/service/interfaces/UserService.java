@@ -1,22 +1,21 @@
 package com.project.social_network.service.interfaces;
 
-import com.project.social_network.request.PaginationRequest;
-import com.project.social_network.response.PagingResult;
 import java.util.List;
 
 import com.project.social_network.dto.UserDto;
-import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
+import com.project.social_network.request.PaginationRequest;
+import com.project.social_network.response.PagingResult;
 
 public interface UserService {
 
-  User findUserById(Long userId) throws UserException;
+  User findUserById(Long userId);
 
-  User findUserProfileByJwt(String jwt) throws UserException;
+  User findUserProfileByJwt(String jwt);
 
-  UserDto updateUser(Long userId, User user) throws UserException;
+  UserDto updateUser(Long userId, User user);
 
-  UserDto followUser(Long userId, User user) throws UserException;
+  UserDto followUser(Long userId, User user);
 
   List<UserDto> searchUser(String query, Long userId);
 
@@ -26,7 +25,9 @@ public interface UserService {
 
   List<UserDto> getRandomUsers(User user);
 
-  UserDto updateUserAdminStatus(Long userId, boolean isAdmin) throws UserException;
+  UserDto updateUserAdminStatus(Long userId, boolean isAdmin);
 
-  void deleteUser(Long userId) throws UserException;
+  void deleteUser(Long userId);
+
+  void validateAdminAccess(String jwt);
 }

@@ -34,7 +34,6 @@ public class AppConfig implements WebMvcConfigurer {
 
   private final RateLimitInterceptor rateLimitInterceptor;
 
-
   public AppConfig(RateLimitInterceptor rateLimitInterceptor) {
     this.rateLimitInterceptor = rateLimitInterceptor;
   }

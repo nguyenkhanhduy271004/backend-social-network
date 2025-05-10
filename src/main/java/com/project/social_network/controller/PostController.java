@@ -1,33 +1,8 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.config.Translator;
-import com.project.social_network.converter.PostConverter;
-import com.project.social_network.dto.CommentDto;
-import com.project.social_network.dto.PostDto;
-import com.project.social_network.exceptions.CommentException;
-import com.project.social_network.exceptions.PostException;
-import com.project.social_network.exceptions.UserException;
-import com.project.social_network.model.Comment;
-import com.project.social_network.model.Group;
-import com.project.social_network.model.JoinRequest;
-import com.project.social_network.model.User;
-import com.project.social_network.repository.GroupRepository;
-import com.project.social_network.repository.JoinRequestRepository;
-import com.project.social_network.request.CommentRequest;
-import com.project.social_network.request.PostReplyRequest;
-import com.project.social_network.response.ResponseData;
-import com.project.social_network.service.interfaces.CommentService;
-import com.project.social_network.service.interfaces.PostService;
-import com.project.social_network.service.interfaces.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -42,6 +17,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.project.social_network.config.Translator;
+import com.project.social_network.converter.PostConverter;
+import com.project.social_network.dto.CommentDto;
+import com.project.social_network.dto.PostDto;
+import com.project.social_network.model.Comment;
+import com.project.social_network.model.Group;
+import com.project.social_network.model.JoinRequest;
+import com.project.social_network.model.User;
+import com.project.social_network.repository.GroupRepository;
+import com.project.social_network.repository.JoinRequestRepository;
+import com.project.social_network.request.CommentRequest;
+import com.project.social_network.request.PostReplyRequest;
+import com.project.social_network.response.ResponseData;
+import com.project.social_network.service.interfaces.CommentService;
+import com.project.social_network.service.interfaces.PostService;
+import com.project.social_network.service.interfaces.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
@@ -58,14 +57,14 @@ public class PostController {
   private final GroupRepository groupRepository;
   private final JoinRequestRepository joinRequestRepository;
 
-  //POST CRUD
+  // POST CRUD
 
   @PostMapping("/create")
   @Operation(summary = "Create new post", description = "Allows users to create a new post with optional image")
   public ResponseEntity<ResponseData<PostDto>> createPost(
       @RequestParam(value = "file", required = false) MultipartFile file,
       @RequestParam("content") String content,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException, IOException {
+      @RequestHeader("Authorization") String jwt) {
 
     validateFile(file);
     PostDto postDto = postService.createPost(content, file, jwt);
@@ -78,7 +77,7 @@ public class PostController {
       @PathVariable @Min(1) Long groupId,
       @RequestParam(value = "file", required = false) MultipartFile file,
       @RequestParam("content") String content,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
     validateFile(file);
     PostDto postDto = postService.createPostForGroup(content, file, jwt, groupId);
@@ -91,7 +90,7 @@ public class PostController {
       @PathVariable @Min(1) Long postId,
       @RequestParam(value = "file", required = false) MultipartFile file,
       @RequestParam("content") String content,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException, IOException {
+      @RequestHeader("Authorization") String jwt) {
 
     validateFile(file);
     PostDto updatedPost = postService.updatePost(postId, file, content, jwt);
@@ -102,9 +101,9 @@ public class PostController {
   @Operation(summary = "Delete post", description = "Delete a post by its ID")
   public ResponseEntity<Void> deletePost(
       @PathVariable @Min(1) Long postId,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     postService.deletePostById(postId, user.getId());
     return ResponseEntity.noContent().build();
   }
@@ -113,7 +112,7 @@ public class PostController {
   @Operation(summary = "Find post by ID", description = "Retrieve post details by post ID")
   public ResponseEntity<ResponseData<PostDto>> findPostById(
       @PathVariable @Min(1) Long postId,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
     PostDto postDto = postService.findById(postId);
     return okResponse("post.find.success", postDto);
@@ -121,7 +120,7 @@ public class PostController {
 
   @GetMapping
   @Operation(summary = "Get all posts", description = "Retrieve all public posts")
-  public ResponseEntity<ResponseData<List<PostDto>>> getAllPosts() throws UserException, PostException {
+  public ResponseEntity<ResponseData<List<PostDto>>> getAllPosts() {
 
     List<PostDto> postDtos = postService.findAllPost();
     return okResponse("post.get.all.success", postDtos);
@@ -130,7 +129,7 @@ public class PostController {
   @GetMapping("/user/{userId}")
   @Operation(summary = "Get user's posts", description = "Retrieve all posts of a specific user")
   public ResponseEntity<ResponseData<List<PostDto>>> getUsersAllPosts(
-      @PathVariable @Min(1) Long userId) throws UserException, PostException {
+      @PathVariable @Min(1) Long userId) {
 
     User user = userService.findUserById(userId);
     List<PostDto> postDtos = postService.getUserPost(user);
@@ -141,22 +140,22 @@ public class PostController {
   @Operation(summary = "Get posts liked by user", description = "Retrieve posts liked by a user")
   public ResponseEntity<ResponseData<List<PostDto>>> getLikedPosts(
       @PathVariable @Min(1) Long userId,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     List<PostDto> postDtos = postService.findByLikesContainsUser(user);
     return okResponse("post.get.liked.success", postDtos);
   }
 
-  //REPLY / REPOST
+  // REPLY / REPOST
 
   @PostMapping("/reply")
   @Operation(summary = "Reply to a post", description = "Reply to an existing post")
   public ResponseEntity<ResponseData<PostDto>> replyPost(
       @Valid @RequestBody PostReplyRequest req,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     PostDto postDto = postService.createdReply(req, user);
     return okResponse("post.reply.success", postDto);
   }
@@ -165,9 +164,9 @@ public class PostController {
   @Operation(summary = "Repost", description = "Repost an existing post")
   public ResponseEntity<ResponseData<PostDto>> repost(
       @PathVariable @Min(1) Long postId,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     PostDto postDto = postService.rePost(postId, user);
     return okResponse("post.repost.success", postDto);
   }
@@ -175,19 +174,19 @@ public class PostController {
   @GetMapping("/repost")
   @Operation(summary = "Get reposted posts", description = "Retrieve reposts by the current user")
   public ResponseEntity<ResponseData<List<PostDto>>> getRepostedPosts(
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     List<PostDto> postDtos = postService.getRepostedPostsByUserId(user.getId());
     return okResponse("post.get.reposted.success", postDtos);
   }
 
-  //COMMENT
+  // COMMENT
 
   @GetMapping("/{postId}/comment")
   @Operation(summary = "Get comments", description = "Retrieve all comments of a post")
   public ResponseEntity<ResponseData<List<CommentDto>>> getAllCommentsByPostId(
-      @PathVariable @Min(1) Long postId) throws UserException, PostException {
+      @PathVariable @Min(1) Long postId) {
 
     List<Comment> comments = postService.getAllCommentsByPostId(postId);
     List<CommentDto> commentDtos = comments.stream()
@@ -201,9 +200,9 @@ public class PostController {
   public ResponseEntity<ResponseData<PostDto>> createComment(
       @PathVariable @Min(1) Long postId,
       @Valid @RequestBody CommentRequest commentRequest,
-      @RequestHeader("Authorization") String jwt) throws UserException, PostException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     PostDto postDto = postService.createComment(commentRequest, user);
     return okResponse("comment.create.success", postDto);
   }
@@ -213,9 +212,9 @@ public class PostController {
   public ResponseEntity<ResponseData<CommentDto>> editComment(
       @PathVariable @Min(1) Long commentId,
       @Valid @RequestBody CommentRequest commentRequest,
-      @RequestHeader("Authorization") String jwt) throws UserException, CommentException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     Comment comment = commentService.editComment(commentRequest, user);
     CommentDto commentDto = postConverter.toCommentDto(comment);
     return okResponse("comment.edit.success", commentDto);
@@ -225,16 +224,16 @@ public class PostController {
   @Operation(summary = "Delete comment", description = "Delete a comment by its ID")
   public ResponseEntity<Void> deleteComment(
       @PathVariable @Min(1) Long commentId,
-      @RequestHeader("Authorization") String jwt) throws UserException, CommentException {
+      @RequestHeader("Authorization") String jwt) {
 
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     commentService.deleteCommentById(commentId, user);
     return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{groupId}/request-join")
   public ResponseEntity<?> requestToJoinGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
-    User user = getUserFromJwt(jwt);
+    User user = userService.findUserProfileByJwt(jwt);
     Group group = groupRepository.findById(groupId).orElseThrow();
     if (group.isPublic()) {
       group.getUsers().add(user);
@@ -260,9 +259,8 @@ public class PostController {
       @PathVariable Long groupId,
       @PathVariable Long requestId,
       @RequestParam boolean approve,
-      @RequestHeader("Authorization") String jwt
-  ) {
-    User admin = getUserFromJwt(jwt);
+      @RequestHeader("Authorization") String jwt) {
+    User admin = userService.findUserProfileByJwt(jwt);
     Group group = groupRepository.findById(groupId).orElseThrow();
 
     if (!group.getAdmin().equals(admin)) {
@@ -294,8 +292,6 @@ public class PostController {
     return ResponseEntity.ok("Request has been " + (approve ? "approved." : "rejected."));
   }
 
-
-
   private void validateFile(MultipartFile file) {
     if (file != null) {
       if (file.getSize() > 5 * 1024 * 1024) {
@@ -306,10 +302,6 @@ public class PostController {
         throw new IllegalArgumentException("Only image files are allowed");
       }
     }
-  }
-
-  private User getUserFromJwt(String jwt) throws UserException {
-    return userService.findUserProfileByJwt(jwt);
   }
 
   private <T> ResponseEntity<ResponseData<T>> okResponse(String messageKey, T data) {

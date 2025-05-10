@@ -1,6 +1,5 @@
 package com.project.social_network.controller;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -11,14 +10,17 @@ import org.springframework.stereotype.Controller;
 import com.project.social_network.model.Message;
 import com.project.social_network.service.interfaces.MessageService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
 @Controller
 @Tag(name = "Chat Controller")
+@RequiredArgsConstructor
 public class ChatController {
-  @Autowired
-  private SimpMessagingTemplate messagingTemplate;
 
-  @Autowired
-  private MessageService messageService;
+  private final MessageService messageService;
+
+  private final SimpMessagingTemplate messagingTemplate;
 
   @MessageMapping("/chat/{senderId}/{receiverId}")
   public void handlePrivateMessage(

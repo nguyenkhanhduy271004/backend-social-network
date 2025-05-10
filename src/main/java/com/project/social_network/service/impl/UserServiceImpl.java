@@ -33,14 +33,14 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
 
   @Override
-//  @Cacheable(value = "users", key = "#userId")
-  public User findUserById(Long userId) throws UserException {
+  // @Cacheable(value = "users", key = "#userId")
+  public User findUserById(Long userId) {
     return userRepository.findById(userId)
         .orElseThrow(() -> new UserException("User not found with id: " + userId));
   }
 
   @Override
-  public User findUserProfileByJwt(String jwt) throws UserException {
+  public User findUserProfileByJwt(String jwt) {
     String email = jwtProvider.getEmailFromToken(jwt);
     return userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException("User not found with email: " + email));
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @CachePut(value = "users", key = "#userId")
-  public UserDto updateUser(Long userId, User user) throws UserException {
+  public UserDto updateUser(Long userId, User user) {
     User existUser = findUserById(userId);
 
     updateUserDetails(existUser, user);
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserDto followUser(Long userId, User user) throws UserException {
+  public UserDto followUser(Long userId, User user) {
     User followToUser = findUserById(userId);
 
     if (user.getFollowings().contains(followToUser) && followToUser.getFollowers().contains(user)) {
@@ -83,7 +83,6 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public List<UserDto> findAllUsers() {
-
     List<UserDto> users = userRepository.findAll().stream().map(userConverter::toUserDto).collect(Collectors.toList());
     return users;
   }
@@ -100,12 +99,11 @@ public class UserServiceImpl implements UserService {
         entities.getTotalElements(),
         entities.getSize(),
         entities.getNumber(),
-        entities.isEmpty()
-    );
+        entities.isEmpty());
   }
 
   @Override
-  public UserDto updateUserAdminStatus(Long userId, boolean isAdmin) throws UserException {
+  public UserDto updateUserAdminStatus(Long userId, boolean isAdmin) {
     User user = findUserById(userId);
     user.setAdmin(isAdmin);
     return userConverter.toUserDto(userRepository.save(user));
@@ -113,7 +111,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @CacheEvict(value = "users", key = "#userId")
-  public void deleteUser(Long userId) throws UserException {
+  public void deleteUser(Long userId) {
     User user = findUserById(userId);
     userRepository.delete(user);
   }
@@ -141,6 +139,14 @@ public class UserServiceImpl implements UserService {
     }
 
     return randomUsers;
+  }
+
+  @Override
+  public void validateAdminAccess(String jwt) {
+    User user = findUserProfileByJwt(jwt);
+    if (!user.isAdmin()) {
+      throw new UserException("Unauthorized: Admin access required");
+    }
   }
 
   private void updateUserDetails(User existUser, User user) {
