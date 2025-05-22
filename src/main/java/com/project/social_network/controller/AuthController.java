@@ -1,5 +1,23 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.config.JwtProvider;
+import com.project.social_network.dto.IdTokenRequestDto;
+import com.project.social_network.exceptions.UserException;
+import com.project.social_network.model.User;
+import com.project.social_network.model.Verification;
+import com.project.social_network.repository.UserRepository;
+import com.project.social_network.request.LoginRequest;
+import com.project.social_network.request.RegisterRequest;
+import com.project.social_network.response.AuthResponse;
+import com.project.social_network.service.impl.AccountServiceImpl;
+import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
+import com.project.social_network.service.impl.MailServiceImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,45 +33,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.social_network.config.JwtProvider;
-import com.project.social_network.dto.IdTokenRequestDto;
-import com.project.social_network.exceptions.UserException;
-import com.project.social_network.model.User;
-import com.project.social_network.model.Verification;
-import com.project.social_network.repository.UserRepository;
-import com.project.social_network.request.LoginRequest;
-import com.project.social_network.request.RegisterRequest;
-import com.project.social_network.response.AuthResponse;
-import com.project.social_network.service.impl.AccountServiceImpl;
-import com.project.social_network.service.impl.CustomUserDetailsServiceImpl;
-import com.project.social_network.service.impl.MailServiceImpl;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.mail.MessagingException;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Auth Controller")
 @Validated
-public class AuthController {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+class AuthController {
 
-  private final JwtProvider jwtProvider;
+  JwtProvider jwtProvider;
 
-  private final UserRepository userRepository;
+  UserRepository userRepository;
 
-  private final PasswordEncoder passwordEncoder;
+  PasswordEncoder passwordEncoder;
 
-  private final MailServiceImpl mailServiceImpl;
+  MailServiceImpl mailServiceImpl;
 
-  private final AccountServiceImpl accountServiceImpl;
+  AccountServiceImpl accountServiceImpl;
 
-  private final CustomUserDetailsServiceImpl customUserDetailsService;
+  CustomUserDetailsServiceImpl customUserDetailsService;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> createUserHandler(@Valid @RequestBody RegisterRequest user) {
+  ResponseEntity<AuthResponse> createUserHandler(@Valid @RequestBody RegisterRequest user) {
     String password = user.getPassword();
     String fullName = user.getFullName();
     String birthDate = user.getBirthDate();
@@ -80,7 +81,7 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user) {
+  ResponseEntity<AuthResponse> login(@RequestBody LoginRequest user) {
     String username = user.getEmail();
     String password = user.getPassword();
 
@@ -93,24 +94,13 @@ public class AuthController {
   }
 
   @PostMapping("/login-oauth2")
-  public ResponseEntity<AuthResponse> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody) {
+  ResponseEntity<AuthResponse> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody) {
     String token = accountServiceImpl.loginOAuthGoogle(requestBody);
     return ResponseEntity.ok(new AuthResponse(token, true));
   }
 
-  private Authentication authenticate(String username, String password) {
-    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-    if (userDetails == null) {
-      throw new BadCredentialsException("Invalid username...");
-    }
-    if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-      throw new BadCredentialsException("Invalid username or password...");
-    }
-    return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-  }
-
   @PostMapping("/forgot-password")
-  public ResponseEntity<?> forgotPassword(@RequestParam String email) throws MessagingException {
+  ResponseEntity<?> forgotPassword(@RequestParam String email) throws MessagingException {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException("User not found with email: " + email));
     if (user == null) {
@@ -122,7 +112,7 @@ public class AuthController {
   }
 
   @PostMapping("/reset-password")
-  public ResponseEntity<?> resetPassword(@RequestParam String email, @RequestParam String otp,
+  ResponseEntity<?> resetPassword(@RequestParam String email, @RequestParam String otp,
       @RequestParam String newPassword) {
     String storedOTP = mailServiceImpl.getOTP(email);
 
@@ -137,5 +127,16 @@ public class AuthController {
     userRepository.save(user);
 
     return ResponseEntity.ok("Password has been successfully reset!");
+  }
+
+  private Authentication authenticate(String username, String password) {
+    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+    if (userDetails == null) {
+      throw new BadCredentialsException("Invalid username...");
+    }
+    if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+      throw new BadCredentialsException("Invalid username or password...");
+    }
+    return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 }

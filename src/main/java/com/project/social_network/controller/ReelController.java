@@ -1,8 +1,25 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.config.Translator;
+import com.project.social_network.dto.ReelDto;
+import com.project.social_network.exceptions.ReelException;
+import com.project.social_network.exceptions.UserException;
+import com.project.social_network.model.User;
+import com.project.social_network.response.ResponseData;
+import com.project.social_network.service.interfaces.ReelService;
+import com.project.social_network.service.interfaces.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.List;
-
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,37 +33,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.project.social_network.config.Translator;
-import com.project.social_network.dto.ReelDto;
-import com.project.social_network.exceptions.ReelException;
-import com.project.social_network.exceptions.UserException;
-import com.project.social_network.model.User;
-import com.project.social_network.response.ResponseData;
-import com.project.social_network.service.interfaces.ReelService;
-import com.project.social_network.service.interfaces.UserService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
-import lombok.RequiredArgsConstructor;
-
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("${api.prefix}/reel")
+@RequestMapping("${api.prefix}/v1/reel")
 @Tag(name = "Reel Controller", description = "APIs for controlling reels")
 @SecurityRequirement(name = "bearerAuth")
 @Validated
-public class ReelController {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+class ReelController {
 
-  private final Translator translator;
+  Translator translator;
 
-  private final ReelService reelService;
+  ReelService reelService;
 
-  private final UserService userService;
+  UserService userService;
 
   @PostMapping("/create")
   @Operation(summary = "Create a new reel", description = "Create a new reel with content and an optional image file")
@@ -54,7 +54,7 @@ public class ReelController {
       @ApiResponse(responseCode = "201", description = "Reel created successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid input or creation failed")
   })
-  public ResponseEntity<ResponseData<ReelDto>> createReel(
+  ResponseEntity<ResponseData<ReelDto>> createReel(
       @Parameter(description = "Image file to upload") @RequestParam(value = "file") MultipartFile file,
       @Parameter(description = "Content of the reel") @RequestParam("content") @NotBlank String content,
       @Parameter(description = "JWT token for authentication") @RequestHeader("Authorization") String jwt)
@@ -71,7 +71,7 @@ public class ReelController {
 
   @GetMapping("/{reelId}")
   @Operation(summary = "Get a reel by ID", description = "Retrieve a reel by its ID")
-  public ResponseEntity<ResponseData<ReelDto>> findReelById(
+  ResponseEntity<ResponseData<ReelDto>> findReelById(
       @PathVariable Long reelId,
       @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
 
@@ -83,7 +83,7 @@ public class ReelController {
 
   @DeleteMapping("/{reelId}")
   @Operation(summary = "Delete a reel by ID", description = "Delete a reel by its ID")
-  public ResponseEntity<Void> deleteReel(
+  ResponseEntity<Void> deleteReel(
       @PathVariable Long reelId,
       @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
 
@@ -94,7 +94,7 @@ public class ReelController {
 
   @GetMapping
   @Operation(summary = "Get all reels", description = "Retrieve all reels")
-  public ResponseEntity<ResponseData<List<ReelDto>>> getAllReels(
+  ResponseEntity<ResponseData<List<ReelDto>>> getAllReels(
       @RequestHeader("Authorization") String jwt) throws UserException, ReelException {
 
     userService.findUserProfileByJwt(jwt);

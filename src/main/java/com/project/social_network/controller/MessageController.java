@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("${api.prefix}/messages")
+@RequestMapping("${api.prefix}/v1/messages")
 @Tag(name = "Message Controller", description = "APIs for sending and retrieving messages between users.")
 @SecurityRequirement(name = "bearerAuth")
 public class MessageController {

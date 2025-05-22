@@ -1,20 +1,5 @@
 package com.project.social_network.controller;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.project.social_network.converter.GroupConverter;
 import com.project.social_network.dto.AdminDashboardDto;
 import com.project.social_network.dto.GroupDto;
@@ -30,30 +15,45 @@ import com.project.social_network.service.interfaces.PostService;
 import com.project.social_network.service.interfaces.ReelService;
 import com.project.social_network.service.interfaces.StoryService;
 import com.project.social_network.service.interfaces.UserService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("${api.prefix}/admin")
+@RequestMapping("${api.prefix}/v1/admin")
 @Tag(name = "Admin Controller")
-public class AdminController {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+class AdminController {
 
-  private final UserService userService;
+  UserService userService;
 
-  private final PostService postService;
+  PostService postService;
 
-  private final ReelService reelService;
+  ReelService reelService;
 
-  private final GroupService groupService;
+  GroupService groupService;
 
-  private final StoryService storyService;
+  StoryService storyService;
 
-  private final GroupConverter groupConverter;
+  GroupConverter groupConverter;
 
   @Operation(summary = "Get dashboard metrics", description = "Retrieves key metrics for the admin dashboard")
   @ApiResponses(value = {
@@ -61,7 +61,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/dashboard")
-  public Object getDashboardMetrics(@RequestHeader("Authorization") String jwt) {
+  Object getDashboardMetrics(@RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
     List<UserDto> allUsers = userService.findAllUsers();
     List<PostDto> allPosts = postService.findAllPost();
@@ -101,7 +101,6 @@ public class AdminController {
         dashboardDto);
   }
 
-  // USER MANAGEMENT
 
   @Operation(summary = "Get all users for admin", description = "Retrieves a list of all users with admin capabilities")
   @ApiResponses(value = {
@@ -109,7 +108,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/users")
-  public Object getAllUsers(@RequestHeader("Authorization") String jwt) {
+  Object getAllUsers(@RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     List<UserDto> users = userService.findAllUsers();
@@ -122,7 +121,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/users/{userId}")
-  public Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
+  Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     User user = userService.findUserById(userId);
@@ -135,7 +134,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @PutMapping("/users/{userId}/admin-status")
-  public Object updateUserAdminStatus(
+  Object updateUserAdminStatus(
       @PathVariable Long userId,
       @RequestParam boolean isAdmin,
       @RequestHeader("Authorization") String jwt) {
@@ -152,7 +151,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @DeleteMapping("/users/{userId}")
-  public Object deleteUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
+  Object deleteUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     userService.deleteUser(userId);
@@ -167,7 +166,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/posts")
-  public Object getAllPosts(@RequestHeader("Authorization") String jwt) {
+  Object getAllPosts(@RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     List<PostDto> posts = postService.findAllPost();
@@ -180,7 +179,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/posts/{postId}")
-  public Object getPostById(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) {
+  Object getPostById(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     PostDto postDto = postService.findById(postId);
@@ -193,7 +192,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @DeleteMapping("/posts/{postId}")
-  public Object deletePost(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) {
+  Object deletePost(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     postService.deletePost(postId, userService.findUserProfileByJwt(jwt));
@@ -208,7 +207,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/stories")
-  public Object getAllStories(@RequestHeader("Authorization") String jwt) {
+  Object getAllStories(@RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     List<StoryDto> stories = storyService.findAllStory();
@@ -221,7 +220,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/stories/{storyId}")
-  public Object getStoryById(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) {
+  Object getStoryById(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     StoryDto story = storyService.findStoryById(storyId);
@@ -234,7 +233,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @DeleteMapping("/stories/{storyId}")
-  public Object deleteStory(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) {
+  Object deleteStory(@PathVariable Long storyId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
     User admin = userService.findUserProfileByJwt(jwt);
 
@@ -242,7 +241,6 @@ public class AdminController {
     return new ResponseData<>(HttpStatus.OK.value(), "Story deleted successfully", null);
   }
 
-  // REEL MANAGEMENT
 
   @Operation(summary = "Get all reels", description = "Retrieves all reels for admin moderation")
   @ApiResponses(value = {
@@ -250,7 +248,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/reels")
-  public Object getAllReels(@RequestHeader("Authorization") String jwt) {
+  Object getAllReels(@RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
     List<ReelDto> reels = reelService.findAllReel();
     return new ResponseData<>(HttpStatus.OK.value(), "Reels retrieved successfully", reels);
@@ -262,7 +260,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/reels/{reelId}")
-  public Object getReelById(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) {
+  Object getReelById(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     ReelDto reel = reelService.findReelById(reelId);
@@ -275,7 +273,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @DeleteMapping("/reels/{reelId}")
-  public Object deleteReel(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) {
+  Object deleteReel(@PathVariable Long reelId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
     User admin = userService.findUserProfileByJwt(jwt);
 
@@ -283,7 +281,6 @@ public class AdminController {
     return new ResponseData<>(HttpStatus.OK.value(), "Reel deleted successfully", null);
   }
 
-  // GROUP MANAGEMENT
 
   @Operation(summary = "Get all groups", description = "Retrieves all groups for admin moderation")
   @ApiResponses(value = {
@@ -291,7 +288,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/groups")
-  public Object getAllGroups(@RequestHeader("Authorization") String jwt) {
+  Object getAllGroups(@RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     List<Group> groups = groupService.getAllGroups();
@@ -305,7 +302,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @GetMapping("/groups/{groupId}")
-  public Object getGroupById(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
+  Object getGroupById(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
 
     Group group = groupService.getGroupById(groupId);
@@ -319,7 +316,7 @@ public class AdminController {
       @ApiResponse(responseCode = "401", description = "Unauthorized: Admin access required")
   })
   @DeleteMapping("/groups/{groupId}")
-  public Object deleteGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
+  Object deleteGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String jwt) {
     userService.validateAdminAccess(jwt);
     User admin = userService.findUserProfileByJwt(jwt);
 

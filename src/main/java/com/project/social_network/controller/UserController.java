@@ -2,9 +2,25 @@ package com.project.social_network.controller;
 
 import static com.project.social_network.dto.AccountDto.convertToDto;
 
+import com.project.social_network.converter.UserConverter;
+import com.project.social_network.dto.UserDto;
+import com.project.social_network.model.Account;
+import com.project.social_network.model.User;
+import com.project.social_network.request.PaginationRequest;
+import com.project.social_network.response.PagingResult;
+import com.project.social_network.response.ResponseData;
+import com.project.social_network.service.impl.AccountServiceImpl;
+import com.project.social_network.service.interfaces.UserService;
+import com.project.social_network.util.UserUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
-
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,47 +33,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.social_network.converter.UserConverter;
-import com.project.social_network.dto.UserDto;
-import com.project.social_network.exceptions.UserException;
-import com.project.social_network.model.Account;
-import com.project.social_network.model.User;
-import com.project.social_network.request.PaginationRequest;
-import com.project.social_network.response.PagingResult;
-import com.project.social_network.response.ResponseData;
-import com.project.social_network.service.impl.AccountServiceImpl;
-import com.project.social_network.service.interfaces.UserService;
-import com.project.social_network.util.UserUtil;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("${api.prefix}/user")
+@RequestMapping("${api.prefix}/v1/user")
 @Tag(name = "User Controller")
-public class UserController {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+class UserController {
 
-  private final UserUtil userUtil;
+  UserUtil userUtil;
 
-  private final UserService userService;
+  UserService userService;
 
-  private final UserConverter userConverter;
+  UserConverter userConverter;
 
-  private final AccountServiceImpl accountServiceImpl;
+  AccountServiceImpl accountServiceImpl;
 
   @Operation(summary = "Get all users", description = "Retrieves a list of all users")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Get user successfully"),
-      @ApiResponse(responseCode = "400", description = "Get user failed")
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Get user successfully"),
+      @ApiResponse(responseCode = "400", description = "Get user failed")})
   @GetMapping("/")
-  public ResponseEntity<ResponseData<PagingResult<UserDto>>> getUser(
-      @RequestHeader("Authorization") String jwt,
-      @RequestParam(defaultValue = "0") int page,
+  ResponseEntity<ResponseData<PagingResult<UserDto>>> getUser(
+      @RequestHeader("Authorization") String jwt, @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "ASC") String direction,
       @RequestParam(defaultValue = "id") String sortBy) {
@@ -76,10 +72,9 @@ public class UserController {
   @Operation(summary = "Get random users", description = "Retrieves a list of random users who are not followed by the current user")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Get random user successfully"),
-      @ApiResponse(responseCode = "400", description = "Get random user failed")
-  })
+      @ApiResponse(responseCode = "400", description = "Get random user failed")})
   @GetMapping("/random")
-  public Object getUserRandom(@RequestHeader("Authorization") String jwt) {
+  Object getUserRandom(@RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     List<UserDto> userDtos = userService.getRandomUsers(user);
 
@@ -89,10 +84,9 @@ public class UserController {
   @Operation(summary = "Get user profile", description = "Retrieves the profile of the authenticated user")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Get user profile successfully"),
-      @ApiResponse(responseCode = "400", description = "Get user profile failed")
-  })
+      @ApiResponse(responseCode = "400", description = "Get user profile failed")})
   @GetMapping("/profile")
-  public Object getUserProfile(@RequestHeader("Authorization") String jwt) {
+  Object getUserProfile(@RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     UserDto userDto = userConverter.toUserDto(user);
     userDto.setReq_user(true);
@@ -103,11 +97,10 @@ public class UserController {
   @Operation(summary = "Get user by ID", description = "Retrieves a user by their ID")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Get user by ID successfully"),
-      @ApiResponse(responseCode = "400", description = "Get user by ID failed")
-  })
+      @ApiResponse(responseCode = "400", description = "Get user by ID failed")})
   @GetMapping("/{userId}")
-  // @Cacheable(value = "users", key = "#userId")
-  public Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
+    // @Cacheable(value = "users", key = "#userId")
+  Object getUserById(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
 
     User reqUser = userService.findUserProfileByJwt(jwt);
     User user = userService.findUserById(userId);
@@ -122,11 +115,9 @@ public class UserController {
   @Operation(summary = "Search users", description = "Search users by query")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Get user by query successfully"),
-      @ApiResponse(responseCode = "400", description = "Get user by query failed")
-  })
+      @ApiResponse(responseCode = "400", description = "Get user by query failed")})
   @GetMapping("/search")
-  public Object getUserByQuery(@RequestParam String query,
-      @RequestHeader("Authorization") String jwt) {
+  Object getUserByQuery(@RequestParam String query, @RequestHeader("Authorization") String jwt) {
     User reqUser = userService.findUserProfileByJwt(jwt);
     List<UserDto> userDtos = userService.searchUser(query, reqUser.getId());
 
@@ -136,10 +127,9 @@ public class UserController {
   @Operation(summary = "Update user profile", description = "Updates the authenticated user's profile")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Update user successfully"),
-      @ApiResponse(responseCode = "400", description = "Update user failed")
-  })
+      @ApiResponse(responseCode = "400", description = "Update user failed")})
   @PutMapping("/update")
-  public Object updateUser(@RequestBody User req, @RequestHeader("Authorization") String jwt) {
+  Object updateUser(@RequestBody User req, @RequestHeader("Authorization") String jwt) {
     User reqUser = userService.findUserProfileByJwt(jwt);
     UserDto userDto = userService.updateUser(reqUser.getId(), req);
 
@@ -149,10 +139,9 @@ public class UserController {
   @Operation(summary = "Follow a user", description = "Allows a user to follow another user")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Follow user successfully"),
-      @ApiResponse(responseCode = "400", description = "Follow user failed")
-  })
+      @ApiResponse(responseCode = "400", description = "Follow user failed")})
   @PutMapping("/{userId}/follow")
-  public Object followUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
+  Object followUser(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
     User reqUser = userService.findUserProfileByJwt(jwt);
     UserDto userDto = userService.followUser(userId, reqUser);
 
@@ -160,7 +149,7 @@ public class UserController {
   }
 
   @GetMapping("/info")
-  public Object getUserInfo(Principal principal) {
+  Object getUserInfo(Principal principal) {
     Account account = accountServiceImpl.getAccount(Long.valueOf(principal.getName()));
     return ResponseEntity.ok().body(convertToDto(account));
   }
