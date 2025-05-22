@@ -50,6 +50,13 @@ spring:
     redis:
       host: localhost
       port: 6379
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: deepseek-r1:1.5b
+
 api:
   prefix: /api/v1
 app:

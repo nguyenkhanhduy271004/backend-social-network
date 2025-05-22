@@ -1,5 +1,6 @@
 package com.project.social_network.converter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +19,32 @@ public class UserConverter {
   public UserConverter(ModelMapper modelMapper) {
     this.modelMapper = modelMapper;
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
+  }
+
+  public List<UserDto> getFollowers(User user) {
+
+    List<UserDto> userDtos = new ArrayList<>();
+
+    for(User user1 : user.getFollowers()) {
+      UserDto userDto = new UserDto();
+      userDto.setId(user1.getId());;
+      userDtos.add(userDto);
+    }
+
+    return userDtos;
+  }
+
+  public List<UserDto> getFollowing(User user) {
+
+    List<UserDto> userDtos = new ArrayList<>();
+
+    for(User user1 : user.getFollowings()) {
+      UserDto userDto = new UserDto();
+      userDto.setId(user1.getId());;
+      userDtos.add(userDto);
+    }
+
+    return userDtos;
   }
 
   public UserDto toUserDto(User user) {
@@ -46,6 +73,8 @@ public class UserConverter {
           userDto.setEmail(user.getEmail());
           userDto.setFullName(user.getFullName());
           userDto.setImage(user.getImage());
+          userDto.setFollowers(getFollowers(user));
+          userDto.setFollowing(getFollowing(user));
           return userDto;
         })
         .collect(Collectors.toList());

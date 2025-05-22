@@ -160,7 +160,7 @@ public class UserController {
   }
 
   @GetMapping("/info")
-  public ResponseEntity getUserInfo(Principal principal) {
+  public Object getUserInfo(Principal principal) {
     Account account = accountServiceImpl.getAccount(Long.valueOf(principal.getName()));
     return ResponseEntity.ok().body(convertToDto(account));
   }
