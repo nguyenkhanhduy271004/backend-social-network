@@ -1,7 +1,9 @@
 package com.project.social_network.controller;
 
+import com.project.social_network.constant.JobQueue;
 import com.project.social_network.converter.PostConverter;
 import com.project.social_network.dto.CommentDto;
+import com.project.social_network.dto.NotificationMessage;
 import com.project.social_network.dto.PostDto;
 import com.project.social_network.model.Comment;
 import com.project.social_network.model.User;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -51,7 +55,7 @@ public class PostController {
   CommentService commentService;
   PostConverter postConverter;
   FileUtil fileUtil;
-
+  RabbitTemplate rabbitTemplate;
 
   @PostMapping("")
   @Operation(summary = "Create new post", description = "Allows users to create a new post with optional image")
@@ -171,7 +175,6 @@ public class PostController {
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "post.get.repost.success", postDtos));
   }
 
-
   @GetMapping("/{postId}/comment")
   @Operation(summary = "Get comments", description = "Retrieve all comments of a post")
   ResponseEntity<ResponseData<List<CommentDto>>> getAllCommentsByPostId(
@@ -193,6 +196,22 @@ public class PostController {
 
     User user = userService.findUserProfileByJwt(jwt);
     PostDto postDto = postService.createComment(commentRequest, user);
+
+    String message = "User " + user.getFullName() + " comment your post: " + postId;
+
+    if (user.getId() != postDto.getUser().getId()) {
+      NotificationMessage request = new NotificationMessage();
+      request.setUserId(postDto.getUser().getId());
+      request.setPostId(postId);
+      request.setMessage(message);
+      try {
+        rabbitTemplate.convertAndSend(JobQueue.QUEUE_DEV, request);
+        return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "comment.create.success", postDto));
+      } catch (Exception e) {
+        return ResponseEntity.ok(new ResponseData<>(HttpStatus.BAD_REQUEST.value(), "Comment post failed"));
+      }
+    }
+
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "comment.create.success", postDto));
   }
 

@@ -31,7 +31,7 @@ public class LikeServiceImpl implements LikeService {
 
     if (isLikeExist != null) {
       likeRepository.deleteById(isLikeExist.getId());
-      return isLikeExist;
+      throw new PostException("You already liked this post!");
     }
 
     Post post = postService.findByPostId(postId);

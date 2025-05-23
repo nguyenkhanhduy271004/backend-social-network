@@ -5,7 +5,8 @@ server:
       charset: UTF-8
       enabled: true
       force: true
-
+queue:
+  name: rabbit-queue
 spring:
   application:
     name: social-network
@@ -56,6 +57,31 @@ spring:
       chat:
         options:
           model: deepseek-r1:1.5b
+  rabbitmq:
+    host: 127.0.0.1
+    password: guest
+    port: 5672
+    username: guest
+    virtual-host: /
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 2.0
+        default-requeue-rejected: false
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        max-interval: 10000
+        multiplier: 2.0
+  amqp:
+    deserialization:
+      trust-all: true
 
 api:
   prefix: /api
