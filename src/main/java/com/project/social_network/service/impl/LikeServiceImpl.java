@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.project.social_network.exceptions.PostException;
+import com.project.social_network.exception.PostException;
 import com.project.social_network.model.Like;
 import com.project.social_network.model.Post;
 import com.project.social_network.model.User;

@@ -1,9 +1,9 @@
 package com.project.social_network.handler;
-import com.project.social_network.exceptions.CommentException;
-import com.project.social_network.exceptions.GroupException;
-import com.project.social_network.exceptions.PostException;
-import com.project.social_network.exceptions.ReelException;
-import com.project.social_network.exceptions.UserException;
+import com.project.social_network.exception.CommentException;
+import com.project.social_network.exception.GroupException;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.ReelException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.response.ErrorResponse;
 import com.project.social_network.response.ResponseError;
 import jakarta.mail.MessagingException;

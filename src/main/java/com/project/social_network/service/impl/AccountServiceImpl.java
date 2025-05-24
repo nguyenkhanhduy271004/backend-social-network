@@ -21,7 +21,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.project.social_network.dto.IdTokenRequestDto;
 import com.project.social_network.enums.AuthProvider;
-import com.project.social_network.exceptions.UserException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.Account;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;

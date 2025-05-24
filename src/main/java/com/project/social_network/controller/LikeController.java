@@ -1,18 +1,16 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.config.RabbitMQConfig;
 import com.project.social_network.config.Translator;
 import com.project.social_network.constant.JobQueue;
 import com.project.social_network.converter.LikeConverter;
 import com.project.social_network.dto.LikeDto;
 import com.project.social_network.dto.NotificationMessage;
-import com.project.social_network.exceptions.PostException;
-import com.project.social_network.exceptions.UserException;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.Like;
 import com.project.social_network.model.User;
 import com.project.social_network.response.ResponseData;
 import com.project.social_network.service.interfaces.LikeService;
-import com.project.social_network.service.interfaces.NotificationStorageService;
 import com.project.social_network.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,6 +20,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -44,8 +43,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class LikeController {
-
-  Translator translator;
 
   UserService userService;
 
@@ -71,20 +68,23 @@ class LikeController {
 
     String message = "User " + user.getFullName() + " liked post: " + postId;
 
-    if (user.getId() != like.getPost().getUser().getId()) {
+    if (!Objects.equals(user.getId(), like.getPost().getUser().getId())) {
       NotificationMessage request = new NotificationMessage();
       request.setUserId(like.getPost().getUser().getId());
       request.setPostId(postId);
       request.setMessage(message);
       try {
         rabbitTemplate.convertAndSend(JobQueue.QUEUE_DEV, request);
-        return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Like post successfully", likeDto));
+        return ResponseEntity.ok(
+            new ResponseData<>(HttpStatus.OK.value(), "Like post successfully", likeDto));
       } catch (Exception e) {
-        return ResponseEntity.ok(new ResponseData<>(HttpStatus.BAD_REQUEST.value(), "Like post failed"));
+        return ResponseEntity.ok(
+            new ResponseData<>(HttpStatus.BAD_REQUEST.value(), "Like post failed"));
       }
     }
 
-    return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "Like post successfully", likeDto));
+    return ResponseEntity.ok(
+        new ResponseData<>(HttpStatus.OK.value(), "Like post successfully", likeDto));
   }
 
   @GetMapping("/{postId}/likes")
@@ -103,6 +103,6 @@ class LikeController {
     List<LikeDto> likeDtos = likeConverter.toLikeDtos(likes, user);
 
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(),
-        translator.toLocale("like.get.all.success"), likeDtos));
+        Translator.toLocale("like.get.all.success"), likeDtos));
   }
 }

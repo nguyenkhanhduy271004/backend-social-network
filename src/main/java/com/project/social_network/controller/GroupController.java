@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,8 @@ class GroupController {
 
   @Operation(summary = "Create a new group", description = "Create a new group")
   @PostMapping
-  ResponseEntity<?> createGroup(@Valid @RequestBody CreateGroupRequest createGroupRequest,
+  ResponseEntity<?> createGroup(
+      @Valid @RequestBody CreateGroupRequest createGroupRequest,
       @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     Group group = groupService.createGroup(createGroupRequest, user);
@@ -60,7 +62,8 @@ class GroupController {
 
   @Operation(summary = "Update group", description = "Update the group's name")
   @PutMapping("/{groupId}")
-  ResponseEntity<?> updateGroup(@PathVariable Long groupId,
+  ResponseEntity<?> updateGroup(
+      @Min(1) @PathVariable Long groupId,
       @Valid @RequestBody UpdateGroupRequest updateGroupRequest,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
@@ -73,7 +76,8 @@ class GroupController {
 
   @Operation(summary = "Delete a group", description = "Delete a group by ID")
   @DeleteMapping("/{groupId}")
-  ResponseEntity<?> deleteGroup(@PathVariable Long groupId,
+  ResponseEntity<?> deleteGroup(
+      @Min(1) @PathVariable Long groupId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
     groupService.deleteGroup(groupId, admin);
@@ -84,7 +88,8 @@ class GroupController {
 
   @Operation(summary = "Join a group", description = "User joins a group or sends a join request if the group is private")
   @PostMapping("/{groupId}/join")
-  ResponseEntity<?> joinGroup(@PathVariable Long groupId,
+  ResponseEntity<?> joinGroup(
+      @Min(1) @PathVariable Long groupId,
       @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     groupService.joinGroup(groupId, user);
@@ -95,7 +100,8 @@ class GroupController {
 
   @Operation(summary = "Leave a group", description = "User leaves a group")
   @PostMapping("/{groupId}/leave")
-  ResponseEntity<?> leaveGroup(@PathVariable Long groupId,
+  ResponseEntity<?> leaveGroup(
+      @Min(1) @PathVariable Long groupId,
       @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     groupService.leaveGroup(groupId, user);
@@ -106,8 +112,9 @@ class GroupController {
 
   @Operation(summary = "Accept join request", description = "Admin accepts a user's request to join the group")
   @PostMapping("/{groupId}/accept-request/{userId}")
-  ResponseEntity<?> acceptJoinRequest(@PathVariable Long groupId,
-      @PathVariable Long userId,
+  ResponseEntity<?> acceptJoinRequest(
+      @Min(1) @PathVariable Long groupId,
+      @Min(1) @PathVariable Long userId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
     groupService.acceptJoinRequest(groupId, userId, admin);
@@ -118,8 +125,9 @@ class GroupController {
 
   @Operation(summary = "Reject join request", description = "Admin rejects a user's request to join the group")
   @PostMapping("/{groupId}/reject-request/{userId}")
-  ResponseEntity<?> rejectJoinRequest(@PathVariable Long groupId,
-      @PathVariable Long userId,
+  ResponseEntity<?> rejectJoinRequest(
+      @Min(1) @PathVariable Long groupId,
+      @Min(1) @PathVariable Long userId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
     groupService.rejectJoinRequest(groupId, userId, admin);
@@ -130,7 +138,8 @@ class GroupController {
 
   @Operation(summary = "Get pending join requests", description = "Admin gets list of pending join requests")
   @GetMapping("/{groupId}/pending-requests")
-  ResponseEntity<?> getPendingRequests(@PathVariable Long groupId,
+  ResponseEntity<?> getPendingRequests(
+      @Min(1) @PathVariable Long groupId,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);
     List<GroupDto.User> pendingRequests = groupService.getPendingRequestsWithUserInfo(groupId,
@@ -151,7 +160,7 @@ class GroupController {
   }
 
   @GetMapping("/{groupId}")
-  ResponseEntity<?> getGroupById(@PathVariable Long groupId) {
+  ResponseEntity<?> getGroupById(@Min(1) @PathVariable Long groupId) {
     Group group = groupService.getGroupById(groupId);
     GroupDto groupDto = groupConverter.toGroupDto(group);
     return ResponseEntity.ok(
@@ -160,7 +169,7 @@ class GroupController {
 
   @Operation(summary = "Get posts from a group", description = "Retrieve all posts of a specific group")
   @GetMapping("/{groupId}/posts")
-  ResponseEntity<?> getPostsByGroupId(@PathVariable Long groupId) {
+  ResponseEntity<?> getPostsByGroupId(@Min(1) @PathVariable Long groupId) {
     List<PostDto> posts = groupService.getPostsByGroupId(groupId);
     if (posts.isEmpty()) {
       return new ResponseEntity<>(new ResponseError(HttpStatus.NOT_FOUND.value(), "No posts found"),
@@ -192,7 +201,9 @@ class GroupController {
   }
 
   @DeleteMapping("/{groupId}/user/{userId}")
-  ResponseEntity<?> removeUserFromGroup(@PathVariable Long groupId, @PathVariable Long userId,
+  ResponseEntity<?> removeUserFromGroup(
+      @Min(1) @PathVariable Long groupId,
+      @PathVariable Long userId,
       @RequestHeader("Authorization") String jwt) {
     User user = userService.findUserProfileByJwt(jwt);
     groupService.removeMember(groupId, userId, user);
@@ -202,7 +213,8 @@ class GroupController {
   }
 
   @PostMapping("/{groupId}/request-join")
-  ResponseEntity<?> requestToJoinGroup(@PathVariable Long groupId,
+  ResponseEntity<?> requestToJoinGroup(
+      @Min(1) @PathVariable Long groupId,
       @RequestHeader("Authorization") String jwt) {
     String result = groupService.requestToJoinGroup(groupId, jwt);
     return ResponseEntity.ok(result);
@@ -210,8 +222,8 @@ class GroupController {
 
   @PostMapping("/{groupId}/approve-request/{requestId}")
   ResponseEntity<?> approveJoinRequest(
-      @PathVariable Long groupId,
-      @PathVariable Long requestId,
+      @Min(1) @PathVariable Long groupId,
+      @Min(1) @PathVariable Long requestId,
       @RequestParam boolean approve,
       @RequestHeader("Authorization") String jwt) {
     User admin = userService.findUserProfileByJwt(jwt);

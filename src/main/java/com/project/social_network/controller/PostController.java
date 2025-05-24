@@ -19,27 +19,22 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -48,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 @SecurityRequirement(name = "bearerAuth")
 @Validated
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class PostController {
 
   PostService postService;
@@ -57,12 +53,13 @@ public class PostController {
   FileUtil fileUtil;
   RabbitTemplate rabbitTemplate;
 
+
   @PostMapping("")
   @Operation(summary = "Create new post", description = "Allows users to create a new post with optional image")
   ResponseEntity<ResponseData<PostDto>> createPost(
       @RequestParam(value = "file", required = false) MultipartFile file,
-      @RequestParam("content") String content,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestParam @NotBlank(message = "Content cannot be empty") @Size(max = 1000, message = "Content must be less than 1000 characters") String content,
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     fileUtil.validateFile(file);
     PostDto postDto = postService.createPost(content, file, jwt);
@@ -74,8 +71,8 @@ public class PostController {
   ResponseEntity<ResponseData<PostDto>> createPostForGroup(
       @PathVariable @Min(1) Long groupId,
       @RequestParam(value = "file", required = false) MultipartFile file,
-      @RequestParam("content") String content,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestParam @NotBlank(message = "Content cannot be empty") @Size(max = 1000, message = "Content must be less than 1000 characters") String content,
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     fileUtil.validateFile(file);
     PostDto postDto = postService.createPostForGroup(content, file, jwt, groupId);
@@ -87,8 +84,8 @@ public class PostController {
   ResponseEntity<ResponseData<PostDto>> editPost(
       @PathVariable @Min(1) Long postId,
       @RequestParam(value = "file", required = false) MultipartFile file,
-      @RequestParam("content") String content,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestParam @NotBlank(message = "Content cannot be empty") @Size(max = 1000, message = "Content must be less than 1000 characters") String content,
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     fileUtil.validateFile(file);
     PostDto updatedPost = postService.updatePost(postId, file, content, jwt);
@@ -99,7 +96,7 @@ public class PostController {
   @Operation(summary = "Delete post", description = "Delete a post by its ID")
   ResponseEntity<Void> deletePost(
       @PathVariable @Min(1) Long postId,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     postService.deletePostById(postId, user.getId());
@@ -136,7 +133,7 @@ public class PostController {
   @Operation(summary = "Get posts liked by user", description = "Retrieve posts liked by a user")
   ResponseEntity<ResponseData<List<PostDto>>> getLikedPosts(
       @PathVariable @Min(1) Long userId,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     List<PostDto> postDtos = postService.findByLikesContainsUser(user);
@@ -147,7 +144,7 @@ public class PostController {
   @Operation(summary = "Reply to a post", description = "Reply to an existing post")
   ResponseEntity<ResponseData<PostDto>> replyPost(
       @Valid @RequestBody PostReplyRequest req,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     PostDto postDto = postService.createdReply(req, user);
@@ -158,7 +155,7 @@ public class PostController {
   @Operation(summary = "Repost", description = "Repost an existing post")
   ResponseEntity<ResponseData<PostDto>> repost(
       @PathVariable @Min(1) Long postId,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     PostDto postDto = postService.rePost(postId, user);
@@ -168,7 +165,7 @@ public class PostController {
   @GetMapping("/repost")
   @Operation(summary = "Get reposted posts", description = "Retrieve reposts by the current user")
   ResponseEntity<ResponseData<List<PostDto>>> getRepostedPosts(
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     List<PostDto> postDtos = postService.getRepostedPostsByUserId(user.getId());
@@ -192,23 +189,22 @@ public class PostController {
   ResponseEntity<ResponseData<PostDto>> createComment(
       @PathVariable @Min(1) Long postId,
       @Valid @RequestBody CommentRequest commentRequest,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     PostDto postDto = postService.createComment(commentRequest, user);
 
-    String message = "User " + user.getFullName() + " comment your post: " + postId;
+    String message = "User " + user.getFullName() + " commented on your post: " + postId;
 
-    if (user.getId() != postDto.getUser().getId()) {
+    if (!user.getId().equals(postDto.getUser().getId())) {
       NotificationMessage request = new NotificationMessage();
       request.setUserId(postDto.getUser().getId());
       request.setPostId(postId);
       request.setMessage(message);
       try {
         rabbitTemplate.convertAndSend(JobQueue.QUEUE_DEV, request);
-        return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "comment.create.success", postDto));
       } catch (Exception e) {
-        return ResponseEntity.ok(new ResponseData<>(HttpStatus.BAD_REQUEST.value(), "Comment post failed"));
+        log.error("Failed to send notification: {}", e.getMessage());
       }
     }
 
@@ -220,7 +216,7 @@ public class PostController {
   ResponseEntity<ResponseData<CommentDto>> editComment(
       @PathVariable @Min(1) Long commentId,
       @Valid @RequestBody CommentRequest commentRequest,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     Comment comment = commentService.editComment(commentRequest, user);
@@ -232,11 +228,10 @@ public class PostController {
   @Operation(summary = "Delete comment", description = "Delete a comment by its ID")
   ResponseEntity<Void> deleteComment(
       @PathVariable @Min(1) Long commentId,
-      @RequestHeader("Authorization") String jwt) {
+      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
 
     User user = userService.findUserProfileByJwt(jwt);
     commentService.deleteCommentById(commentId, user);
     return ResponseEntity.noContent().build();
   }
-
 }

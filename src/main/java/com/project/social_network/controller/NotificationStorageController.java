@@ -3,6 +3,7 @@ package com.project.social_network.controller;
 import com.project.social_network.model.Notification;
 import com.project.social_network.service.impl.NotificationStorageServiceImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,12 +25,12 @@ public class NotificationStorageController {
   }
 
   @GetMapping("/{userID}")
-  public ResponseEntity<List<Notification>> getNotificationsByUserID(@PathVariable Long userID) {
+  public ResponseEntity<List<Notification>> getNotificationsByUserID(@Min(1) @PathVariable Long userID) {
     return ResponseEntity.ok(notifService.getNotificationsByUserID(userID));
   }
 
   @PatchMapping("/read/{notifID}")
-  public ResponseEntity changeNotifStatusToRead(@PathVariable Long notifID) {
+  public ResponseEntity<?> changeNotifStatusToRead(@Min(1) @PathVariable Long notifID) {
     return ResponseEntity.ok(notifService.changeNotifStatusToRead(notifID));
   }
 

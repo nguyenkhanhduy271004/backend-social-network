@@ -22,6 +22,7 @@ public class BaseRedisServiceImpl implements BaseRedisService {
     this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
+
   @Override
   public void set(String key, String value) {
     redisTemplate.opsForValue().set(key, value);
@@ -67,8 +68,8 @@ public class BaseRedisServiceImpl implements BaseRedisService {
     List<Object> objects = new ArrayList<>();
     Map<String, Object> hashEntries = hashOperations.entries(key);
 
-    for(Map.Entry<String, Object> entry:hashEntries.entrySet()) {
-      if(entry.getKey().startsWith(fieldPrefix)) {
+    for (Map.Entry<String, Object> entry : hashEntries.entrySet()) {
+      if (entry.getKey().startsWith(fieldPrefix)) {
         objects.add(entry.getValue());
       }
     }
@@ -92,7 +93,7 @@ public class BaseRedisServiceImpl implements BaseRedisService {
 
   @Override
   public void delete(String key, List<String> fields) {
-    for(String field:fields) {
+    for (String field : fields) {
       hashOperations.delete(key, field);
     }
   }

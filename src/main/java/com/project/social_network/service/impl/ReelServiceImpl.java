@@ -11,8 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.project.social_network.converter.ReelConverter;
 import com.project.social_network.dto.ReelDto;
-import com.project.social_network.exceptions.PostException;
-import com.project.social_network.exceptions.UserException;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.Reel;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.ReelRepository;

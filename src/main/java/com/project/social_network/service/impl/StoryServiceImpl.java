@@ -2,9 +2,8 @@ package com.project.social_network.service.impl;
 
 import com.project.social_network.converter.StoryConverter;
 import com.project.social_network.dto.StoryDto;
-import com.project.social_network.exceptions.PostException;
-import com.project.social_network.exceptions.StoryException;
-import com.project.social_network.exceptions.UserException;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.Story;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.StoryRepository;

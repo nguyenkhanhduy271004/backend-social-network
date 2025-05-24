@@ -1,5 +1,8 @@
 package com.project.social_network.request;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,8 +11,11 @@ import lombok.Setter;
 @Setter
 public class PostReplyRequest {
 
-  private String content;
+  @Min(value = 1, message = "Post id must be greater than 0")
   private Long postId;
-  private LocalDateTime createdAt;
+  @NotBlank(message = "Reply content cannot be empty")
+  @Size(max = 1000, message = "Reply must be less than 1000 characters")
+  private String content;
   private String image;
+  private LocalDateTime createdAt;
 }

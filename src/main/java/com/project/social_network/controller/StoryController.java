@@ -1,6 +1,5 @@
 package com.project.social_network.controller;
 
-import com.project.social_network.config.Translator;
 import com.project.social_network.dto.StoryDto;
 import com.project.social_network.model.User;
 import com.project.social_network.response.ResponseData;
@@ -39,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class StoryController {
 
-  Translator translator;
 
   UserService userService;
 
@@ -64,7 +62,8 @@ class StoryController {
     User user = userService.findUserProfileByJwt(jwt);
     StoryDto storyDto = storyService.createStory(file, content, user);
 
-    return buildResponse(HttpStatus.CREATED, "story.create.success", storyDto);
+    return ResponseEntity.ok(
+        new ResponseData<>(HttpStatus.CREATED.value(), "story.create.success", storyDto));
   }
 
   @GetMapping("/{storyId}")
@@ -79,8 +78,8 @@ class StoryController {
 
     userService.findUserProfileByJwt(jwt);
     StoryDto storyDto = storyService.findStoryById(storyId);
-
-    return buildResponse(HttpStatus.OK, "story.find.success", storyDto, storyId);
+    return ResponseEntity.ok(
+        new ResponseData<>(HttpStatus.OK.value(), "story.find.success", storyDto));
   }
 
   @DeleteMapping("/{storyId}")
@@ -110,14 +109,9 @@ class StoryController {
 
     userService.findUserProfileByJwt(jwt);
     List<StoryDto> storyDtos = storyService.findAllStory();
+    return ResponseEntity.ok(
+        new ResponseData<>(HttpStatus.OK.value(), "story.get.all.success", storyDtos));
 
-    return buildResponse(HttpStatus.OK, "story.get.all.success", storyDtos);
   }
 
-  private <T> ResponseEntity<ResponseData<T>> buildResponse(HttpStatus status, String messageKey,
-      T data,
-      Object... args) {
-    return ResponseEntity.status(status)
-        .body(new ResponseData<>(status.value(), translator.toLocale(messageKey, args), data));
-  }
 }

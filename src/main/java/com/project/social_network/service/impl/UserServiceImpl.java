@@ -3,7 +3,7 @@ package com.project.social_network.service.impl;
 import com.project.social_network.config.JwtProvider;
 import com.project.social_network.converter.UserConverter;
 import com.project.social_network.dto.UserDto;
-import com.project.social_network.exceptions.UserException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;
 import com.project.social_network.request.PaginationRequest;

@@ -1,4 +1,4 @@
-package com.project.social_network.exceptions;
+package com.project.social_network.exception;
 
 public class UserException extends RuntimeException {
 

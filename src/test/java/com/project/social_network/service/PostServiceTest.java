@@ -2,8 +2,8 @@ package com.project.social_network.service;
 
 import com.project.social_network.converter.PostConverter;
 import com.project.social_network.dto.PostDto;
-import com.project.social_network.exceptions.PostException;
-import com.project.social_network.exceptions.UserException;
+import com.project.social_network.exception.PostException;
+import com.project.social_network.exception.UserException;
 import com.project.social_network.model.Post;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.CommentRepository;

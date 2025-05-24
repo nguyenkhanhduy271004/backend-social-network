@@ -1,14 +1,10 @@
 package com.project.social_network.service.impl;
 
-import com.project.social_network.exceptions.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
