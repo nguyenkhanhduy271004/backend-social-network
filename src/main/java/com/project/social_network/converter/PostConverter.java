@@ -3,6 +3,7 @@ package com.project.social_network.converter;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -34,7 +35,7 @@ public class PostConverter {
     }
 
     Post newPost = modelMapper.map(post, Post.class);
-    newPost.setCreatedAt(LocalDateTime.now());
+    newPost.setCreatedAt(post.getCreatedAt());
     newPost.setUser(user);
     newPost.setReply(false);
     newPost.setPost(true);
@@ -49,7 +50,7 @@ public class PostConverter {
 
     Post newPost = new Post();
     newPost.setContent(post.getContent());
-    newPost.setCreatedAt(LocalDateTime.now());
+    newPost.setCreatedAt(post.getCreatedAt());
     newPost.setImage(post.getImage());
     newPost.setUser(user);
     newPost.setReply(true);
@@ -111,7 +112,7 @@ public class PostConverter {
 
     return posts.stream()
         .map(post -> toPostDtoInternal(post, reqUser, null, null))
-        .filter(postDto -> postDto != null)
+        .filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 

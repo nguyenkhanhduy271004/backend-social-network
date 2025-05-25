@@ -71,15 +71,17 @@ public class PostController {
   ResponseEntity<ResponseData<PostDto>> createPostForGroup(
       @PathVariable @Min(1) Long groupId,
       @RequestParam(value = "file", required = false) MultipartFile file,
-      @RequestParam @NotBlank(message = "Content cannot be empty") @Size(max = 1000, message = "Content must be less than 1000 characters") String content,
-      @RequestHeader("Authorization") @NotBlank(message = "Authorization header is required") String jwt) {
+      @RequestParam @NotBlank(message = "Content cannot be empty")
+      @Size(max = 1000, message = "Content must be less than 1000 characters") String content,
+      @RequestHeader("Authorization")
+      @NotBlank(message = "Authorization header is required") String jwt) {
 
     fileUtil.validateFile(file);
     PostDto postDto = postService.createPostForGroup(content, file, jwt, groupId);
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "post.create.success", postDto));
   }
 
-  @PutMapping("/{postId}/edit")
+  @PutMapping("/{postId}")
   @Operation(summary = "Edit post", description = "Edit a previously created post")
   ResponseEntity<ResponseData<PostDto>> editPost(
       @PathVariable @Min(1) Long postId,
@@ -172,7 +174,7 @@ public class PostController {
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "post.get.repost.success", postDtos));
   }
 
-  @GetMapping("/{postId}/comment")
+  @GetMapping("/{postId}/comments")
   @Operation(summary = "Get comments", description = "Retrieve all comments of a post")
   ResponseEntity<ResponseData<List<CommentDto>>> getAllCommentsByPostId(
       @PathVariable @Min(1) Long postId) {
@@ -184,7 +186,7 @@ public class PostController {
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "post.get.comment.success", commentDtos));
   }
 
-  @PostMapping("/{postId}/comment")
+  @PostMapping("/{postId}/comments")
   @Operation(summary = "Add comment", description = "Add a comment to a post")
   ResponseEntity<ResponseData<PostDto>> createComment(
       @PathVariable @Min(1) Long postId,
@@ -211,7 +213,7 @@ public class PostController {
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "comment.create.success", postDto));
   }
 
-  @PutMapping("/{commentId}/comment")
+  @PutMapping("/{commentId}/comments")
   @Operation(summary = "Edit comment", description = "Edit an existing comment")
   ResponseEntity<ResponseData<CommentDto>> editComment(
       @PathVariable @Min(1) Long commentId,
@@ -224,7 +226,7 @@ public class PostController {
     return ResponseEntity.ok(new ResponseData<>(HttpStatus.OK.value(), "comment.edit.success", commentDto));
   }
 
-  @DeleteMapping("/{commentId}/comment")
+  @DeleteMapping("/{commentId}/comments")
   @Operation(summary = "Delete comment", description = "Delete a comment by its ID")
   ResponseEntity<Void> deleteComment(
       @PathVariable @Min(1) Long commentId,

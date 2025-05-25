@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Getter
@@ -46,6 +47,7 @@ public class Post extends BaseEntity {
   @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = true)
   private Group group;
 
+  @CreationTimestamp
   private LocalDateTime createdAt;
 
 }

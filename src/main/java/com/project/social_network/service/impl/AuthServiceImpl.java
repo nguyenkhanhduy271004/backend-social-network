@@ -37,14 +37,13 @@ public class AuthServiceImpl implements AuthService {
 
 
   @Override
-  public String login(LoginRequest user) {
+  public Authentication login(LoginRequest user) {
     String username = user.getEmail();
     String password = user.getPassword();
 
     Authentication authentication = authenticate(username, password);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    return jwtProvider.generateToken(authentication);
+    return authentication;
   }
 
   private Authentication authenticate(String username, String password) {

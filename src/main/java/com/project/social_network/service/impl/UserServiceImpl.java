@@ -7,9 +7,13 @@ import com.project.social_network.exception.UserException;
 import com.project.social_network.model.User;
 import com.project.social_network.repository.UserRepository;
 import com.project.social_network.request.PaginationRequest;
+import com.project.social_network.request.UpdateUserRequest;
 import com.project.social_network.response.PagingResult;
+import com.project.social_network.service.interfaces.UploadImageFile;
 import com.project.social_network.service.interfaces.UserService;
+import com.project.social_network.util.FileUtil;
 import com.project.social_network.util.PaginationUtils;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,16 +25,21 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+  private final FileUtil fileUtil;
 
   private final JwtProvider jwtProvider;
 
   private final UserConverter userConverter;
 
   private final UserRepository userRepository;
+
+  private final UploadImageFile uploadImageFile;
 
   @Override
   // @Cacheable(value = "users", key = "#userId")
@@ -47,8 +56,15 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  @CachePut(value = "users", key = "#userId")
-  public UserDto updateUser(Long userId, User user) {
+//  @CachePut(value = "users", key = "#userId")
+  public UserDto updateUser(Long userId, MultipartFile image, UpdateUserRequest user)
+      throws IOException {
+    fileUtil.validateFile(image);
+    if(image != null && !image.isEmpty()) {
+      String imageUrl = uploadImageFile.uploadImage(image);
+      user.setImage(imageUrl);
+    }
+
     User existUser = findUserById(userId);
 
     updateUserDetails(existUser, user);
@@ -149,7 +165,7 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  private void updateUserDetails(User existUser, User user) {
+  private void updateUserDetails(User existUser, UpdateUserRequest user) {
     Optional.ofNullable(user.getFullName()).ifPresent(existUser::setFullName);
     Optional.ofNullable(user.getImage()).ifPresent(existUser::setImage);
     Optional.ofNullable(user.getBackgroundImage()).ifPresent(existUser::setBackgroundImage);
