@@ -89,4 +89,4 @@ api:
   prefix: /api
 app:
   jwtSecret: Aslkdjalwidjaslmdnmcnvxleflisdjflskejflidsjflskjefasdsadsadasdqweqewqe123asdsadzxczcadw
-  googleClientId: 615612093999-3ommfatdj5qm627gs6um9dneft4civdv.apps.googleusercontent.com
+  googleClientId: 123456
